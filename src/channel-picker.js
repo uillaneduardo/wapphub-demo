@@ -21,11 +21,11 @@ export function setupChannelPicker({trigger,popover,list,summary,badge,getChanne
   const all=availableChannels(channels());
   const allRow=create("label","channel-menu-choice channel-menu-all");
   const allCheck=create("input");
-  allCheck.type="checkbox";allCheck.checked=selection===null;
+  allCheck.type="checkbox";allCheck.dataset.channelId="all";allCheck.checked=selection===null;
   const allCopy=create("span","channel-menu-copy");
   allCopy.append(create("strong","","Todos os canais"),create("small","","Exibir todas as caixas habilitadas"));
   allRow.append(allCheck,allCopy);
-  allCheck.addEventListener("change",()=>{selection=null;changed()});
+  allCheck.addEventListener("change",()=>{selection=null;changed("all")});
   list.append(allRow);
   for(const provider of getProviders()){
    const items=all.filter(c=>c.provider===provider.id);
@@ -35,7 +35,7 @@ export function setupChannelPicker({trigger,popover,list,summary,badge,getChanne
    for(const channel of items){
     const row=create("label","channel-menu-choice");
     const check=create("input");
-    check.type="checkbox";
+    check.type="checkbox";check.dataset.channelId=channel.id;
     check.checked=selection===null||selection.has(channel.id);
     const copy=create("span","channel-menu-copy");
     copy.append(create("strong","",channel.name));
@@ -46,7 +46,7 @@ export function setupChannelPicker({trigger,popover,list,summary,badge,getChanne
       const next=selection===null?new Set([channel.id]):new Set(selection);
       if(selection!==null){if(check.checked)next.add(channel.id);else next.delete(channel.id)}
       selection=normalizeSelection(next,channels());
-      changed();
+      changed(channel.id);
     });
     section.append(row);
    }
@@ -60,7 +60,7 @@ export function setupChannelPicker({trigger,popover,list,summary,badge,getChanne
   trigger.title="Canais: "+title();
   trigger.setAttribute("aria-label","Filtrar canais: "+title());
  }
- function changed(){render();onChange(selection===null?null:new Set(selection))}
+ function changed(focusId){render();if(!popover.hidden&&focusId){[...popover.querySelectorAll("input")].find(x=>x.dataset.channelId===focusId)?.focus()}onChange(selection===null?null:new Set(selection))}
  trigger.addEventListener("click",()=>setOpen(popover.hidden));
  document.addEventListener("pointerdown",e=>{if(!popover.hidden&&!popover.contains(e.target)&&!trigger.contains(e.target))setOpen(false)});
  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!popover.hidden){e.preventDefault();setOpen(false);trigger.focus()}});
