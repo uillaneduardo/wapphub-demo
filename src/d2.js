@@ -1,5 +1,5 @@
-import {canAccess} from "./d3.js?v=d3";
-import {permissions,can} from "./permissions.js";
+import {canAccess} from "./d3.js?v=d4-6";
+import {permissions,can} from "./permissions.js?v=d4-6";
 const $=s=>document.querySelector(s), el=(tag,cl="",text)=>{const n=document.createElement(tag);n.className=cl;if(text!==undefined)n.textContent=text;return n};
 let reply=null,file=null,query="",selected=new Set(),menu=null,active=()=>null,all=()=>[],refresh=()=>{},modal=null,touchTimer=0,touchStart=null;
 const statuses=["sent","delivered","read","failed"], labels={sent:"Enviada",delivered:"Entregue",read:"Lida",failed:"Falha no envio"};

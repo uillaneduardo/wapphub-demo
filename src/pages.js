@@ -1,7 +1,7 @@
 import {nameOf,avatar,editContact} from "./contact-identity.js?v=channel-popover-1";
-import {renderSettings} from "./settings.js?v=mobile-polish-1";
-import {conversations} from "./data.js";
-import {getChannel} from "./channels.js";
+import {renderSettings} from "./settings.js?v=d4-6";
+import {conversations} from "./data.js?v=channels-1";
+import {getChannel} from "./channels.js?v=channels-1";
 const make=(tag,className="",value)=>{const n=document.createElement(tag);n.className=className;if(value!==undefined)n.textContent=value;return n};
 let view=null;
 function ensure(){if(view)return view;view=make("section","module-view");view.id="module-view";view.setAttribute("aria-label","Módulo");document.body.append(view);return view}

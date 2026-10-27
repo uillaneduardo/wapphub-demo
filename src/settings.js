@@ -1,6 +1,11 @@
-import {renderChannelManagement,renderProviderManagement} from "./channel-management.js?v=mobile-polish-1";
+import {renderAccessPanel} from "./access-panel.js?v=d4-6";
+import {adminState} from "./admin-data.js?v=inbox-1";
+import {conversations} from "./data.js?v=channels-1";
+import {roleAllows,setRoleGrant,assignConversation} from "./demo-access-store.js?v=d4-6";
+import {getChannel} from "./channels.js?v=channels-1";
+import {renderChannelManagement,renderProviderManagement} from "./channel-management.js?v=d4-6";
 import {organizationPanel,teamPanel,bindAdminRender} from "./admin-ui.js?v=mobile-polish-1";
-import {channels} from "./channels.js";
+import {channels} from "./channels.js?v=channels-1";
 import {openAppearanceSettings} from "./appearance.js";
 const sections=[
 ["organizacao","Organização","Identidade, dados gerais e preferências da organização"],
@@ -26,7 +31,7 @@ export function renderSettings(root){root.replaceChildren();const h=el("header",
  function show(id){sectionSelect.value=id;menu.querySelectorAll("button").forEach(b=>{const active=b.dataset.section===id;b.classList.toggle("active",active);b.setAttribute("aria-current",active?"page":"false")});panel.replaceChildren();const meta=sections.find(s=>s[0]===id);panel.append(el("h2","",meta[1]),el("p","settings-description",meta[2]));
  if(id==="organizacao")organizationPanel(panel)
  if(id==="equipe")teamPanel(panel)
- if(id==="permissoes"){panel.append(line("Papéis","OWNER, SUPERVISOR e AGENT"),line("Acesso às conversas","Atendentes visualizam apenas conversas atribuídas"),line("Encaminhamento","Autorização independente e revogável pelo Core"),line("Ações destrutivas","Exigem permissão e confirmação explícita"))}
+ if(id==="permissoes")renderAccessPanel(panel,{getMembers:()=>adminState().members,getConversations:()=>conversations,getChannel,getGrant:roleAllows,setGrant:setRoleGrant,assign:(conversationId,memberId)=>assignConversation(conversations,adminState().members,conversationId,memberId)});
  if(id==="canais")renderChannelManagement(panel,show)
  if(id==="providers")renderProviderManagement(panel,show)
  if(id==="aparencia"){panel.append(line("Personalização organizacional","Personalize a cor de destaque e o modo claro ou escuro."));const b=el("button","settings-primary","Personalizar aparência");b.type="button";b.onclick=openAppearanceSettings;panel.append(b)}
