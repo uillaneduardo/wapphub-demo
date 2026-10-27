@@ -9,8 +9,10 @@ test("seletor de canais fica ao lado de Caixa de entrada",()=>{
  assert.match(html,/<div class="inbox-topline">/);
  const top=html.split('<div class="inbox-topline">')[1].split("</div>")[0];
  assert.match(top,/Caixa de entrada/);
- assert.match(top,/id="channel-select"/);
- assert.match(top,/aria-label="Selecionar canal de mensagens"/);
+ assert.match(top,/id="channel-filter-trigger"/);
+ assert.match(top,/id="channel-filter-popover"/);
+ assert.match(top,/aria-haspopup="dialog"/);
+ assert.doesNotMatch(html,/id="channel-select"/);
  assert.match(html,/id="conversation-count"/);
 });
 
@@ -32,7 +34,7 @@ test("canal da conversa é exibido nos detalhes e imports são versionados",()=>
  const main=source("src/main.js");
  assert.match(html,/id="detail-channel"/);
  assert.match(main,/\$\("#detail-channel"\)\.textContent=getChannel\(c.channelId\)\.name/);
- assert.match(html,/main\.js\?v=mobile-polish-1/);
- assert.match(main,/d3\.js\?v=inbox-1/);
- assert.match(main,/d2\.js\?v=mobile-polish-1/);
+ assert.match(html,/main\.js\?v=channel-popover-1/);
+ assert.match(main,/d3\.js\?v=channel-popover-1/);
+ assert.match(main,/d2\.js\?v=channel-popover-1/);
 });
