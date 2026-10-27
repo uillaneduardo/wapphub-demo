@@ -4,8 +4,8 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#fafafa"><meta name="description" content="WappHub — atendimento multicanal">
 <title>Atendimento · WappHub</title>
-<link rel="stylesheet" href="./src/styles.css?v=d5-1">
-<script type="module" src="./src/main.js?v=d5-2"></script>
+<link rel="stylesheet" href="./src/styles.css?v=media-1">
+<script type="module" src="./src/main.js?v=media-1"></script>
 </head>
 <body>
 <div id="app" class="shell">
@@ -15,6 +15,7 @@
       <button class="icon-button active" data-nav="atendimento" aria-label="Atendimento" title="Atendimento"><svg><use href="#i-message"/></svg></button>
       <button class="icon-button" data-nav="visao-geral" aria-label="Visão geral" title="Visão geral"><svg><use href="#i-grid"/></svg></button>
       <button class="icon-button" data-nav="contatos" aria-label="Contatos" title="Contatos"><svg><use href="#i-users"/></svg></button>
+      <button class="icon-button" data-nav="midias" aria-label="Mídias" title="Mídias"><svg><use href="#i-gallery"/></svg></button>
     </div>
     <div class="rail-bottom">
       <button class="icon-button" data-nav="configuracoes" aria-label="Configurações" title="Configurações"><svg><use href="#i-settings"/></svg></button>
@@ -82,6 +83,7 @@
     <div class="details-head"><strong>Detalhes</strong><button class="icon-button" id="details-close" aria-label="Fechar detalhes"><svg><use href="#i-close"/></svg></button></div>
     <div class="contact-card"><div class="avatar large" id="detail-avatar">MC</div><strong id="detail-name">Mariana Costa</strong><span id="detail-phone" class="muted"></span></div>
     <div class="detail-section"><span class="eyebrow">Atendimento</span><div class="detail-row"><span>Situação</span><strong id="detail-status"></strong></div><div class="detail-row"><span>Responsável</span><strong id="detail-agent"></strong></div><div class="detail-row"><span>Canal</span><strong id="detail-channel"></strong></div></div>
+    <section id="detail-media" class="detail-media" aria-label="Mídias desta conversa"></section>
   </aside>
 </div>
 <div id="toast-region" class="toast-region" role="status" aria-live="polite"></div>
@@ -135,6 +137,10 @@
 <symbol id="i-close" viewBox="0 0 24 24">
   <path d="M18 6 6 18" />
   <path d="m6 6 12 12" />
-</symbol><symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 2 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5"/><path d="m3 17 9 5 9-5"/></symbol><symbol id="i-smile" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></symbol></svg>
+</symbol>
+<symbol id="i-gallery" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m3 17 5-5 3 3 4-4 6 6"/></symbol>
+<symbol id="i-play" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7z"/></symbol>
+<symbol id="i-pause" viewBox="0 0 24 24"><path d="M9 5v14M15 5v14"/></symbol>
+<symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 2 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5"/><path d="m3 17 9 5 9-5"/></symbol><symbol id="i-smile" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></symbol></svg>
 </body>
 </html>
