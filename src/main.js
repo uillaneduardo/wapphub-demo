@@ -67,7 +67,7 @@ function setDetails(open){root.classList.toggle("details-open",open);$("#details
 $("#details-toggle").addEventListener("click",()=>setDetails($("#details").hidden));
 $("#details-close").addEventListener("click",()=>setDetails(false));
 $("#back-button").addEventListener("click",()=>{root.classList.remove("chat-open");setDetails(false)});
-$("#theme-toggle").addEventListener("click",()=>{state.theme=state.theme==="light"?"dark":"light";setAppearance({mode:state.theme})});
+$("#theme-toggle").addEventListener("click",()=>setAppearance({mode:appearance.mode==="light"?"dark":"light"}));
 $("#composer").addEventListener("submit",e=>{e.preventDefault();const input=$("#message-input");if(!active()||!assertCanSend(active())||!sendD2(active(),input.value))return;input.value="";input.style.height="";renderMessages();renderList();});
 $("#message-input").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){e.preventDefault();$("#composer").requestSubmit()}});
 $("#message-input").addEventListener("input",e=>{e.target.style.height="auto";e.target.style.height=Math.min(e.target.scrollHeight,144)+"px"});
