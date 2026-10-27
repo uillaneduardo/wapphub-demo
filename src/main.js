@@ -1,3 +1,5 @@
+import {seedMediaFixtures} from "./media-fixtures.js?v=media-1";
+import {renderConversationMedia} from "./media-gallery.js?v=media-1";
 import {getProfile,initials} from "./profile-store.js?v=d4-7";
 import {initializeAssignments} from "./demo-access-store.js?v=d4-6";
 import {adminState} from "./admin-data.js?v=inbox-1";
@@ -5,14 +7,15 @@ import {setupChannelPicker} from "./channel-picker.js?v=d5-1";
 import {conversationMatchesChannels} from "./channel-filter.mjs?v=d5-1";
 import {providers} from "./channels.js?v=channels-1";
 import {nameOf,avatar,editContact} from "./contact-identity.js?v=channel-popover-1";
-import {showModule} from "./pages.js?v=d5-1";
+import {showModule} from "./pages.js?v=media-1";
 import {channels,getChannel} from "./channels.js?v=channels-1";
 import {setupD3,updateD3,canAccess,assertCanSend} from "./d3.js?v=d4-6";
 import {appearance,setAppearance,openAppearanceSettings} from "./appearance.js?v=d5-1";
-import {renderD2,sendD2,setupD2,resetD2Selection} from "./d2.js?v=d5-2";
+import {renderD2,sendD2,setupD2,resetD2Selection} from "./d2.js?v=media-1";
 import {conversations} from "./data.js?v=channels-1";
 const $=s=>document.querySelector(s);const root=$("#app"),list=$("#conversation-list"),messages=$("#messages");
 const state={active:"mariana",filter:"all",selectedChannels:null,query:"",theme:appearance.mode};
+seedMediaFixtures(conversations);
 initializeAssignments(conversations,adminState().members);
 
 const active=()=>conversations.find(c=>c.id===state.active);
@@ -29,12 +32,12 @@ function renderList(){
  $("#conversation-count").textContent=String(shown.length);
 }
 function renderMessages(){if(!active()){messages.replaceChildren(node("p","placeholder","Nenhuma conversa disponível nos canais selecionados."));return}if(!canAccess(active())){messages.replaceChildren(node("p","placeholder","Conversa não atribuída. Aguarde autorização de um OWNER ou SUPERVISOR."));return}renderD2(active(),messages)}
-function select(id,{openChat=true,markRead=openChat}={}){resetD2Selection();state.active=id;const c=active();if(markRead)c.unread=0;$("#chat-title").textContent=nameOf(c);$("#chat-avatar").replaceWith(Object.assign(avatar(c),{id:"chat-avatar"}));$("#chat-subtitle").textContent=c.status+" · "+getChannel(c.channelId).name;$("#detail-avatar").replaceWith(Object.assign(avatar(c,"avatar large"),{id:"detail-avatar"}));$("#detail-name").textContent=nameOf(c);$("#detail-phone").textContent=c.phone;$("#detail-agent").textContent=c.agent;$("#detail-status").textContent=c.status;$("#detail-channel").textContent=getChannel(c.channelId).name;$("#message-input").value="";renderList();renderMessages();$("#details-toggle").disabled=false;$("#find-messages").disabled=false;$("#chat-menu").disabled=false;if(openChat)root.classList.add("chat-open");updateD3()}
+function select(id,{openChat=true,markRead=openChat}={}){resetD2Selection();state.active=id;const c=active();if(markRead)c.unread=0;$("#chat-title").textContent=nameOf(c);$("#chat-avatar").replaceWith(Object.assign(avatar(c),{id:"chat-avatar"}));$("#chat-subtitle").textContent=c.status+" · "+getChannel(c.channelId).name;$("#detail-avatar").replaceWith(Object.assign(avatar(c,"avatar large"),{id:"detail-avatar"}));$("#detail-name").textContent=nameOf(c);$("#detail-phone").textContent=c.phone;$("#detail-agent").textContent=c.agent;$("#detail-status").textContent=c.status;$("#detail-channel").textContent=getChannel(c.channelId).name;renderConversationMedia(c,$("#detail-media"),openConversationMedia);$("#message-input").value="";renderList();renderMessages();$("#details-toggle").disabled=false;$("#find-messages").disabled=false;$("#chat-menu").disabled=false;if(openChat)root.classList.add("chat-open");updateD3()}
 function clearActive(){
  resetD2Selection();state.active=null;
  $("#chat-title").textContent="Selecione uma conversa";
  $("#chat-subtitle").textContent="";
- $("#details").hidden=true;
+ $("#details").hidden=true;$("#detail-media").replaceChildren();
  root.classList.remove("details-open","chat-open");
  $("#details-toggle").setAttribute("aria-expanded","false");
  $("#details-toggle").disabled=true;
@@ -63,6 +66,11 @@ window.addEventListener("demo-assignments-updated",()=>{onChannelSelection(chann
 list.addEventListener("click",e=>{const item=e.target.closest("[data-id]");if(item)select(item.dataset.id)});
 $("#search").addEventListener("input",e=>{state.query=e.target.value;renderList()});
 document.querySelectorAll("[data-filter]").forEach(b=>b.addEventListener("click",()=>{state.filter=b.dataset.filter;document.querySelectorAll("[data-filter]").forEach(x=>{x.classList.toggle("selected",x===b);x.setAttribute("aria-pressed",String(x===b))});renderList()}));
+function openConversationMedia(conversationId){
+ setDetails(false);
+ showModule("midias",{conversationId});
+ document.querySelectorAll("[data-nav]").forEach(b=>b.classList.toggle("active",b.dataset.nav==="midias"));
+}
 function setDetails(open){root.classList.toggle("details-open",open);$("#details").hidden=!open;$("#details-toggle").setAttribute("aria-expanded",String(open))}
 $("#details-toggle").addEventListener("click",()=>setDetails($("#details").hidden));
 $("#details-close").addEventListener("click",()=>setDetails(false));
@@ -87,6 +95,6 @@ const contactEditButton=document.createElement("button");contactEditButton.class
 document.querySelectorAll("[data-nav]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-nav]").forEach(x=>x.classList.toggle("active",x===b));showModule(b.dataset.nav);if(b.dataset.nav==="atendimento")root.classList.remove("chat-open")}));
 
 document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();$("#search").focus()}if(e.key==="Escape"&&root.classList.contains("details-open"))setDetails(false)});
-setupD2(active,()=>conversations,()=>{const c=active();if(c){$("#detail-status").textContent=c.status;$("#detail-agent").textContent=c.agent}renderMessages();renderList();updateD3()});
+setupD2(active,()=>conversations,()=>{const c=active();if(c){$("#detail-status").textContent=c.status;$("#detail-agent").textContent=c.agentrenderConversationMedia(c,$("#detail-media"),openConversationMedia);}renderMessages();renderList();updateD3()});
 setupD3(active,()=>{onChannelSelection(channelPicker.getSelection());renderMessages()});
 select(state.active,{openChat:false,markRead:window.matchMedia("(min-width:761px)").matches});onChannelSelection(channelPicker.getSelection());root.classList.remove("chat-open");
