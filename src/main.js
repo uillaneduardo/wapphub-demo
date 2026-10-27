@@ -1,8 +1,9 @@
-import {renderD2,sendD2,setupD2,resetD2Selection} from "./d2.js?v=d2-3";
+import {appearance,setAppearance,openAppearanceSettings} from "./appearance.js?v=d2-4";
+import {renderD2,sendD2,setupD2,resetD2Selection} from "./d2.js?v=d2-4";
 import {conversations} from "./data.js?v=d2-3";
 const $=s=>document.querySelector(s);const root=$("#app"),list=$("#conversation-list"),messages=$("#messages");
-const state={active:"mariana",filter:"all",query:"",theme:localStorage.getItem("wapphub-demo-theme")||"light"};
-document.documentElement.dataset.theme=state.theme;
+const state={active:"mariana",filter:"all",query:"",theme:appearance.mode};
+
 const active=()=>conversations.find(c=>c.id===state.active);
 const node=(tag,cls,text)=>{const x=document.createElement(tag);if(cls)x.className=cls;if(text!==undefined)x.textContent=text;return x};
 const toast=text=>{const item=node("div","toast",text);$("#toast-region").append(item);setTimeout(()=>item.remove(),3800)};
@@ -25,12 +26,12 @@ function setDetails(open){root.classList.toggle("details-open",open);$("#details
 $("#details-toggle").addEventListener("click",()=>setDetails($("#details").hidden));
 $("#details-close").addEventListener("click",()=>setDetails(false));
 $("#back-button").addEventListener("click",()=>{root.classList.remove("chat-open");setDetails(false)});
-$("#theme-toggle").addEventListener("click",()=>{state.theme=state.theme==="light"?"dark":"light";document.documentElement.dataset.theme=state.theme;localStorage.setItem("wapphub-demo-theme",state.theme)});
+$("#theme-toggle").addEventListener("click",()=>{state.theme=state.theme==="light"?"dark":"light";setAppearance({mode:state.theme})});
 $("#composer").addEventListener("submit",e=>{e.preventDefault();const input=$("#message-input");if(!sendD2(active(),input.value))return;input.value="";input.style.height="";renderMessages();renderList();toast("Mensagem adicionada à demonstração. Nenhum envio externo.");});
 $("#message-input").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){e.preventDefault();$("#composer").requestSubmit()}});
 $("#message-input").addEventListener("input",e=>{e.target.style.height="auto";e.target.style.height=Math.min(e.target.scrollHeight,144)+"px"});
 $("#inbox-menu").addEventListener("click",()=>toast("WappHub Demo D1 · Interface estática com dados fictícios."));
-$("#profile-button").addEventListener("click",()=>toast("Perfil demonstrativo · tela prevista na D4."));
+$("#profile-button").addEventListener("click",()=>openAppearanceSettings());
 document.querySelectorAll("[data-nav]").forEach(b=>b.addEventListener("click",()=>{if(b.dataset.nav==="atendimento"){document.querySelectorAll("[data-nav]").forEach(x=>x.classList.toggle("active",x===b));root.classList.remove("chat-open")}else toast("Tela de "+(b.dataset.nav==="contatos"?"contatos":"visão geral")+" prevista na D4.")}));
 document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();$("#search").focus()}if(e.key==="Escape"&&root.classList.contains("details-open"))setDetails(false)});
 setupD2(active,()=>conversations,()=>{renderMessages();renderList()});

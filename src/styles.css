@@ -38,3 +38,24 @@
 .workspace{position:relative}.d2-permission{display:flex;align-items:center;gap:10px;padding:8px 0}.d2-forwarded{font-size:11px;opacity:.65;margin-bottom:5px}
 .d2-menu button:disabled{opacity:.35;cursor:not-allowed}
 @media(max-width:760px){.d2-selection{bottom:90px;max-width:calc(100% - 14px);overflow-x:auto;left:7px;transform:none;width:calc(100% - 14px)}.d2-dialog{max-height:90dvh}.d2-result{padding:13px 8px}}
+
+
+/* D2.4 — tokens de destaque, contraste e seleção */
+:root{--brand-accent:#4f46e5;--brand-soft:#efefff;--brand-border:#4f46e5;--brand-text:#fff;--brand-indicator:#4f46e5}
+.message-row.d2-picked{border-radius:10px;background:var(--brand-soft);box-shadow:inset 4px 0 var(--brand-border);padding:9px 12px;margin:-9px -12px;position:relative}
+.message-row.d2-picked .bubble{outline:2px solid var(--brand-border);outline-offset:2px}
+.message-row.d2-picked::before{content:"✓";position:absolute;left:-11px;top:6px;width:21px;height:21px;border-radius:100%;background:var(--brand-accent);color:var(--brand-text);display:grid;place-items:center;font-size:13px;font-weight:700;box-shadow:0 0 0 2px var(--panel)}
+.message-row.d2-picked .message-meta{font-weight:650;color:var(--text)}
+.conversation.selected{box-shadow:inset 3px 0 var(--brand-border);background:var(--brand-soft)}
+.chip.selected,.icon-button.active,.d2-result.chosen{background:var(--brand-soft);color:var(--text)}
+.d2-result.chosen{box-shadow:inset 3px 0 var(--brand-border)}
+.send-button,.d2-primary{background:var(--brand-accent);color:var(--brand-text)}
+button:focus-visible,input:focus-visible,textarea:focus-visible,.message-row:focus-visible{outline:2px solid var(--brand-border);outline-offset:2px}
+.toast{border-left:4px solid var(--brand-border)}
+.d2-selection{border-color:var(--brand-border);box-shadow:0 5px 30px #0002}
+.appearance-colors{display:flex;flex-wrap:wrap;gap:12px;padding:8px 0}
+.appearance-swatch{width:32px;height:32px;border-radius:50%;border:2px solid var(--panel);outline:1px solid var(--line)}
+.appearance-swatch[aria-pressed=true]{outline:3px solid var(--brand-border);outline-offset:2px}
+#appearance-dialog label{display:flex;flex-direction:column;gap:8px;font-size:12px;font-weight:600}
+#appearance-dialog input[type=color]{width:60px;height:36px;border:1px solid var(--line);background:var(--panel);border-radius:7px;padding:2px}
+@media(max-width:760px){.message-row.d2-picked{margin:-7px -7px;padding:7px}.message-row.d2-picked::before{left:-5px}}
