@@ -10,11 +10,11 @@ const $=s=>document.querySelector(s);
 const roles={OWNER:"Proprietário",SUPERVISOR:"Supervisor",AGENT:"Atendente"};
 let state={role:"OWNER",connection:"online"},getCurrent=()=>null,onChange=()=>{};
 const elem=(tag,cl,text)=>{const n=document.createElement(tag);n.className=cl;if(text!==undefined)n.textContent=text;return n};
-export function canAccess(c){return !!c&&(state.role!=="AGENT"||c.assigned===true)}
+export function canAccess(c){return !!c&&(state.role!=="AGENT"||c.assignedToMemberId==="member-agent")}
 export function canSend(c){return !!c&&canAccess(c)&&scenarios[state.connection].send&&c.status!=="Finalizado"}
 export function currentState(){return {...state,...scenarios[state.connection]}}
 function notify(text,tone="info"){const n=elem("div","toast d3-toast "+tone,text);$("#toast-region").append(n);setTimeout(()=>n.remove(),5000)}
-function render(){const data=scenarios[state.connection],bar=$("#status-banner"),c=getCurrent();bar.hidden=state.connection==="online";bar.textContent=data.message;bar.dataset.tone=data.tone;const compose=$("#message-input");compose.disabled=!canSend(c);compose.placeholder=!c?"Selecione uma conversa":!canAccess(c)?"Aguarde a atribuição de um supervisor":!data.send?"Canal indisponível para envio":c?.status==="Finalizado"?"Atendimento finalizado":"Escreva uma mensagem...";$("#composer").querySelector('button[type="submit"]').disabled=!canSend(c);$("#chat-subtitle").textContent=!canAccess(c)?"Acesso restrito":c?.status||data.label;const status=$("#d3-connection");if(status){status.textContent=data.label;status.dataset.tone=data.tone}const role=$("#d3-role");if(role)role.textContent=roles[state.role];}
+function render(){const data=scenarios[state.connection],bar=$("#status-banner"),c=getCurrent();bar.hidden=state.connection==="online";bar.textContent=data.message;bar.dataset.tone=data.tone;const compose=$("#message-input");compose.disabled=!canSend(c);compose.placeholder=!c?"Selecione uma conversa":!canAccess(c)?"Aguarde a atribuição de um supervisor":!data.send?"Canal indisponível para envio":c?.status==="Finalizado"?"Atendimento finalizado":"Escreva uma mensagem...";$("#composer").querySelector('button[type="submit"]').disabled=!canSend(c);$("#chat-subtitle").textContent=!c?"":!canAccess(c)?"Acesso restrito":c?.status||data.label;const status=$("#d3-connection");if(status){status.textContent=data.label;status.dataset.tone=data.tone}const role=$("#d3-role");if(role)role.textContent=roles[state.role];}
 export function setupD3(getActive,refresh){
  getCurrent=getActive;onChange=refresh;
  // Diagnósticos são opt-in e não ocupam a navegação habitual.
