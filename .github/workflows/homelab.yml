@@ -1,0 +1,80 @@
+name: CI / Homelab CD
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: wapphub-demo-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image: ${{ steps.image.outputs.ref }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate configuration
+        run: |
+          docker compose config --quiet
+          test -f Dockerfile
+          grep -q 'location = /health' nginx.conf
+          bash -n .github/scripts/deploy.sh
+      - name: Build image
+        run: docker build --pull -t wapphub-demo:ci .
+      - name: Smoke test
+        run: |
+          docker run -d --rm --name wapphub-demo-ci -p 127.0.0.1:18280:80 wapphub-demo:ci
+          trap 'docker rm -f wapphub-demo-ci >/dev/null 2>&1 || true' EXIT
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:18280/health | grep -qx ok; then
+              curl -fsS http://127.0.0.1:18280/ >/dev/null
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs wapphub-demo-ci
+          exit 1
+      - name: Resolve immutable image ref
+        id: image
+        run: echo "ref=ghcr.io/${GITHUB_REPOSITORY,,}:${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+      - name: Login to GHCR
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish
+        if: github.event_name != 'pull_request'
+        run: |
+          docker tag wapphub-demo:ci "${{ steps.image.outputs.ref }}"
+          docker push "${{ steps.image.outputs.ref }}"
+  deploy:
+    if: github.event_name == 'push' && vars.HOMELAB_DEPLOY_ENABLED == 'true'
+    needs: build
+    runs-on: [self-hosted, linux, homelab-deploy]
+    timeout-minutes: 15
+    environment: production
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Deploy and verify
+        env:
+          IMAGE_REF: ${{ needs.build.outputs.image }}
+          DEPLOY_DIR: ${{ vars.HOMELAB_COMPOSE_DIR }}
+          DEPLOY_SERVICE: demo
+        run: bash .github/scripts/deploy.sh

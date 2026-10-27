@@ -1,7 +1,7 @@
 services:
   demo:
     build: .
-    image: wapphub-demo:d1
+    image: ${HOMELAB_IMAGE:-wapphub-demo:d1}
     restart: unless-stopped
     ports:
       - "127.0.0.1:8280:80"
