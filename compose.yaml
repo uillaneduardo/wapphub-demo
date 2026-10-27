@@ -1,0 +1,14 @@
+services:
+  demo:
+    build: .
+    image: wapphub-demo:d1
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8280:80"
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx
+      - /var/run
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
