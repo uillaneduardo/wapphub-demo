@@ -1,0 +1,6 @@
+.git
+.github
+docs
+README.md
+*.log
+node_modules
