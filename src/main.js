@@ -7,7 +7,7 @@ import {setupChannelPicker} from "./channel-picker.js?v=d5-1";
 import {conversationMatchesChannels} from "./channel-filter.mjs?v=d5-1";
 import {providers} from "./channels.js?v=channels-1";
 import {nameOf,avatar,editContact} from "./contact-identity.js?v=channel-popover-1";
-import {showModule} from "./pages.js?v=media-1";
+import {showModule,refreshCurrentMediaModule} from "./pages.js?v=media-1";
 import {channels,getChannel} from "./channels.js?v=channels-1";
 import {setupD3,updateD3,canAccess,assertCanSend} from "./d3.js?v=d4-6";
 import {appearance,setAppearance,openAppearanceSettings} from "./appearance.js?v=d5-1";
@@ -62,7 +62,7 @@ const channelPicker=setupChannelPicker({
  onChange:onChannelSelection
 });
 window.addEventListener("demo-channels-updated",()=>channelPicker.refresh());
-window.addEventListener("demo-assignments-updated",()=>{onChannelSelection(channelPicker.getSelection());const current=active();if(current){$("#detail-agent").textContent=current.agent;$("#detail-status").textContent=current.status;}renderMessages();updateD3()});
+window.addEventListener("demo-assignments-updated",()=>{onChannelSelection(channelPicker.getSelection());const current=active();if(current){$("#detail-agent").textContent=current.agent;$("#detail-status").textContent=current.status;}renderMessages();updateD3();refreshCurrentMediaModule()});
 list.addEventListener("click",e=>{const item=e.target.closest("[data-id]");if(item)select(item.dataset.id)});
 $("#search").addEventListener("input",e=>{state.query=e.target.value;renderList()});
 document.querySelectorAll("[data-filter]").forEach(b=>b.addEventListener("click",()=>{state.filter=b.dataset.filter;document.querySelectorAll("[data-filter]").forEach(x=>{x.classList.toggle("selected",x===b);x.setAttribute("aria-pressed",String(x===b))});renderList()}));
@@ -96,5 +96,5 @@ document.querySelectorAll("[data-nav]").forEach(b=>b.addEventListener("click",()
 
 document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();$("#search").focus()}if(e.key==="Escape"&&root.classList.contains("details-open"))setDetails(false)});
 setupD2(active,()=>conversations,()=>{const c=active();if(c){$("#detail-status").textContent=c.status;$("#detail-agent").textContent=c.agentrenderConversationMedia(c,$("#detail-media"),openConversationMedia);}renderMessages();renderList();updateD3()});
-setupD3(active,()=>{onChannelSelection(channelPicker.getSelection());renderMessages()});
+setupD3(active,()=>{onChannelSelection(channelPicker.getSelection());renderMessages();refreshCurrentMediaModule()});
 select(state.active,{openChat:false,markRead:window.matchMedia("(min-width:761px)").matches});onChannelSelection(channelPicker.getSelection());root.classList.remove("chat-open");
