@@ -23,8 +23,10 @@ test("seleção múltipla cruza conversas de cada canal escolhido",()=>{
 test("canal único, desabilitado e seleção vazia têm estados consistentes",()=>{
  assert.equal(selectionLabel(normalizeSelection(["a"],channels),channels),"WhatsApp Comercial");
  assert.deepEqual([...normalizeSelection(["b","c"],channels)],["b"]);
- assert.equal(normalizeSelection(["c"],channels),null);
- assert.equal(normalizeSelection([],channels),null);
+ assert.deepEqual([...normalizeSelection(["c"],channels)],[]);
+ assert.deepEqual([...normalizeSelection([],channels)],[]);
+ assert.equal(selectionLabel(new Set(),channels),"Nenhum canal selecionado");
+ assert.equal(conversationMatchesChannels(conversation("a"),new Set(),channels),false);
 });
 test("interface e editor permanecem desacoplados da persistência",()=>{
  const ui=readFileSync(new URL("../src/channel-picker.js",import.meta.url),"utf8");

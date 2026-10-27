@@ -3,11 +3,12 @@ export const normalizeSelection = (selection, channels) => {
   if (selection == null) return null;
   const enabled = new Set(availableChannels(channels).map(c => c.id));
   const ids = [...new Set(selection)].filter(id => enabled.has(id));
-  return ids.length ? new Set(ids) : null;
+  return new Set(ids);
 };
 export const conversationMatchesChannels = (conversation, selection, channels) => availableChannels(channels).some(c => c.id === conversation.channelId && (selection === null || selection.has(c.id)));
 export const selectionLabel = (selection, channels) => {
   if (selection === null) return 'Todos os canais';
+  if (selection.size === 0) return 'Nenhum canal selecionado';
   const names = availableChannels(channels).filter(c => selection.has(c.id)).map(c => c.name);
   return names.length === 1 ? names[0] : names.length + ' canais selecionados';
 };

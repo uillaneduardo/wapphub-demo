@@ -39,6 +39,11 @@ jobs:
           for i in $(seq 1 30); do
             if curl -fsS http://127.0.0.1:18280/health | grep -qx ok; then
               curl -fsS http://127.0.0.1:18280/ >/dev/null
+              curl -fsS http://127.0.0.1:18280/src/main.js | grep -q 'setupChannelPicker'
+              curl -fsS http://127.0.0.1:18280/src/channel-filter.mjs | grep -q 'normalizeSelection'
+              curl -fsS http://127.0.0.1:18280/src/role-rules.mjs | grep -q 'eligibleConversations'
+              curl -fsS http://127.0.0.1:18280/src/styles.css | grep -q 'channel-filter-popover'
+              curl -fsSI http://127.0.0.1:18280/src/channel-filter.mjs | grep -qi '^content-type: application/javascript'
               exit 0
             fi
             sleep 2
