@@ -1,5 +1,5 @@
 import {nameOf,avatar,editContact} from "./contact-identity.js?v=identity-1";
-import {renderSettings} from "./settings.js?v=inbox-1";
+import {renderSettings} from "./settings.js?v=mobile-polish-1";
 import {conversations} from "./data.js";
 import {getChannel} from "./channels.js";
 const make=(tag,className="",value)=>{const n=document.createElement(tag);n.className=className;if(value!==undefined)n.textContent=value;return n};
