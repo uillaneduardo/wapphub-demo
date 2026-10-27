@@ -43,8 +43,9 @@ export function setupChannelPicker({trigger,popover,list,summary,badge,getChanne
     copy.append(state);
     row.append(check,copy);
     check.addEventListener("change",()=>{
-      const next=selection===null?new Set([channel.id]):new Set(selection);
-      if(selection!==null){if(check.checked)next.add(channel.id);else next.delete(channel.id)}
+      const next=selection===null?new Set(all.map(c=>c.id)):new Set(selection);
+      if(check.checked)next.add(channel.id);
+      else next.delete(channel.id);
       selection=normalizeSelection(next,channels());
       changed(channel.id);
     });
