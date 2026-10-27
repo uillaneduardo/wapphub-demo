@@ -23,6 +23,8 @@ function renderList(){
 }
 function renderMessages(){if(!canAccess(active())){messages.replaceChildren(node("p","placeholder","Conversa não atribuída. Aguarde autorização de um OWNER ou SUPERVISOR."));return}renderD2(active(),messages)}
 function select(id){resetD2Selection();state.active=id;const c=active();c.unread=0;$("#chat-title").textContent=nameOf(c);$("#chat-avatar").replaceWith(Object.assign(avatar(c),{id:"chat-avatar"}));$("#chat-subtitle").textContent=c.status+" · "+getChannel(c.channelId).name;$("#detail-avatar").replaceWith(Object.assign(avatar(c,"avatar large"),{id:"detail-avatar"}));$("#detail-name").textContent=nameOf(c);$("#detail-phone").textContent=c.phone;$("#detail-agent").textContent=c.agent;$("#detail-status").textContent=c.status;$("#message-input").value="";renderList();renderMessages();root.classList.add("chat-open");updateD3()}
+function refreshChannelOptions(){const select=$("#channel-select"),selected=state.channel;select.replaceChildren();for(const c of channels.filter(c=>c.id==="all"||c.enabled)){const option=document.createElement("option");option.value=c.id;option.textContent=c.name;select.append(option)}if(!channels.some(c=>c.id===selected&&c.enabled))state.channel="all";select.value=state.channel;}
+window.addEventListener("demo-channels-updated",()=>{refreshChannelOptions();setChannel(state.channel)});
 function setChannel(id){state.channel=getChannel(id).id;const ch=getChannel(id);$("#channel-select").value=state.channel;$("#channel-status").textContent=id==="all"?"Visão unificada":ch.state==="disconnected"?"Canal desconectado":"Canal conectado";$("#channel-status").dataset.status=ch.state;const visible=conversations.filter(c=>canAccess(c)&&(id==="all"||c.channelId===id));if(!visible.some(c=>c.id===state.active)){if(visible.length)select(visible[0].id);else{resetD2Selection();messages.replaceChildren(node("p","placeholder","Nenhuma conversa disponível neste canal."));$("#chat-title").textContent=ch.name;$("#chat-subtitle").textContent="Sem conversas";}}renderList();}
 $("#channel-select").addEventListener("change",e=>setChannel(e.target.value));
 list.addEventListener("click",e=>{const item=e.target.closest("[data-id]");if(item)select(item.dataset.id)});
@@ -45,4 +47,4 @@ document.querySelectorAll("[data-nav]").forEach(b=>b.addEventListener("click",()
 document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();$("#search").focus()}if(e.key==="Escape"&&root.classList.contains("details-open"))setDetails(false)});
 setupD2(active,()=>conversations,()=>{renderMessages();renderList();updateD3()});
 setupD3(active,()=>{renderMessages();renderList()});
-select(state.active);setChannel("all");root.classList.remove("chat-open");
+select(state.active);refreshChannelOptions();setChannel("all");root.classList.remove("chat-open");
