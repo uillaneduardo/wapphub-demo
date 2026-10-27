@@ -7,3 +7,6 @@ export const conversations=[
 {id:"lucas",name:"Lucas Ferreira",initials:"LF",phone:"+55 (81) 99999-1005",time:"Seg",unread:0,assigned:false,agent:"Não atribuído",status:"Aguardando atribuição",preview:"Preciso alterar meu agendamento",messages:[["in","Preciso alterar meu agendamento, por favor.","11:04"]]},
 {id:"ana",name:"Ana Beatriz",initials:"AB",phone:"+55 (81) 99999-1006",time:"Seg",unread:0,assigned:true,agent:"Você",status:"Em atendimento",preview:"Tudo certo, obrigado!",messages:[["in","Tudo certo, obrigado!","10:05"]]}
 ];
+// Vínculo de conversas a instâncias de canal, sem acoplamento ao provider.
+const bindings={mariana:"wa-sales",ricardo:"wa-sales",empresa:"web-support",patricia:"wa-help",lucas:"web-support",ana:"team"};
+for(const conversation of conversations)conversation.channelId=bindings[conversation.id];
