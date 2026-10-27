@@ -3,7 +3,7 @@ import {adminState} from "./admin-data.js?v=inbox-1";
 import {conversations} from "./data.js?v=channels-1";
 import {roleAllows,setRoleGrant,assignConversation} from "./demo-access-store.js?v=d4-6";
 import {getChannel} from "./channels.js?v=channels-1";
-import {renderChannelManagement,renderProviderManagement} from "./channel-management.js?v=mobile-polish-1";
+import {renderChannelManagement,renderProviderManagement} from "./channel-management.js?v=d4-6";
 import {organizationPanel,teamPanel,bindAdminRender} from "./admin-ui.js?v=mobile-polish-1";
 import {channels} from "./channels.js?v=channels-1";
 import {openAppearanceSettings} from "./appearance.js";
