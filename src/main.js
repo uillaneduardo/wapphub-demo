@@ -9,7 +9,7 @@ import {showModule} from "./pages.js?v=d5-1";
 import {channels,getChannel} from "./channels.js?v=channels-1";
 import {setupD3,updateD3,canAccess,assertCanSend} from "./d3.js?v=d4-6";
 import {appearance,setAppearance,openAppearanceSettings} from "./appearance.js?v=d5-1";
-import {renderD2,sendD2,setupD2,resetD2Selection} from "./d2.js?v=d4-6";
+import {renderD2,sendD2,setupD2,resetD2Selection} from "./d2.js?v=d5-2";
 import {conversations} from "./data.js?v=channels-1";
 const $=s=>document.querySelector(s);const root=$("#app"),list=$("#conversation-list"),messages=$("#messages");
 const state={active:"mariana",filter:"all",selectedChannels:null,query:"",theme:appearance.mode};
