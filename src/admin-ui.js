@@ -1,4 +1,4 @@
-import {adminState,mutateAdmin,uid,roleLabels} from "./admin-data.js";
+import {adminState,mutateAdmin,uid,roleLabels} from "./admin-data.js?v=inbox-1";
 const el=(tag,cls="",text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n};
 const line=(title,desc)=>{const row=el("div","settings-item");const copy=el("div","settings-item-copy");copy.append(el("strong","",title),el("span","",desc));row.append(copy);return row};
 const action=(text,click,cls="settings-action")=>{const b=el("button",cls,text);b.type="button";b.onclick=click;return b};
