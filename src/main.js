@@ -1,3 +1,4 @@
+import {showModule} from "./pages.js?v=d4-1";
 import {channels,getChannel} from "./channels.js?v=channels-1";
 import {setupD3,updateD3,canAccess,assertCanSend} from "./d3.js?v=channels-1";
 import {appearance,setAppearance,openAppearanceSettings} from "./appearance.js?v=channels-1";
@@ -36,7 +37,8 @@ $("#message-input").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftK
 $("#message-input").addEventListener("input",e=>{e.target.style.height="auto";e.target.style.height=Math.min(e.target.scrollHeight,144)+"px"});
 $("#inbox-menu").addEventListener("click",()=>toast("WappHub Demo D1 · Interface estática com dados fictícios."));
 $("#profile-button").addEventListener("click",()=>openAppearanceSettings());
-document.querySelectorAll("[data-nav]").forEach(b=>b.addEventListener("click",()=>{if(b.dataset.nav==="atendimento"){document.querySelectorAll("[data-nav]").forEach(x=>x.classList.toggle("active",x===b));root.classList.remove("chat-open")}else toast("Tela de "+(b.dataset.nav==="contatos"?"contatos":"visão geral")+" prevista na D4.")}));
+document.querySelectorAll("[data-nav]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-nav]").forEach(x=>x.classList.toggle("active",x===b));showModule(b.dataset.nav);if(b.dataset.nav==="atendimento")root.classList.remove("chat-open")}));
+
 document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();$("#search").focus()}if(e.key==="Escape"&&root.classList.contains("details-open"))setDetails(false)});
 setupD2(active,()=>conversations,()=>{renderMessages();renderList();updateD3()});
 setupD3(active,()=>{renderMessages();renderList()});
