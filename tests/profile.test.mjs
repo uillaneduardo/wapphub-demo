@@ -18,6 +18,6 @@ test("a apresentação não depende da persistência",()=>{
  assert.match(panel,/photoFile|upload\.onchange|reader\.readAsDataURL/);
 });
 test("versão cacheada da interface reflete a nova tela",()=>{
- assert.match(src("index.html"),/main\.js\?v=d5-1/);
+ assert.match(src("index.html"),/main\.js\?v=d5-2/);
  assert.match(src("src/main.js"),/pages\.js\?v=d5-1/);
 });
