@@ -259,3 +259,66 @@ html[data-theme=dark] .status-banner[data-tone=warning]{background:#3a260e;color
  .message-search-button{grid-area:clear;justify-self:end}
  .message-search-close{grid-area:close;align-self:center}
 }
+
+
+/* D4.5.3 — seletor contextual multicanal, alinhado ao título da Inbox */
+.inbox-topline{position:relative;align-items:center}
+.inbox-channel-control{position:relative;display:flex;align-items:center;justify-content:flex-end;min-width:0}
+.channel-filter-trigger{position:relative;width:38px;height:38px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--text)}
+.channel-filter-trigger svg{width:18px;height:18px}
+.channel-filter-trigger:hover,.channel-filter-trigger[aria-expanded=true],.channel-filter-trigger.is-filtered{background:var(--brand-soft);border-color:var(--brand-border);color:var(--text)}
+.channel-filter-badge{position:absolute;top:-7px;right:-7px;min-width:18px;height:18px;padding:0 4px;border-radius:999px;background:var(--brand-accent);color:var(--brand-text);font-size:10px;font-weight:700;display:grid;place-items:center;box-shadow:0 0 0 2px var(--panel)}
+.channel-filter-badge[hidden],.channel-filter-popover[hidden]{display:none!important}
+.channel-filter-popover{position:absolute;top:calc(100% + 9px);right:0;z-index:40;width:min(308px,calc(100vw - 32px));min-width:min(270px,calc(100vw - 32px));max-height:min(68dvh,470px);overflow-y:auto;background:var(--panel);border:1px solid var(--line);border-radius:11px;box-shadow:0 14px 36px #0000001c;color:var(--text)}
+.channel-filter-head{padding:15px 15px 12px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:3px}
+.channel-filter-head strong{font-size:13px;font-weight:650}
+.channel-filter-summary{color:var(--muted);font-size:11px;overflow-wrap:anywhere}
+.channel-filter-options{padding:6px}
+.channel-menu-section{padding-top:7px}
+.channel-menu-section+.channel-menu-section{border-top:1px solid var(--line);margin-top:6px}
+.channel-menu-group{display:block;margin:2px 9px 6px;color:var(--muted);font-size:10px;font-weight:650;letter-spacing:.025em}
+.channel-menu-choice{display:flex;align-items:center;gap:11px;padding:10px 9px;min-height:46px;border-radius:8px;cursor:pointer}
+.channel-menu-choice:hover,.channel-menu-choice:focus-within{background:var(--hover)}
+.channel-menu-choice input{appearance:none;display:grid;place-items:center;flex:none;width:18px;height:18px;border:1px solid var(--line);border-radius:5px;background:var(--panel);cursor:pointer}
+.channel-menu-choice input:checked{background:var(--brand-accent);border-color:var(--brand-accent)}
+.channel-menu-choice input:checked::after{content:"";width:8px;height:5px;border:solid var(--brand-text);border-width:0 0 2px 2px;transform:rotate(-45deg) translate(1px,-1px)}
+.channel-menu-choice input:focus-visible{outline:2px solid var(--brand-border);outline-offset:2px}
+.channel-menu-copy{display:flex;flex-direction:column;min-width:0;gap:3px}
+.channel-menu-copy strong{font-weight:550;font-size:12px;overflow-wrap:anywhere}
+.channel-menu-copy small{font-size:10px;color:var(--muted)}
+.channel-menu-all .channel-menu-copy strong{font-weight:650}
+.channel-menu-empty{padding:12px;color:var(--muted);font-size:12px}
+
+/* Editor de contato: campos organizados, alinhamento e seletor de foto refinados */
+.contact-editor-overlay{position:fixed;inset:0;z-index:105;display:flex;align-items:center;justify-content:center;background:#0008;padding:18px}
+.contact-editor-dialog{width:min(100%,430px);max-height:calc(100dvh - 36px);overflow-y:auto;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--text)}
+.contact-editor-header{display:flex;align-items:start;justify-content:space-between;gap:16px;padding:19px 20px;border-bottom:1px solid var(--line)}
+.contact-editor-header h2{margin:0;font-size:16px;font-weight:680;letter-spacing:-.02em}
+.contact-editor-header p{margin:6px 0 0;font-size:12px;line-height:1.5;color:var(--muted)}
+.contact-editor-dismiss{display:grid;place-items:center;flex:0 0 30px;width:30px;height:30px;border:0;border-radius:7px;background:transparent;color:var(--muted);font-size:22px;line-height:1}
+.contact-editor-dismiss:hover{background:var(--hover);color:var(--text)}
+.contact-editor-body{display:flex;flex-direction:column;gap:20px;padding:20px}
+.contact-editor-field{display:flex;flex-direction:column;gap:8px;min-width:0}
+.contact-editor-label{font-size:12px;font-weight:570;line-height:1.4}
+.contact-editor-input{width:100%;height:41px;box-sizing:border-box;padding:0 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--text);font:inherit;font-size:13px}
+.contact-editor-input:focus-visible{outline:2px solid var(--brand-border);outline-offset:2px}
+.contact-editor-photo{display:flex;align-items:center;gap:13px;min-width:0}
+.contact-editor-avatar{width:52px!important;height:52px!important}
+.contact-editor-photo-actions{display:flex;flex-direction:column;align-items:flex-start;gap:7px;min-width:0}
+.contact-editor-photo-actions small{font-size:11px;color:var(--muted);line-height:1.45}
+.contact-editor-file{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.contact-editor-error{margin:0;color:#be123c;font-size:12px;line-height:1.5}
+.contact-editor-error[hidden]{display:none}
+.contact-editor-actions{display:flex;align-items:center;justify-content:flex-end;gap:9px;padding:14px 20px;border-top:1px solid var(--line)}
+.contact-editor-actions .settings-primary{margin:0;min-height:37px;font-weight:600}
+.contact-editor-actions .settings-action{min-height:37px}
+.contact-editor-actions button:disabled{opacity:.5}
+@media(max-width:760px){
+ .channel-filter-trigger{width:42px;height:42px}
+ .channel-filter-popover{max-height:min(58dvh,465px)}
+ .contact-editor-overlay{align-items:center;padding:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+ .contact-editor-dialog{max-height:calc(100dvh - 26px - env(safe-area-inset-bottom,0px))}
+ .contact-editor-header{padding:16px}
+ .contact-editor-body{padding:16px;gap:18px}
+ .contact-editor-actions{padding:13px 16px}
+}
