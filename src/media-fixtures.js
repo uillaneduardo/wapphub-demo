@@ -28,7 +28,9 @@ export function seedMediaFixtures(conversations){
   mariana:[
    image("sample:image:mariana","Foto do equipamento","./assets/equipment.svg","14:25","Equipamento avaliado"),
    audio("sample:voice:mariana",audioFixture(),"14:26"),
-   video("sample:video:mariana","14:27")
+   video("sample:video:mariana","14:27"),
+   {id:"sample:reply:mariana",direction:"out",body:"Recebi o vídeo, obrigado!",time:"14:29",status:"read",
+    reply:{conversationId:"mariana",messageId:"sample:video:mariana",body:"",direction:"in",file:{name:"Vídeo recebido"}}}
   ],
   ricardo:[image("sample:receipt:ricardo","Comprovante ilustrativo","./assets/receipt.svg","14:07")],
   empresa:[video("sample:video:empresa","13:47")]
