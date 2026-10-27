@@ -89,15 +89,15 @@ html[data-theme=dark] .status-banner[data-tone=warning]{background:#3a260e;color
 .message-row.d2-picked::before{box-shadow:none!important}
 
 
-/* Navegação multicanal: compacta, sem sombras laterais */
-.channel-picker{display:flex;flex-direction:column;gap:6px;margin-bottom:17px}
-.channel-picker label{font-size:11px;color:var(--muted);font-weight:550}
-.channel-picker select{width:100%;min-height:37px;padding:7px 28px 7px 10px;border:1px solid var(--line);border-radius:7px;background:var(--panel);color:var(--text);font-size:12px;cursor:pointer}
-.channel-picker select:focus-visible{outline:2px solid var(--brand-border);outline-offset:2px}
-.channel-status{font-size:10px;color:var(--muted)}
-.channel-status[data-status=disconnected]{color:#b91c1c}
-html[data-theme=dark] .channel-status[data-status=disconnected]{color:#fca5a5}
-
+/* Alternância compacta de canais ao lado de "Caixa de entrada" */
+.inbox-topline{display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:0;margin:0 0 11px}
+.inbox-topline .eyebrow{flex:none;white-space:nowrap}
+.inbox-topline .channel-picker{display:block;flex:1 1 auto;min-width:0;max-width:195px;margin:0}
+.inbox-topline .channel-picker select{display:block;width:100%;max-width:100%;height:36px;min-width:0;padding:0 8px;border:1px solid var(--line);border-radius:7px;background:var(--panel);color:var(--text);font-size:12px;cursor:pointer;text-overflow:ellipsis;box-shadow:none}
+.inbox-topline .channel-picker select:hover{border-color:var(--ring)}
+.inbox-topline .channel-picker select:focus-visible{outline:2px solid var(--brand-border);outline-offset:2px}
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:390px){.inbox-topline{gap:8px}.inbox-topline .channel-picker{max-width:175px}.inbox-topline .channel-picker select{font-size:11px}}
 
 /* D3.3 — saída utiliza a personalização da organização */
 .mine .bubble{background:var(--brand-accent);color:var(--brand-text)}
