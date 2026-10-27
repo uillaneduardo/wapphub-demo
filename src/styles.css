@@ -157,3 +157,22 @@ html[data-theme=dark] .channel-status[data-status=disconnected]{color:#fca5a5}
  .rail .rail-bottom .user-avatar{display:grid;width:38px;height:38px}
  .rail .rail-bottom #theme-toggle{display:none}
 }
+
+
+/* D4.2 — Configurações: padrão compacto, plano e responsivo */
+.settings-layout{display:grid;grid-template-columns:238px minmax(0,710px);align-items:start;gap:24px;max-width:1020px}
+.settings-menu{display:flex;flex-direction:column;gap:4px}
+.settings-menu-item{width:100%;border:0;border-radius:7px;background:transparent;padding:11px 12px;text-align:left;color:var(--muted);font-size:12px}
+.settings-menu-item:hover{background:var(--hover);color:var(--text)}
+.settings-menu-item.active{background:var(--brand-soft);color:var(--text);font-weight:650}
+.settings-panel{border:1px solid var(--line);border-radius:9px;padding:22px;min-width:0}
+.settings-panel h2{font-size:17px;letter-spacing:-.02em;margin:0 0 7px}
+.settings-description{font-size:12px;color:var(--muted);margin:0 0 20px;line-height:1.6}
+.settings-item{display:flex;justify-content:space-between;gap:12px;align-items:center;border-top:1px solid var(--line);padding:15px 0}
+.settings-item-copy{display:flex;flex-direction:column;gap:5px;min-width:0}
+.settings-item-copy strong{font-size:12px;font-weight:600}
+.settings-item-copy span{font-size:12px;color:var(--muted);line-height:1.55}
+.settings-pill{font-size:10px;color:var(--muted);padding:5px 8px;border:1px solid var(--line);border-radius:6px;white-space:nowrap}
+.settings-primary{border:0;border-radius:7px;background:var(--brand-accent);color:var(--brand-text);font-size:12px;padding:10px 13px;margin-top:16px}
+.settings-hint{font-size:11px;color:var(--muted);line-height:1.6;margin:20px 0 0;padding-top:15px;border-top:1px solid var(--line)}
+@media(max-width:760px){.settings-layout{grid-template-columns:minmax(0,1fr);gap:14px}.settings-menu{flex-direction:row;overflow-x:auto;scrollbar-width:thin;padding-bottom:7px}.settings-menu-item{flex:0 0 auto;width:auto;white-space:nowrap}.settings-panel{padding:16px}.settings-item{align-items:flex-start}.rail-links{gap:5px}.rail-links .icon-button{min-width:43px}}
