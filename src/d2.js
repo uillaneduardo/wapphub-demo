@@ -1,3 +1,4 @@
+import {resolveReplyTarget} from "./reply-navigation.mjs?v=reply-1";
 import {createMediaPlayer,openMediaViewer} from "./media-player.js?v=media-1";
 import {canAccess} from "./d3.js?v=d4-6";
 import {can} from "./permissions.js?v=d4-6";
@@ -27,6 +28,30 @@ function forward(ids){if(!can("forward")){notify("Encaminhamento bloqueado nas p
  search.addEventListener("input",render);confirm.onclick=()=>{const now=stamp();for(const c of all().filter(c=>picked.has(c.id))){normalize(c);for(const m of items){c.messages.push({...m,id:newId(),conversationId:c.id,direction:"out",time:now,status:"sent",forwarded:true,reply:undefined,hidden:false});}c.preview="↪ "+(items.at(-1).body||items.at(-1).file?.name||"Arquivo");c.time=now}closeDialog();choose([]);refresh();notify(items.length+" mensagem(ns) encaminhada(s) para "+picked.size+" destinatário(s).")};
  footer.append(count,confirm);content.append(summary,search,results,footer);dialog("Encaminhar mensagens",content);render();search.focus();
 }
+let replyJumpTimer=null;
+function jumpToOriginal(reference){
+ const conversation=active();
+ if(!conversation||!reference)return;
+ normalize(conversation);
+ const original=resolveReplyTarget(conversation,reference);
+ if(!original){notify("A mensagem original não está disponível nesta conversa.");return}
+ // O filtro de busca pode ter ocultado a referência: restaurar o histórico.
+ if(query){
+  query="";
+  const input=$("#message-search-input");if(input)input.value="";
+  refresh();
+ }
+ const area=$("#messages");
+ const row=[...area.querySelectorAll("[data-message-id]")].find(node=>node.dataset.messageId===original.id);
+ if(!row){notify("Não foi possível localizar a mensagem original.");return}
+ if(replyJumpTimer)clearTimeout(replyJumpTimer);
+ for(const previous of area.querySelectorAll(".reply-jump-highlight"))previous.classList.remove("reply-jump-highlight");
+ row.classList.add("reply-jump-highlight");
+ row.focus({preventScroll:true});
+ const motion=window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches?"instant":"smooth";
+ row.scrollIntoView({behavior:motion==="instant"?"auto":"smooth",block:"center"});
+ replyJumpTimer=setTimeout(()=>{row.classList.remove("reply-jump-highlight");replyJumpTimer=null},1900);
+}
 function action(action,i){const c=normalize(active()),m=byId(c,i);if(!m)return;
  if(action==="reply"){reply={conversationId:c.id,messageId:m.id,body:m.body,direction:m.direction,file:m.file?{name:m.file.name}:undefined};draft();$("#message-input").focus()}
  if(action==="forward")forward([i]);
@@ -38,7 +63,14 @@ function action(action,i){const c=normalize(active()),m=byId(c,i);if(!m)return;
  if(action==="retry"){m.status="sent";refresh();notify("Reenvio solicitado.")}
 }
 function context(i,x,y){const m=byId(active(),i);if(!m)return;openMenu([["Responder",()=>action("reply",i)],["Copiar texto",()=>action("copy",i),!m.body],["Encaminhar",()=>action("forward",i),!can("forward")],["Selecionar mensagens",()=>action("select",i)],["Apagar para mim",()=>action("deleteMine",i),!can("deleteMine")],["Apagar para todos",()=>action("deleteAll",i),!can("deleteAll")]],x,y)}
-export function renderD2(c,container){normalize(c);container.replaceChildren(el("div","date-separator","Hoje"));let n=0;c.messages.forEach((m,i)=>{if(m.hidden)return;if(query&&!(m.body+" "+(m.file?.name||"")).toLowerCase().includes(query))return;n++;const row=el("div","message-row"+(m.direction==="out"?" mine":"")+(selected.has(m.id)?" d2-picked":""));row.dataset.messageId=m.id;row.tabIndex=0;const b=el("div","bubble");if(m.file)b.classList.add("has-media");if(m.reply)b.append(el("div","reply-reference","↪ "+(m.reply.body||m.reply.file?.name||"Mídia")));if(m.forwarded)b.append(el("div","d2-forwarded","Encaminhada"));if(m.file){
+export function renderD2(c,container){normalize(c);container.replaceChildren(el("div","date-separator","Hoje"));let n=0;c.messages.forEach((m,i)=>{if(m.hidden)return;if(query&&!(m.body+" "+(m.file?.name||"")).toLowerCase().includes(query))return;n++;const row=el("div","message-row"+(m.direction==="out"?" mine":"")+(selected.has(m.id)?" d2-picked":""));row.dataset.messageId=m.id;row.tabIndex=0;const b=el("div","bubble");if(m.file)b.classList.add("has-media");if(m.reply){
+ const ref=el("button","reply-reference","↪ "+(m.reply.body||m.reply.file?.name||"Mídia"));
+ ref.type="button";
+ ref.dataset.replyTarget=m.reply.messageId||"";
+ ref.setAttribute("aria-label","Ir para mensagem respondida: "+(m.reply.body||m.reply.file?.name||"Mídia"));
+ ref.title="Ir para mensagem original";
+ b.append(ref);
+}if(m.forwarded)b.append(el("div","d2-forwarded","Encaminhada"));if(m.file){
  const mediaKind=m.file.kind;
  if(mediaKind==="audio"||mediaKind==="video"){
    b.append(createMediaPlayer(m.file,{compact:true}));
@@ -59,13 +91,21 @@ if(searchCount)searchCount.textContent=query?(n===1?"1 resultado":n+" resultados
 if(clear)clear.hidden=!query;
 selectionBar()}
 export function sendD2(c,value){normalize(c);const body=value.trim();if(!body&&!file)return false;const m={id:newId(),conversationId:c.id,direction:"out",body,time:stamp(),status:"sent"};if(reply&&reply.conversationId===c.id&&byId(c,reply.messageId))m.reply={...reply};if(file){m.file=file;file=null}c.messages.push(m);c.preview=body||"📎 "+m.file.name;c.time=m.time;reply=null;draft();return true}
-export function resetD2Selection(){reply=null;file=null;query="";selected.clear();selectionMode=false;const search=$("#message-search"),field=$("#message-search-input");if(search)search.hidden=true;if(field)field.value="";draft();closeDialog();closeMenu();selectionBar()}
+export function resetD2Selection(){if(replyJumpTimer){clearTimeout(replyJumpTimer);replyJumpTimer=null}$("#messages")?.querySelectorAll(".reply-jump-highlight").forEach(row=>row.classList.remove("reply-jump-highlight"));reply=null;file=null;query="";selected.clear();selectionMode=false;const search=$("#message-search"),field=$("#message-search-input");if(search)search.hidden=true;if(field)field.value="";draft();closeDialog();closeMenu();selectionBar()}
 export function setupD2(getActive,getAll,onChange){active=getActive;all=getAll;refresh=onChange;const area=$("#messages");
+ area.addEventListener("click",e=>{
+  const quote=e.target.closest("[data-reply-target]");
+  if(!quote)return;
+  e.preventDefault();e.stopPropagation();
+  const messageRow=quote.closest("[data-message-id]");
+  const message=messageRow&&active()?byId(active(),messageRow.dataset.messageId):null;
+  if(message?.reply)jumpToOriginal(message.reply);
+ });
  area.addEventListener("click",e=>{const b=e.target.closest("[data-action]");if(!b)return;const i=b.dataset.msg;if(b.dataset.action==="context"){const r=b.getBoundingClientRect();context(i,r.left,r.bottom);return}action(b.dataset.action,i)});
- area.addEventListener("click",e=>{if((!selected.size&&!selectionMode)||e.target.closest("[data-action],a"))return;const row=e.target.closest("[data-message-id]");if(!row)return;const id=row.dataset.messageId;selected.has(id)?selected.delete(id):selected.add(id);refresh()});
+ area.addEventListener("click",e=>{if((!selected.size&&!selectionMode)||e.target.closest("[data-action],[data-reply-target],a,button,input,video,audio"))return;const row=e.target.closest("[data-message-id]");if(!row)return;const id=row.dataset.messageId;selected.has(id)?selected.delete(id):selected.add(id);refresh()});
  area.addEventListener("contextmenu",e=>{const row=e.target.closest("[data-message-id]");if(!row)return;e.preventDefault();context(row.dataset.messageId,e.clientX,e.clientY)});
  area.addEventListener("keydown",e=>{const row=e.target.closest("[data-message-id]");if(row&&(e.key==="ContextMenu"||(e.shiftKey&&e.key==="F10"))){e.preventDefault();const r=row.getBoundingClientRect();context(row.dataset.messageId,r.left,r.top)}});
- area.addEventListener("touchstart",e=>{const row=e.target.closest("[data-message-id]");if(!row)return;touchStart={x:e.touches[0].clientX,y:e.touches[0].clientY};clearTimeout(touchTimer);touchTimer=setTimeout(()=>{touchTimer=0;context(row.dataset.messageId,touchStart.x,touchStart.y)},550)},{passive:true});
+ area.addEventListener("touchstart",e=>{if(e.target.closest("[data-reply-target],button,input,video,audio"))return;const row=e.target.closest("[data-message-id]");if(!row)return;touchStart={x:e.touches[0].clientX,y:e.touches[0].clientY};clearTimeout(touchTimer);touchTimer=setTimeout(()=>{touchTimer=0;context(row.dataset.messageId,touchStart.x,touchStart.y)},550)},{passive:true});
  area.addEventListener("touchmove",e=>{if(touchStart&&Math.hypot(e.touches[0].clientX-touchStart.x,e.touches[0].clientY-touchStart.y)>12)clearTimeout(touchTimer)},{passive:true});
  area.addEventListener("touchend",()=>clearTimeout(touchTimer));
  const upload=el("input");upload.type="file";upload.hidden=true;document.body.append(upload);$("#attach-button").onclick=()=>upload.click();upload.addEventListener("change",()=>{const f=upload.files[0];if(!f)return;if(f.size>20*1024*1024){notify("Tamanho máximo permitido: 20 MB.");return}const kind=f.type.startsWith("image/")?"image":f.type.startsWith("audio/")?"audio":f.type.startsWith("video/")?"video":"document";file={name:f.name,kind,url:URL.createObjectURL(f)};draft();upload.value=""});
