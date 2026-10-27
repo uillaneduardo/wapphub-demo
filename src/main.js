@@ -9,7 +9,7 @@ const active=()=>conversations.find(c=>c.id===state.active);
 const node=(tag,cls,text)=>{const x=document.createElement(tag);if(cls)x.className=cls;if(text!==undefined)x.textContent=text;return x};
 const toast=text=>{const item=node("div","toast",text);$("#toast-region").append(item);setTimeout(()=>item.remove(),3800)};
 function renderList(){
- const shown=conversations.filter(c=>(state.filter==="all"||state.filter==="unread"&&c.unread>0||state.filter==="mine"&&c.assigned)&&[c.name,c.preview].some(v=>v.toLocaleLowerCase("pt-BR").includes(state.query.toLocaleLowerCase("pt-BR"))));
+ const shown=conversations.filter(c=>canAccess(c)&&(state.filter==="all"||state.filter==="unread"&&c.unread>0||state.filter==="mine"&&c.assigned)&&[c.name,c.preview].some(v=>v.toLocaleLowerCase("pt-BR").includes(state.query.toLocaleLowerCase("pt-BR"))));
  list.replaceChildren();
  for(const c of shown){const b=node("button","conversation"+(state.active===c.id?" selected":""));b.type="button";b.dataset.id=c.id;b.setAttribute("aria-label",c.name+(c.unread?", "+c.unread+" não lidas":""));b.setAttribute("aria-current",state.active===c.id?"true":"false");
  const av=node("span","avatar",c.initials),body=node("span","conversation-content"),head=node("span","conversation-head"),preview=node("span","conversation-preview");
