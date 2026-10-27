@@ -5,7 +5,7 @@ const create=(tag,cls,text)=>{
  if(text!==undefined)n.textContent=text;
  return n;
 };
-/** Purely presentational adapter. No localStorage and no Core knowledge. */
+/** Adaptador visual desacoplado da camada de dados. */
 export function setupChannelPicker({trigger,popover,list,summary,badge,getChannels,getProviders,onChange}){
  let selection=null;
  const channels=()=>getChannels();
