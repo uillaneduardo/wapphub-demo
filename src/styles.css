@@ -97,3 +97,28 @@ html[data-theme=dark] .status-banner[data-tone=warning]{background:#3a260e;color
 .channel-status{font-size:10px;color:var(--muted)}
 .channel-status[data-status=disconnected]{color:#b91c1c}
 html[data-theme=dark] .channel-status[data-status=disconnected]{color:#fca5a5}
+
+
+/* D3.3 — saída utiliza a personalização da organização */
+.mine .bubble{background:var(--brand-accent);color:var(--brand-text)}
+.mine .bubble a,.mine .bubble .file-link{color:inherit}
+.mine .reply-reference{border-left-color:currentColor}
+@media(max-width:760px){
+  :root{--mobile-nav-height:65px}
+  .shell,.shell.details-open{display:block;height:100dvh;padding-bottom:calc(var(--mobile-nav-height) + env(safe-area-inset-bottom,0px));overflow:hidden}
+  .rail{position:fixed;z-index:15;bottom:0;left:0;right:0;height:calc(var(--mobile-nav-height) + env(safe-area-inset-bottom,0px));padding:5px 8px calc(5px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:row;align-items:center;justify-content:space-around;gap:0;border-right:0;border-top:1px solid var(--line);background:var(--panel)}
+  .rail .brand,.rail .rail-bottom #theme-toggle,.rail .rail-bottom .user-avatar{display:none}
+  .rail-links{display:flex;flex:1;flex-direction:row;align-items:center;justify-content:space-around;gap:5px}
+  .rail-links .icon-button{min-width:48px;min-height:48px;border-radius:10px}
+  .rail-bottom{display:none}
+  .inbox,.workspace{height:calc(100dvh - var(--mobile-nav-height) - env(safe-area-inset-bottom,0px));width:100%;border:0}
+  .shell .inbox{display:flex}
+  .shell .workspace{display:none}
+  .shell.chat-open .inbox{display:none}
+  .shell.chat-open .workspace{display:flex}
+  .details{position:fixed!important;z-index:35;inset:0!important;width:100vw!important;height:100dvh!important;max-width:none!important;border:0;background:var(--panel);box-shadow:none!important;padding-bottom:env(safe-area-inset-bottom,0px)}
+  .shell.details-open .details{display:block}
+  .details-head{height:64px}
+  .message-row.d2-picked{padding:7px}
+}
+@media(min-width:761px){.mine .bubble{background:var(--brand-accent);color:var(--brand-text)}}
