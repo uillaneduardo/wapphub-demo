@@ -1,4 +1,4 @@
-import {availableChannels,normalizeSelection,selectionLabel} from "./channel-filter.mjs";
+import {availableChannels,normalizeSelection,selectionLabel} from "./channel-filter.mjs?v=d5-1";
 const create=(tag,cls,text)=>{
  const n=document.createElement(tag);
  if(cls)n.className=cls;
