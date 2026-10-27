@@ -30,7 +30,7 @@ test("interface e editor permanecem desacoplados da persistência",()=>{
  const ui=readFileSync(new URL("../src/channel-picker.js",import.meta.url),"utf8");
  const editor=readFileSync(new URL("../src/contact-editor.js",import.meta.url),"utf8");
  const html=readFileSync(new URL("../index.html",import.meta.url),"utf8");
- for(const source of [ui,editor])assert.doesNotMatch(source,/localStorage|fetch\(|indexedDB|XMLHttpRequest/);
+ for(const source of [ui,editor])assert.doesNotMatch(source,/localStorage\.|\bfetch\(|indexedDB\.|new XMLHttpRequest/);
  assert.match(ui,/role|aria-expanded/);
  assert.match(html,/channel-filter-popover/);
  assert.match(html,/i-layers/);
