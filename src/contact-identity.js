@@ -1,3 +1,4 @@
+import {openContactEditor} from "./contact-editor.js?v=channel-popover-1";
 // Identidade local de contatos na demo. Core futuro será autoridade dos nomes e fotos.
 const KEY="wapphub-demo-contacts-v1";
 let edits={};try{edits=JSON.parse(localStorage.getItem(KEY)||"{}")||{}}catch{edits={}}
@@ -6,4 +7,11 @@ export const photoOf=c=>edits[c.id]?.photo||c.photo||null;
 export const initialsOf=c=>{const name=nameOf(c);if(name===c.phone)return "☎";return name.trim().split(/\s+/).slice(0,2).map(x=>x[0]).join("").toLocaleUpperCase("pt-BR")||"?"};
 export function avatar(c,className="avatar"){const node=document.createElement("span");node.className=className;node.setAttribute("aria-hidden","true");node.textContent=initialsOf(c);const url=photoOf(c);if(url&&/^(https:\/\/|data:image\/(png|jpeg|webp);base64,)/i.test(url)){const img=document.createElement("img");img.alt="";img.loading="lazy";img.referrerPolicy="no-referrer";img.src=url;img.onerror=()=>img.remove();node.append(img)}return node}
 export const updateContact=(c,fields)=>{edits[c.id]={...edits[c.id],...fields};localStorage.setItem(KEY,JSON.stringify(edits))};
-export function editContact(c,onSaved){const modal=document.createElement("div");modal.className="d2-overlay";const panel=document.createElement("form");panel.className="d2-dialog";panel.setAttribute("role","dialog");panel.setAttribute("aria-modal","true");panel.setAttribute("aria-label","Editar identificação do contato");const h=document.createElement("header");h.className="d2-dialog-head";const title=document.createElement("strong");title.textContent="Identificação do contato";const close=document.createElement("button");close.type="button";close.className="chip";close.textContent="Fechar";close.onclick=()=>modal.remove();h.append(title,close);panel.append(h);const body=document.createElement("div");body.className="d2-body";const nameLabel=document.createElement("label");nameLabel.textContent="Nome na plataforma";const input=document.createElement("input");input.className="d2-search";input.value=edits[c.id]?.alias||"";input.maxLength=80;input.placeholder=c.name||c.phone||"Nome do contato";nameLabel.append(input);const photoLabel=document.createElement("label");photoLabel.textContent="Foto (PNG, JPEG ou WebP até 150 KB)";const upload=document.createElement("input");upload.type="file";upload.accept="image/png,image/jpeg,image/webp";photoLabel.append(upload);const save=document.createElement("button");save.className="d2-primary";save.type="submit";save.textContent="Salvar";body.append(nameLabel,photoLabel,save);panel.append(body);modal.append(panel);document.body.append(modal);modal.onclick=e=>{if(e.target===modal)modal.remove()};panel.onsubmit=async e=>{e.preventDefault();const fields={alias:input.value.trim()};const file=upload.files?.[0];if(file){if(file.size>150*1024||!["image/png","image/jpeg","image/webp"].includes(file.type)){alert("Selecione uma foto PNG, JPEG ou WebP de até 150 KB.");return}fields.photo=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(file)})}try{updateContact(c,fields)}catch{alert("O navegador não conseguiu persistir a imagem.");return}modal.remove();onSaved()};input.focus()}
+export function editContact(contact,onSaved){
+ return openContactEditor({
+  contact,
+  alias:edits[contact.id]?.alias||"",
+  renderAvatar:()=>avatar(contact,"avatar large"),
+  save:fields=>{updateContact(contact,fields);onSaved?.()}
+ });
+}
