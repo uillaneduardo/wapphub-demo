@@ -29,23 +29,23 @@ function renderList(){
  $("#conversation-count").textContent=String(shown.length);
 }
 function renderMessages(){if(!active()){messages.replaceChildren(node("p","placeholder","Nenhuma conversa disponível nos canais selecionados."));return}if(!canAccess(active())){messages.replaceChildren(node("p","placeholder","Conversa não atribuída. Aguarde autorização de um OWNER ou SUPERVISOR."));return}renderD2(active(),messages)}
-function select(id,{openChat=true}={}){resetD2Selection();state.active=id;const c=active();c.unread=0;$("#chat-title").textContent=nameOf(c);$("#chat-avatar").replaceWith(Object.assign(avatar(c),{id:"chat-avatar"}));$("#chat-subtitle").textContent=c.status+" · "+getChannel(c.channelId).name;$("#detail-avatar").replaceWith(Object.assign(avatar(c,"avatar large"),{id:"detail-avatar"}));$("#detail-name").textContent=nameOf(c);$("#detail-phone").textContent=c.phone;$("#detail-agent").textContent=c.agent;$("#detail-status").textContent=c.status;$("#detail-channel").textContent=getChannel(c.channelId).name;$("#message-input").value="";renderList();renderMessages();if(openChat)root.classList.add("chat-open");updateD3()}
+function select(id,{openChat=true,markRead=openChat}={}){resetD2Selection();state.active=id;const c=active();if(markRead)c.unread=0;$("#chat-title").textContent=nameOf(c);$("#chat-avatar").replaceWith(Object.assign(avatar(c),{id:"chat-avatar"}));$("#chat-subtitle").textContent=c.status+" · "+getChannel(c.channelId).name;$("#detail-avatar").replaceWith(Object.assign(avatar(c,"avatar large"),{id:"detail-avatar"}));$("#detail-name").textContent=nameOf(c);$("#detail-phone").textContent=c.phone;$("#detail-agent").textContent=c.agent;$("#detail-status").textContent=c.status;$("#detail-channel").textContent=getChannel(c.channelId).name;$("#message-input").value="";renderList();renderMessages();$("#details-toggle").disabled=false;$("#find-messages").disabled=false;$("#chat-menu").disabled=false;if(openChat)root.classList.add("chat-open");updateD3()}
 function clearActive(){
  resetD2Selection();state.active=null;
  $("#chat-title").textContent="Selecione uma conversa";
  $("#chat-subtitle").textContent="";
  $("#details").hidden=true;
- root.classList.remove("details-open");
+ root.classList.remove("details-open","chat-open");
  $("#details-toggle").setAttribute("aria-expanded","false");
+ $("#details-toggle").disabled=true;
+ $("#find-messages").disabled=true;
+ $("#chat-menu").disabled=true;
  renderList();renderMessages();updateD3();
 }
 function onChannelSelection(next){
  state.selectedChannels=next;
  const candidates=conversations.filter(c=>canAccess(c)&&conversationMatchesChannels(c,next,channels));
- if(!candidates.some(c=>c.id===state.active)){
-   if(candidates.length)select(candidates[0].id,{openChat:false});
-   else clearActive();
- }
+ if(!candidates.some(c=>c.id===state.active))clearActive();
  renderList();
 }
 const channelPicker=setupChannelPicker({
@@ -59,7 +59,7 @@ const channelPicker=setupChannelPicker({
  onChange:onChannelSelection
 });
 window.addEventListener("demo-channels-updated",()=>channelPicker.refresh());
-window.addEventListener("demo-assignments-updated",()=>{renderList();renderMessages();updateD3()});
+window.addEventListener("demo-assignments-updated",()=>{onChannelSelection(channelPicker.getSelection());const current=active();if(current){$("#detail-agent").textContent=current.agent;$("#detail-status").textContent=current.status;}renderMessages();updateD3()});
 list.addEventListener("click",e=>{const item=e.target.closest("[data-id]");if(item)select(item.dataset.id)});
 $("#search").addEventListener("input",e=>{state.query=e.target.value;renderList()});
 document.querySelectorAll("[data-filter]").forEach(b=>b.addEventListener("click",()=>{state.filter=b.dataset.filter;document.querySelectorAll("[data-filter]").forEach(x=>{x.classList.toggle("selected",x===b);x.setAttribute("aria-pressed",String(x===b))});renderList()}));
@@ -88,5 +88,5 @@ document.querySelectorAll("[data-nav]").forEach(b=>b.addEventListener("click",()
 
 document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();$("#search").focus()}if(e.key==="Escape"&&root.classList.contains("details-open"))setDetails(false)});
 setupD2(active,()=>conversations,()=>{renderMessages();renderList();updateD3()});
-setupD3(active,()=>{renderMessages();renderList()});
-select(state.active);onChannelSelection(channelPicker.getSelection());root.classList.remove("chat-open");
+setupD3(active,()=>{onChannelSelection(channelPicker.getSelection());renderMessages()});
+select(state.active,{openChat:false,markRead:window.matchMedia("(min-width:761px)").matches});onChannelSelection(channelPicker.getSelection());root.classList.remove("chat-open");
