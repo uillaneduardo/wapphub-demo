@@ -176,3 +176,6 @@ html[data-theme=dark] .channel-status[data-status=disconnected]{color:#fca5a5}
 .settings-primary{border:0;border-radius:7px;background:var(--brand-accent);color:var(--brand-text);font-size:12px;padding:10px 13px;margin-top:16px}
 .settings-hint{font-size:11px;color:var(--muted);line-height:1.6;margin:20px 0 0;padding-top:15px;border-top:1px solid var(--line)}
 @media(max-width:760px){.settings-layout{grid-template-columns:minmax(0,1fr);gap:14px}.settings-menu{flex-direction:row;overflow-x:auto;scrollbar-width:thin;padding-bottom:7px}.settings-menu-item{flex:0 0 auto;width:auto;white-space:nowrap}.settings-panel{padding:16px}.settings-item{align-items:flex-start}.rail-links{gap:5px}.rail-links .icon-button{min-width:43px}}
+
+/* Configurações agrupadas com o perfil */
+@media(max-width:760px){.rail-bottom{display:flex;align-items:center;gap:6px;margin-left:auto}.rail-bottom [data-nav=configuracoes]{display:grid;min-width:43px;min-height:43px}.rail-links{margin-right:auto}}
