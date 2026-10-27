@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420" role="img" aria-label="Comprovante ilustrativo">
+<defs><linearGradient id="g" x2="1" y2="1"><stop stop-color="#f5eade"/><stop offset="1" stop-color="#d8d7cb"/></linearGradient></defs>
+<rect width="640" height="420" fill="url(#g)"/><rect x="152" y="33" width="346" height="360" rx="10" fill="#878782" opacity=".16" transform="rotate(4 325 215)"/>
+<rect x="163" y="23" width="322" height="365" rx="9" fill="#fffefa" transform="rotate(-3 324 206)"/>
+<g transform="rotate(-3 324 206)" fill="none"><rect x="187" y="56" width="125" height="15" rx="7" fill="#2a343d"/><rect x="187" y="92" width="270" height="2" fill="#e0e3e2"/><rect x="187" y="121" width="190" height="11" rx="5" fill="#c7cdca"/><rect x="187" y="148" width="247" height="11" rx="5" fill="#e1e5e1"/><rect x="187" y="175" width="225" height="11" rx="5" fill="#e1e5e1"/><rect x="187" y="237" width="270" height="2" fill="#e0e3e2"/><rect x="187" y="263" width="118" height="12" rx="6" fill="#aab4af"/><rect x="348" y="263" width="108" height="12" rx="6" fill="#2e6252"/><rect x="187" y="323" width="270" height="4" rx="2" fill="#e0e3e2"/><rect x="187" y="335" width="218" height="4" rx="2" fill="#e0e3e2"/></g>
+</svg>
