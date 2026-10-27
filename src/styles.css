@@ -122,3 +122,24 @@ html[data-theme=dark] .channel-status[data-status=disconnected]{color:#fca5a5}
   .message-row.d2-picked{padding:7px}
 }
 @media(min-width:761px){.mine .bubble{background:var(--brand-accent);color:var(--brand-text)}}
+
+
+/* D4.1: módulos estáticos da navegação */
+.module-view{position:fixed;z-index:7;left:60px;right:0;top:0;bottom:0;overflow:auto;padding:clamp(20px,4vw,48px);background:var(--bg);color:var(--text)}
+.module-view[hidden]{display:none}
+.module-head h1{font-size:26px;letter-spacing:-.04em;margin:0 0 8px}
+.module-head p{font-size:13px;color:var(--muted);margin:0 0 28px}
+.module-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;max-width:1000px}
+.module-stat{border:1px solid var(--line);border-radius:9px;padding:18px;display:flex;flex-direction:column;gap:14px}
+.module-stat span{font-size:12px;color:var(--muted)}
+.module-stat strong{font-size:30px;font-weight:650}
+.module-section{border:1px solid var(--line);border-radius:9px;margin-top:25px;max-width:1000px;overflow:hidden}
+.module-section h2{font-size:14px;margin:0;padding:18px;border-bottom:1px solid var(--line)}
+.module-row{display:flex;justify-content:space-between;gap:15px;align-items:center;padding:16px 18px;border-bottom:1px solid var(--line);font-size:13px}
+.module-row:last-child{border-bottom:0}.module-row span{color:var(--muted)}
+.module-search{display:block;width:100%;max-width:600px;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:12px;font-size:13px}
+.module-contact{display:flex;align-items:center;gap:13px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.module-contact:last-child{border-bottom:0}
+.module-contact-name{display:flex;flex-direction:column;gap:5px;min-width:0}
+.module-contact-name strong{font-size:13px}.module-contact-name small{font-size:11px;color:var(--muted);overflow-wrap:anywhere}
+@media(max-width:760px){.module-view{left:0;bottom:calc(var(--mobile-nav-height) + env(safe-area-inset-bottom,0px));padding:24px 18px}.module-head h1{font-size:23px}.module-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.module-stat{padding:14px}.module-stat strong{font-size:25px}}
