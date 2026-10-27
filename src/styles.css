@@ -451,3 +451,27 @@ html[data-theme=dark] .status-banner[data-tone=warning]{background:#3a260e;color
  .media-time,.media-duration,.media-time-separator{font-size:9px}
 }
 @media(max-width:370px){.media-library-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.media-speed{padding:3px 4px;min-width:29px}.media-play{width:32px;height:32px;flex-basis:32px}}
+
+
+/* D5.4 — resposta navegável, realce contextual breve e sem contorno duplo */
+.reply-reference{
+ display:block;width:100%;max-width:100%;box-sizing:border-box;
+ border:0;border-radius:7px;padding:8px 10px;margin:0 0 9px;
+ text-align:left;background:rgba(127,127,127,.12);color:inherit;
+ font:inherit;font-size:12px;line-height:1.4;opacity:1;
+ white-space:normal;overflow-wrap:anywhere;cursor:pointer;
+}
+.reply-reference:hover{background:rgba(127,127,127,.19)}
+.reply-reference:focus-visible{outline:2px solid var(--brand-border);outline-offset:2px}
+.mine .reply-reference{border:0}
+.message-row.reply-jump-highlight{border:0;box-shadow:none;outline:0}
+.message-row.reply-jump-highlight .bubble{
+ background:var(--brand-soft);color:var(--text);
+ border:0;outline:0;box-shadow:none;
+ transition:background-color .32s ease;
+}
+.message-row.reply-jump-highlight:focus{outline:0}
+.message-row{scroll-margin-block:96px}
+@media(prefers-reduced-motion:reduce){
+ .message-row.reply-jump-highlight .bubble{transition:none}
+}
