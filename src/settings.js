@@ -6,7 +6,7 @@ import {getChannel} from "./channels.js?v=channels-1";
 import {renderChannelManagement,renderProviderManagement} from "./channel-management.js?v=d4-6";
 import {organizationPanel,teamPanel,bindAdminRender} from "./admin-ui.js?v=mobile-polish-1";
 import {channels} from "./channels.js?v=channels-1";
-import {openAppearanceSettings} from "./appearance.js";
+import {openAppearanceSettings} from "./appearance.js?v=channels-1";
 const sections=[
 ["organizacao","Organização","Identidade, dados gerais e preferências da organização"],
 ["equipe","Usuários e equipes","Membros, convites e composição das equipes"],
