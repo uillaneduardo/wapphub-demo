@@ -143,3 +143,17 @@ html[data-theme=dark] .channel-status[data-status=disconnected]{color:#fca5a5}
 .module-contact-name{display:flex;flex-direction:column;gap:5px;min-width:0}
 .module-contact-name strong{font-size:13px}.module-contact-name small{font-size:11px;color:var(--muted);overflow-wrap:anywhere}
 @media(max-width:760px){.module-view{left:0;bottom:calc(var(--mobile-nav-height) + env(safe-area-inset-bottom,0px));padding:24px 18px}.module-head h1{font-size:23px}.module-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.module-stat{padding:14px}.module-stat strong{font-size:25px}}
+
+
+/* Mobile: módulos agrupados à esquerda, avatar à direita */
+.profile-popover{position:fixed;z-index:70;bottom:80px;right:14px;min-width:220px;padding:5px;border:1px solid var(--line);border-radius:9px;background:var(--panel);box-shadow:0 8px 22px #0002}
+.profile-popover button{display:block;width:100%;border:0;background:transparent;text-align:left;color:var(--text);font-size:12px;padding:11px;border-radius:6px}
+.profile-popover button:hover,.profile-popover button:focus-visible{background:var(--hover)}
+@media(min-width:761px){.profile-popover{bottom:68px;right:auto;left:52px}}
+@media(max-width:760px){
+ .rail{justify-content:space-between;padding-left:13px;padding-right:13px}
+ .rail-links{flex:0 1 auto;justify-content:flex-start;gap:8px}
+ .rail-bottom{display:flex;margin:0;flex-direction:row}
+ .rail .rail-bottom .user-avatar{display:grid;width:38px;height:38px}
+ .rail .rail-bottom #theme-toggle{display:none}
+}
