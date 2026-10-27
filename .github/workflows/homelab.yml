@@ -26,6 +26,10 @@ jobs:
           test -f Dockerfile
           grep -q 'location = /health' nginx.conf
           bash -n .github/scripts/deploy.sh
+      - name: Validate interface and modules
+        run: |
+          node --test tests/*.test.mjs
+          for file in src/*.js; do node --input-type=module --check < "$file"; done
       - name: Build image
         run: docker build --pull -t wapphub-demo:ci .
       - name: Smoke test

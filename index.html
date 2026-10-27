@@ -2,10 +2,10 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#fafafa"><meta name="description" content="WappHub Demo — interface estática de atendimento">
-<title>Atendimento · WappHub Demo</title>
-<link rel="stylesheet" href="./src/styles.css?v=d4-5">
-<script type="module" src="./src/main.js?v=d4-5"></script>
+<meta name="theme-color" content="#fafafa"><meta name="description" content="WappHub — atendimento multicanal">
+<title>Atendimento · WappHub</title>
+<link rel="stylesheet" href="./src/styles.css?v=inbox-1">
+<script type="module" src="./src/main.js?v=inbox-1"></script>
 </head>
 <body>
 <div id="app" class="shell">
@@ -19,18 +19,23 @@
     <div class="rail-bottom">
       <button class="icon-button" data-nav="configuracoes" aria-label="Configurações" title="Configurações"><svg><use href="#i-settings"/></svg></button>
       <button class="icon-button" id="theme-toggle" aria-label="Alternar tema" title="Alternar tema"><svg><use href="#i-moon"/></svg></button>
-      <button class="avatar user-avatar" id="profile-button" aria-label="Perfil de demonstração">UE</button>
+      <button class="avatar user-avatar" id="profile-button" aria-label="Menu do usuário">UE</button>
     </div>
   </nav>
   <aside class="inbox" id="inbox">
     <header class="inbox-header">
-      <div class="channel-picker"><label for="channel-select">Canal de mensagens</label><select id="channel-select" aria-label="Selecionar canal"><option value="all">Todas as caixas</option><option value="wa-sales">WhatsApp · Comercial</option><option value="web-support">Chat · Suporte</option><option value="team">WappHub · Equipe</option><option value="wa-help">WhatsApp · Suporte</option></select><span id="channel-status" class="channel-status"></span></div>
-      <div class="heading"><div><span class="eyebrow">Caixa de entrada</span><h1>Conversas <span id="conversation-count" class="count"></span></h1></div><button class="icon-button" id="inbox-menu" aria-label="Informações da demonstração" title="Informações"><svg><use href="#i-more"/></svg></button></div>
+      <div class="inbox-topline">
+        <span class="eyebrow">Caixa de entrada</span>
+        <label class="channel-picker" for="channel-select">
+          <span class="sr-only">Selecionar canal de mensagens</span>
+          <select id="channel-select" aria-label="Selecionar canal de mensagens"><option value="all">Todas as caixas</option></select>
+        </label>
+      </div>
+      <div class="heading"><h1>Conversas <span id="conversation-count" class="count"></span></h1></div>
       <label class="search"><svg><use href="#i-search"/></svg><input id="search" type="search" placeholder="Buscar conversas..." aria-label="Buscar conversas"><kbd>⌘ K</kbd></label>
       <div class="filters" role="group" aria-label="Filtrar conversas"><button class="chip selected" data-filter="all" aria-pressed="true">Todas</button><button class="chip" data-filter="unread" aria-pressed="false">Não lidas</button><button class="chip" data-filter="mine" aria-pressed="false">Minhas</button></div>
     </header>
     <div class="list" id="conversation-list" role="list" aria-label="Conversas"></div>
-    <footer class="inbox-footer"><span class="connection-dot"></span> Demonstração local <span class="subtle">· dados fictícios</span></footer>
   </aside>
   <main class="workspace" id="workspace">
     <header class="chat-header">
@@ -47,19 +52,18 @@
     <section class="messages" id="messages" aria-label="Histórico da conversa" aria-live="polite"></section>
     <form class="composer" id="composer">
       <div class="composer-box">
-        <button type="button" class="icon-button" id="attach-button" aria-label="Anexar (simulação)" title="Anexar"><svg><use href="#i-plus"/></svg></button>
+        <button type="button" class="icon-button" id="attach-button" aria-label="Anexar arquivo" title="Anexar"><svg><use href="#i-plus"/></svg></button>
         <textarea id="message-input" rows="1" placeholder="Escreva uma mensagem..." aria-label="Escreva uma mensagem"></textarea>
-        <button type="button" class="icon-button" id="emoji-button" aria-label="Emoji (simulação)" title="Emoji"><svg><use href="#i-smile"/></svg></button>
+        <button type="button" class="icon-button" id="emoji-button" aria-label="Inserir emoji" title="Emoji"><svg><use href="#i-smile"/></svg></button>
         <button class="send-button" type="submit" aria-label="Enviar mensagem"><svg><use href="#i-send"/></svg></button>
       </div>
-      <div class="composer-foot"><span>Enter para enviar · Shift+Enter para nova linha</span><span>Ambiente de demonstração</span></div>
+      <div class="composer-foot"><span>Enter para enviar · Shift+Enter para nova linha</span></div>
     </form>
   </main>
   <aside class="details" id="details" aria-label="Detalhes da conversa" hidden>
     <div class="details-head"><strong>Detalhes</strong><button class="icon-button" id="details-close" aria-label="Fechar detalhes"><svg><use href="#i-close"/></svg></button></div>
     <div class="contact-card"><div class="avatar large" id="detail-avatar">MC</div><strong id="detail-name">Mariana Costa</strong><span id="detail-phone" class="muted"></span></div>
-    <div class="detail-section"><span class="eyebrow">Atendimento</span><div class="detail-row"><span>Situação</span><strong id="detail-status"></strong></div><div class="detail-row"><span>Responsável</span><strong id="detail-agent"></strong></div><div class="detail-row"><span>Canal</span><strong>WhatsApp · Simulado</strong></div></div>
-    <div class="detail-section"><span class="eyebrow">Sobre este contato</span><p class="muted">Informações fictícias de atendimento. Nesta etapa, as ações não são enviadas a serviços externos.</p></div>
+    <div class="detail-section"><span class="eyebrow">Atendimento</span><div class="detail-row"><span>Situação</span><strong id="detail-status"></strong></div><div class="detail-row"><span>Responsável</span><strong id="detail-agent"></strong></div><div class="detail-row"><span>Canal</span><strong id="detail-channel"></strong></div></div>
   </aside>
 </div>
 <div id="toast-region" class="toast-region" role="status" aria-live="polite"></div>
