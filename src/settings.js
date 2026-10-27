@@ -1,3 +1,4 @@
+import {organizationPanel,teamPanel,bindAdminRender} from "./admin-ui.js?v=d4-4";
 import {channels} from "./channels.js";
 import {openAppearanceSettings} from "./appearance.js";
 const sections=[
@@ -14,11 +15,12 @@ function pill(t){return el("span","settings-pill",t)}
 export function renderSettings(root){root.replaceChildren();const h=el("header","module-head");h.append(el("h1","","Configurações"),el("p","","Gerencie a organização, os canais e a experiência de atendimento. Dados de demonstração."));root.append(h);
  const layout=el("div","settings-layout"),menu=el("nav","settings-menu"),panel=el("section","settings-panel");menu.setAttribute("aria-label","Seções de configurações");panel.setAttribute("aria-live","polite");
  function show(id){menu.querySelectorAll("button").forEach(b=>{const active=b.dataset.section===id;b.classList.toggle("active",active);b.setAttribute("aria-current",active?"page":"false")});panel.replaceChildren();const meta=sections.find(s=>s[0]===id);panel.append(el("h2","",meta[1]),el("p","settings-description",meta[2]));
- if(id==="organizacao"){panel.append(line("Nome da organização","WappHub Demonstração"),line("Identificador","org-demo-001"),line("Idioma e região","Português (Brasil) · Brasil"),line("Fuso horário","America/Recife"))}
- if(id==="equipe"){panel.append(line("Proprietário","1 membro · acesso administrativo",pill("OWNER")),line("Supervisores","1 membro fictício",pill("SUPERVISOR")),line("Atendentes","3 membros fictícios",pill("AGENT")),line("Convites","Convites por e-mail serão demonstrados em uma entrega futura",pill("Planejado")))}
+ if(id==="organizacao")organizationPanel(panel)
+ if(id==="equipe")teamPanel(panel)
  if(id==="permissoes"){panel.append(line("Papéis","OWNER, SUPERVISOR e AGENT"),line("Acesso às conversas","Atendentes visualizam apenas conversas atribuídas"),line("Encaminhamento","Autorização independente e revogável pelo Core"),line("Ações destrutivas","Exigem permissão e confirmação explícita"))}
  if(id==="canais"){for(const c of channels.filter(x=>x.id!=="all"))panel.append(line(c.name,c.provider==="native"?"Canal nativo":"Canal de integração externa",pill(c.state==="disconnected"?"Desconectado":"Conectado")))}
  if(id==="providers"){panel.append(line("WappHub Native","Proposta de provider independente para mensagens internas e chat incorporável",pill("Planejado")),line("Provider de WhatsApp","Integração dedicada a ser estudada e desenvolvida em fase posterior",pill("Planejado")),line("Contrato de integração","Providers autenticados se comunicam com o Core; a interface não acessa credenciais"))}
  if(id==="aparencia"){panel.append(line("Personalização organizacional","Cor de destaque e modo claro/escuro ficam armazenados localmente nesta demo"));const b=el("button","settings-primary","Personalizar aparência");b.type="button";b.onclick=openAppearanceSettings;panel.append(b)}
  const tip=el("p","settings-hint","Simulação estática. Ações administrativas e permissões serão validadas pelo Core quando integrado.");panel.append(tip)}
+ bindAdminRender(show);
  for(const [id,label] of sections){const b=el("button","settings-menu-item",label);b.type="button";b.dataset.section=id;b.onclick=()=>show(id);menu.append(b)}layout.append(menu,panel);root.append(layout);show("organizacao")}
