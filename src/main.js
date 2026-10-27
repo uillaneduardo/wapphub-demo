@@ -1,15 +1,18 @@
+import {initializeAssignments} from "./demo-access-store.js?v=d4-6";
+import {adminState} from "./admin-data.js?v=inbox-1";
 import {setupChannelPicker} from "./channel-picker.js?v=channel-popover-1";
 import {conversationMatchesChannels} from "./channel-filter.mjs";
 import {providers} from "./channels.js?v=channels-1";
 import {nameOf,avatar,editContact} from "./contact-identity.js?v=channel-popover-1";
-import {showModule} from "./pages.js?v=channel-popover-1";
+import {showModule} from "./pages.js?v=d4-6";
 import {channels,getChannel} from "./channels.js?v=channels-1";
-import {setupD3,updateD3,canAccess,assertCanSend} from "./d3.js?v=channel-popover-1";
+import {setupD3,updateD3,canAccess,assertCanSend} from "./d3.js?v=d4-6";
 import {appearance,setAppearance,openAppearanceSettings} from "./appearance.js?v=channels-1";
-import {renderD2,sendD2,setupD2,resetD2Selection} from "./d2.js?v=channel-popover-1";
+import {renderD2,sendD2,setupD2,resetD2Selection} from "./d2.js?v=d4-6";
 import {conversations} from "./data.js?v=channels-1";
 const $=s=>document.querySelector(s);const root=$("#app"),list=$("#conversation-list"),messages=$("#messages");
 const state={active:"mariana",filter:"all",selectedChannels:null,query:"",theme:appearance.mode};
+initializeAssignments(conversations,adminState().members);
 
 const active=()=>conversations.find(c=>c.id===state.active);
 const node=(tag,cls,text)=>{const x=document.createElement(tag);if(cls)x.className=cls;if(text!==undefined)x.textContent=text;return x};
@@ -55,6 +58,7 @@ const channelPicker=setupChannelPicker({
  onChange:onChannelSelection
 });
 window.addEventListener("demo-channels-updated",()=>channelPicker.refresh());
+window.addEventListener("demo-assignments-updated",()=>{renderList();renderMessages();updateD3()});
 list.addEventListener("click",e=>{const item=e.target.closest("[data-id]");if(item)select(item.dataset.id)});
 $("#search").addEventListener("input",e=>{state.query=e.target.value;renderList()});
 document.querySelectorAll("[data-filter]").forEach(b=>b.addEventListener("click",()=>{state.filter=b.dataset.filter;document.querySelectorAll("[data-filter]").forEach(x=>{x.classList.toggle("selected",x===b);x.setAttribute("aria-pressed",String(x===b))});renderList()}));
