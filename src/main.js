@@ -1,4 +1,4 @@
-import {seedMediaFixtures} from "./media-fixtures.js?v=media-1";
+import {seedMediaFixtures} from "./media-fixtures.js?v=reply-1";
 import {renderConversationMedia} from "./media-gallery.js?v=media-1";
 import {getProfile,initials} from "./profile-store.js?v=d4-7";
 import {initializeAssignments} from "./demo-access-store.js?v=d4-6";
@@ -11,7 +11,7 @@ import {showModule,refreshCurrentMediaModule} from "./pages.js?v=media-1";
 import {channels,getChannel} from "./channels.js?v=channels-1";
 import {setupD3,updateD3,canAccess,assertCanSend} from "./d3.js?v=d4-6";
 import {appearance,setAppearance,openAppearanceSettings} from "./appearance.js?v=d5-1";
-import {renderD2,sendD2,setupD2,resetD2Selection} from "./d2.js?v=media-1";
+import {renderD2,sendD2,setupD2,resetD2Selection} from "./d2.js?v=reply-1";
 import {conversations} from "./data.js?v=channels-1";
 const $=s=>document.querySelector(s);const root=$("#app"),list=$("#conversation-list"),messages=$("#messages");
 const state={active:"mariana",filter:"all",selectedChannels:null,query:"",theme:appearance.mode};
