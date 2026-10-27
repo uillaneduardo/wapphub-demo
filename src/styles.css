@@ -87,3 +87,13 @@ html[data-theme=dark] .status-banner[data-tone=warning]{background:#3a260e;color
 .message-row.d2-picked{box-shadow:none!important;border:0;background:var(--brand-soft);border-radius:10px}
 .message-row.d2-picked .bubble{outline:none!important;box-shadow:none!important;border:0}
 .message-row.d2-picked::before{box-shadow:none!important}
+
+
+/* Navegação multicanal: compacta, sem sombras laterais */
+.channel-picker{display:flex;flex-direction:column;gap:6px;margin-bottom:17px}
+.channel-picker label{font-size:11px;color:var(--muted);font-weight:550}
+.channel-picker select{width:100%;min-height:37px;padding:7px 28px 7px 10px;border:1px solid var(--line);border-radius:7px;background:var(--panel);color:var(--text);font-size:12px;cursor:pointer}
+.channel-picker select:focus-visible{outline:2px solid var(--brand-border);outline-offset:2px}
+.channel-status{font-size:10px;color:var(--muted)}
+.channel-status[data-status=disconnected]{color:#b91c1c}
+html[data-theme=dark] .channel-status[data-status=disconnected]{color:#fca5a5}
