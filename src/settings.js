@@ -1,5 +1,5 @@
-import {renderChannelManagement,renderProviderManagement} from "./channel-management.js?v=d4-5";
-import {organizationPanel,teamPanel,bindAdminRender} from "./admin-ui.js?v=d4-4";
+import {renderChannelManagement,renderProviderManagement} from "./channel-management.js?v=inbox-1";
+import {organizationPanel,teamPanel,bindAdminRender} from "./admin-ui.js?v=inbox-1";
 import {channels} from "./channels.js";
 import {openAppearanceSettings} from "./appearance.js";
 const sections=[
