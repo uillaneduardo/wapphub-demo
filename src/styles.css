@@ -81,3 +81,9 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,.message-row:foc
 html[data-theme=dark] .status-banner[data-tone=danger]{background:#3b1414;color:#fecaca}
 html[data-theme=dark] .status-banner[data-tone=warning]{background:#3a260e;color:#fde68a}
 @media(max-width:760px){.inbox-footer{display:flex;align-items:center;flex-wrap:wrap;gap:5px}.d3-control{margin-left:0}}
+
+
+/* D3.1 — seleção plana, sem faixa lateral, contorno ou sombra */
+.message-row.d2-picked{box-shadow:none!important;border:0;background:var(--brand-soft);border-radius:10px}
+.message-row.d2-picked .bubble{outline:none!important;box-shadow:none!important;border:0}
+.message-row.d2-picked::before{box-shadow:none!important}
