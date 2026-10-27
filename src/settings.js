@@ -1,3 +1,4 @@
+import {renderChannelManagement,renderProviderManagement} from "./channel-management.js?v=d4-5";
 import {organizationPanel,teamPanel,bindAdminRender} from "./admin-ui.js?v=d4-4";
 import {channels} from "./channels.js";
 import {openAppearanceSettings} from "./appearance.js";
@@ -18,8 +19,8 @@ export function renderSettings(root){root.replaceChildren();const h=el("header",
  if(id==="organizacao")organizationPanel(panel)
  if(id==="equipe")teamPanel(panel)
  if(id==="permissoes"){panel.append(line("Papéis","OWNER, SUPERVISOR e AGENT"),line("Acesso às conversas","Atendentes visualizam apenas conversas atribuídas"),line("Encaminhamento","Autorização independente e revogável pelo Core"),line("Ações destrutivas","Exigem permissão e confirmação explícita"))}
- if(id==="canais"){for(const c of channels.filter(x=>x.id!=="all"))panel.append(line(c.name,c.provider==="native"?"Canal nativo":"Canal de integração externa",pill(c.state==="disconnected"?"Desconectado":"Conectado")))}
- if(id==="providers"){panel.append(line("WappHub Native","Proposta de provider independente para mensagens internas e chat incorporável",pill("Planejado")),line("Provider de WhatsApp","Integração dedicada a ser estudada e desenvolvida em fase posterior",pill("Planejado")),line("Contrato de integração","Providers autenticados se comunicam com o Core; a interface não acessa credenciais"))}
+ if(id==="canais")renderChannelManagement(panel,show)
+ if(id==="providers")renderProviderManagement(panel,show)
  if(id==="aparencia"){panel.append(line("Personalização organizacional","Cor de destaque e modo claro/escuro ficam armazenados localmente nesta demo"));const b=el("button","settings-primary","Personalizar aparência");b.type="button";b.onclick=openAppearanceSettings;panel.append(b)}
  const tip=el("p","settings-hint","Simulação estática. Ações administrativas e permissões serão validadas pelo Core quando integrado.");panel.append(tip)}
  bindAdminRender(show);
