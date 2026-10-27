@@ -1,5 +1,5 @@
-import {renderD2,sendD2,setupD2,resetD2Selection} from "./d2.js";
-import {conversations} from "./data.js";
+import {renderD2,sendD2,setupD2,resetD2Selection} from "./d2.js?v=d2-3";
+import {conversations} from "./data.js?v=d2-3";
 const $=s=>document.querySelector(s);const root=$("#app"),list=$("#conversation-list"),messages=$("#messages");
 const state={active:"mariana",filter:"all",query:"",theme:localStorage.getItem("wapphub-demo-theme")||"light"};
 document.documentElement.dataset.theme=state.theme;
