@@ -1,10 +1,11 @@
+import {getProfile,initials} from "./profile-store.js?v=d4-7";
 import {initializeAssignments} from "./demo-access-store.js?v=d4-6";
 import {adminState} from "./admin-data.js?v=inbox-1";
 import {setupChannelPicker} from "./channel-picker.js?v=channel-popover-1";
 import {conversationMatchesChannels} from "./channel-filter.mjs";
 import {providers} from "./channels.js?v=channels-1";
 import {nameOf,avatar,editContact} from "./contact-identity.js?v=channel-popover-1";
-import {showModule} from "./pages.js?v=d4-6";
+import {showModule} from "./pages.js?v=d4-7";
 import {channels,getChannel} from "./channels.js?v=channels-1";
 import {setupD3,updateD3,canAccess,assertCanSend} from "./d3.js?v=d4-6";
 import {appearance,setAppearance,openAppearanceSettings} from "./appearance.js?v=channels-1";
@@ -70,7 +71,17 @@ $("#theme-toggle").addEventListener("click",()=>{state.theme=state.theme==="ligh
 $("#composer").addEventListener("submit",e=>{e.preventDefault();const input=$("#message-input");if(!active()||!assertCanSend(active())||!sendD2(active(),input.value))return;input.value="";input.style.height="";renderMessages();renderList();});
 $("#message-input").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){e.preventDefault();$("#composer").requestSubmit()}});
 $("#message-input").addEventListener("input",e=>{e.target.style.height="auto";e.target.style.height=Math.min(e.target.scrollHeight,144)+"px"});
-$("#profile-button").addEventListener("click",()=>{document.querySelector("#profile-popover")?.remove();const menu=document.createElement("div");menu.id="profile-popover";menu.className="profile-popover";menu.setAttribute("role","menu");for(const [label,handler] of [["Meu perfil",()=>{const box=document.createElement("div");box.className="d2-overlay";const card=document.createElement("section");card.className="d2-dialog";card.innerHTML="<header class='d2-dialog-head'><strong>Meu perfil</strong></header><div class='d2-body'><p>Usuário</p><p>Nome de exibição: Uillan Eduardo</p><p>Gerencie os dados de perfil e identificação utilizados nas mensagens.</p></div>";const close=document.createElement("button");close.className="chip";close.type="button";close.textContent="Fechar";close.onclick=()=>box.remove();card.querySelector("header").append(close);box.append(card);document.body.append(box)}],["Sair",()=>toast("O encerramento de sessão estará disponível após a autenticação.")]]){const button=document.createElement("button");button.type="button";button.textContent=label;button.setAttribute("role","menuitem");button.onclick=()=>{menu.remove();handler()};menu.append(button)}document.body.append(menu);menu.querySelector("button")?.focus();const dismiss=e=>{if(!menu.contains(e.target)&&e.target!==$("#profile-button")){menu.remove();document.removeEventListener("pointerdown",dismiss)}};document.addEventListener("pointerdown",dismiss)});
+function renderProfileAvatar(){
+ const button=$("#profile-button"),profile=getProfile();
+ button.textContent=initials(profile);
+ button.setAttribute("aria-label","Menu do usuário: "+(profile.displayName||profile.name));
+ if(profile.photo&&/^data:image\/(png|jpeg|webp);base64,/i.test(profile.photo)){
+  const image=document.createElement("img");image.alt="";image.src=profile.photo;image.onerror=()=>image.remove();button.append(image);
+ }
+}
+window.addEventListener("demo-profile-updated",renderProfileAvatar);
+renderProfileAvatar();
+$("#profile-button").addEventListener("click",()=>{document.querySelector("#profile-popover")?.remove();const menu=document.createElement("div");menu.id="profile-popover";menu.className="profile-popover";menu.setAttribute("role","menu");for(const [label,handler] of [["Meu perfil",()=>{showModule("perfil");document.querySelectorAll("[data-nav]").forEach(b=>b.classList.remove("active"))}],["Sair",()=>toast("O encerramento de sessão estará disponível após a autenticação.")]]){const button=document.createElement("button");button.type="button";button.textContent=label;button.setAttribute("role","menuitem");button.onclick=()=>{menu.remove();handler()};menu.append(button)}document.body.append(menu);menu.querySelector("button")?.focus();const dismiss=e=>{if(!menu.contains(e.target)&&e.target!==$("#profile-button")){menu.remove();document.removeEventListener("pointerdown",dismiss)}};document.addEventListener("pointerdown",dismiss)});
 const contactEditButton=document.createElement("button");contactEditButton.className="chip";contactEditButton.type="button";contactEditButton.textContent="Editar contato";contactEditButton.onclick=()=>{if(!active())return;editContact(active(),()=>{const id=state.active;select(id);renderList()})};document.querySelector(".contact-card")?.append(contactEditButton);
 
 document.querySelectorAll("[data-nav]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-nav]").forEach(x=>x.classList.toggle("active",x===b));showModule(b.dataset.nav);if(b.dataset.nav==="atendimento")root.classList.remove("chat-open")}));
