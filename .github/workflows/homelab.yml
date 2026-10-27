@@ -43,6 +43,11 @@ jobs:
               curl -fsS http://127.0.0.1:18280/src/channel-filter.mjs | grep -q 'normalizeSelection'
               curl -fsS http://127.0.0.1:18280/src/role-rules.mjs | grep -q 'eligibleConversations'
               curl -fsS http://127.0.0.1:18280/src/styles.css | grep -q 'channel-filter-popover'
+              curl -fsS http://127.0.0.1:18280/src/media-catalog.mjs | grep -q 'mediaEntries'
+              curl -fsS http://127.0.0.1:18280/src/media-player.js | grep -q 'createMediaPlayer'
+              curl -fsS http://127.0.0.1:18280/assets/equipment.svg | grep -q '<svg'
+              curl -fsS http://127.0.0.1:18280/assets/receipt.svg | grep -q '<svg'
+              curl -fsS http://127.0.0.1:18280/assets/video-poster.svg | grep -q '<svg'
               curl -fsSI http://127.0.0.1:18280/src/channel-filter.mjs | grep -qi '^content-type: application/javascript'
               exit 0
             fi

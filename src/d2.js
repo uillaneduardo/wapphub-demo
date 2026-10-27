@@ -1,3 +1,4 @@
+import {createMediaPlayer,openMediaViewer} from "./media-player.js?v=media-1";
 import {canAccess} from "./d3.js?v=d4-6";
 import {can} from "./permissions.js?v=d4-6";
 const $=s=>document.querySelector(s), el=(tag,cl="",text)=>{const n=document.createElement(tag);n.className=cl;if(text!==undefined)n.textContent=text;return n};
@@ -37,7 +38,22 @@ function action(action,i){const c=normalize(active()),m=byId(c,i);if(!m)return;
  if(action==="retry"){m.status="sent";refresh();notify("Reenvio solicitado.")}
 }
 function context(i,x,y){const m=byId(active(),i);if(!m)return;openMenu([["Responder",()=>action("reply",i)],["Copiar texto",()=>action("copy",i),!m.body],["Encaminhar",()=>action("forward",i),!can("forward")],["Selecionar mensagens",()=>action("select",i)],["Apagar para mim",()=>action("deleteMine",i),!can("deleteMine")],["Apagar para todos",()=>action("deleteAll",i),!can("deleteAll")]],x,y)}
-export function renderD2(c,container){normalize(c);container.replaceChildren(el("div","date-separator","Hoje"));let n=0;c.messages.forEach((m,i)=>{if(m.hidden)return;if(query&&!(m.body+" "+(m.file?.name||"")).toLowerCase().includes(query))return;n++;const row=el("div","message-row"+(m.direction==="out"?" mine":"")+(selected.has(m.id)?" d2-picked":""));row.dataset.messageId=m.id;row.tabIndex=0;const b=el("div","bubble");if(m.reply)b.append(el("div","reply-reference","↪ "+(m.reply.body||m.reply.file?.name||"Mídia")));if(m.forwarded)b.append(el("div","d2-forwarded","Encaminhada"));if(m.file){const f=el("div","file-card");f.append(el("span","file-type",(m.file.kind||"Arquivo").toUpperCase()),el("span","file-label",m.file.name));if(m.file.url){const a=el("a","file-link","Abrir");a.href=m.file.url;a.download=m.file.name;f.append(a)}b.append(f)}if(m.body)b.append(el("span","message-text",m.body));row.append(b,el("span","message-meta",m.time+(m.direction==="out"?" · "+(labels[m.status]||"Enviada"):"")));const controls=el("div","message-actions");for(const [text,a] of [["Responder","reply"],["Encaminhar","forward"],["Mais","context"]]){const btn=el("button","message-action",text);btn.type="button";btn.dataset.action=a;btn.dataset.msg=m.id;controls.append(btn)}row.append(controls);container.append(row)});if(!n)container.append(el("p","placeholder","Nenhuma mensagem encontrada."));container.scrollTop=query?0:container.scrollHeight;
+export function renderD2(c,container){normalize(c);container.replaceChildren(el("div","date-separator","Hoje"));let n=0;c.messages.forEach((m,i)=>{if(m.hidden)return;if(query&&!(m.body+" "+(m.file?.name||"")).toLowerCase().includes(query))return;n++;const row=el("div","message-row"+(m.direction==="out"?" mine":"")+(selected.has(m.id)?" d2-picked":""));row.dataset.messageId=m.id;row.tabIndex=0;const b=el("div","bubble");if(m.file)b.classList.add("has-media");if(m.reply)b.append(el("div","reply-reference","↪ "+(m.reply.body||m.reply.file?.name||"Mídia")));if(m.forwarded)b.append(el("div","d2-forwarded","Encaminhada"));if(m.file){
+ const mediaKind=m.file.kind;
+ if(mediaKind==="audio"||mediaKind==="video"){
+   b.append(createMediaPlayer(m.file,{compact:true}));
+ }else if(mediaKind==="image"&&m.file.url){
+   const preview=el("button","message-image");preview.type="button";
+   preview.setAttribute("aria-label","Ver imagem: "+m.file.name);
+   const img=el("img");img.src=m.file.url;img.alt=m.file.name||"Imagem recebida";img.loading="lazy";
+   preview.append(img);preview.onclick=()=>openMediaViewer({...m.file,kind:"image",caption:m.body||""});
+   b.append(preview);
+ }else{
+   const f=el("div","file-card");f.append(el("span","file-type",(m.file.kind||"Arquivo").toUpperCase()),el("span","file-label",m.file.name));
+   if(m.file.url){const a=el("a","file-link","Abrir");a.href=m.file.url;a.download=m.file.name;f.append(a)}
+   b.append(f);
+ }
+}if(m.body)b.append(el("span","message-text",m.body));row.append(b,el("span","message-meta",m.time+(m.direction==="out"?" · "+(labels[m.status]||"Enviada"):"")));const controls=el("div","message-actions");for(const [text,a] of [["Responder","reply"],["Encaminhar","forward"],["Mais","context"]]){const btn=el("button","message-action",text);btn.type="button";btn.dataset.action=a;btn.dataset.msg=m.id;controls.append(btn)}row.append(controls);container.append(row)});if(!n)container.append(el("p","placeholder","Nenhuma mensagem encontrada."));container.scrollTop=query?0:container.scrollHeight;
 const searchCount=$("#message-search-count"),clear=$("#message-search-clear");
 if(searchCount)searchCount.textContent=query?(n===1?"1 resultado":n+" resultados"):"";
 if(clear)clear.hidden=!query;
