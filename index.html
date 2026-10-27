@@ -4,8 +4,8 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#fafafa"><meta name="description" content="WappHub Demo — interface estática de atendimento">
 <title>Atendimento · WappHub Demo</title>
-<link rel="stylesheet" href="./src/styles.css?v=d3-1">
-<script type="module" src="./src/main.js?v=d3-1"></script>
+<link rel="stylesheet" href="./src/styles.css?v=channels-1">
+<script type="module" src="./src/main.js?v=channels-1"></script>
 </head>
 <body>
 <div id="app" class="shell">
@@ -23,6 +23,7 @@
   </nav>
   <aside class="inbox" id="inbox">
     <header class="inbox-header">
+      <div class="channel-picker"><label for="channel-select">Canal de mensagens</label><select id="channel-select" aria-label="Selecionar canal"><option value="all">Todas as caixas</option><option value="wa-sales">WhatsApp · Comercial</option><option value="web-support">Chat · Suporte</option><option value="team">WappHub · Equipe</option><option value="wa-help">WhatsApp · Suporte</option></select><span id="channel-status" class="channel-status"></span></div>
       <div class="heading"><div><span class="eyebrow">Caixa de entrada</span><h1>Conversas <span id="conversation-count" class="count"></span></h1></div><button class="icon-button" id="inbox-menu" aria-label="Informações da demonstração" title="Informações"><svg><use href="#i-more"/></svg></button></div>
       <label class="search"><svg><use href="#i-search"/></svg><input id="search" type="search" placeholder="Buscar conversas..." aria-label="Buscar conversas"><kbd>⌘ K</kbd></label>
       <div class="filters" role="group" aria-label="Filtrar conversas"><button class="chip selected" data-filter="all" aria-pressed="true">Todas</button><button class="chip" data-filter="unread" aria-pressed="false">Não lidas</button><button class="chip" data-filter="mine" aria-pressed="false">Minhas</button></div>
