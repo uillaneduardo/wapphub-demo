@@ -214,3 +214,48 @@ html[data-theme=dark] .status-banner[data-tone=warning]{background:#3a260e;color
 .d3-diagnostics{position:fixed;top:10px;right:12px;z-index:80;display:flex;align-items:center;gap:8px;padding:6px 8px;border:1px solid var(--line);background:var(--panel);border-radius:8px;font-size:11px;color:var(--muted)}
 .d3-diagnostics .d3-control{margin:0}
 @media(max-width:760px){.d3-diagnostics{top:auto;right:8px;bottom:calc(74px + env(safe-area-inset-bottom,0px))}}
+
+
+/* D4.5.2 — alinhamento de controles e pesquisa integrada à conversa */
+.settings-mobile-switch{display:none}
+.settings-panel .settings-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center;min-width:0}
+.settings-panel .settings-item-copy{min-width:0;overflow-wrap:anywhere}
+.settings-panel .settings-row-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.settings-panel .settings-row-actions .settings-pill{flex:0 0 auto}
+.settings-panel .settings-row-actions .settings-action{min-height:36px;flex:0 0 auto}
+.settings-panel .settings-item>.settings-pill{justify-self:end}
+.settings-panel>.settings-primary{margin:12px 0 8px}
+.settings-panel .admin-actions>.settings-primary{margin-top:0}
+.message-search{display:flex;align-items:center;gap:10px;padding:9px 24px;background:var(--panel);border-bottom:1px solid var(--line);min-width:0}
+.message-search[hidden],.message-search-button[hidden]{display:none!important}
+.message-search-field{display:flex;flex:1 1 auto;min-width:0;align-items:center;gap:9px;height:40px;border:1px solid var(--line);border-radius:8px;background:var(--subtle);color:var(--muted);padding:0 12px}
+.message-search-field:focus-within{border-color:var(--brand-accent);outline:2px solid var(--brand-soft)}
+.message-search-field svg{width:17px;height:17px;flex:none}
+.message-search-field input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:var(--text);font:inherit;font-size:13px}
+.message-search-field input::placeholder{color:var(--muted)}
+.message-search-count{flex:0 0 auto;font-size:11px;color:var(--muted);white-space:nowrap}
+.message-search-button{flex:0 0 auto;border:0;background:transparent;color:var(--muted);font-size:12px;padding:8px;border-radius:6px}
+.message-search-button:hover{background:var(--hover);color:var(--text)}
+.message-search-close{width:34px;height:34px}
+@media(max-width:760px){
+ .settings-mobile-switch{display:flex;align-items:center;gap:10px;width:100%;min-width:0;margin:0 0 14px;color:var(--muted);font-size:12px}
+ .settings-mobile-switch span{flex:0 0 auto}
+ .settings-mobile-select{flex:1;min-width:0;height:42px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--text);font:inherit;font-size:13px;padding:0 10px;text-overflow:ellipsis}
+ .settings-mobile-select:focus-visible{outline:2px solid var(--brand-accent);outline-offset:2px}
+ .settings-layout{grid-template-columns:minmax(0,1fr);gap:0}
+ .settings-menu{display:none}
+ .settings-panel{width:100%;min-width:0;padding:16px}
+ .settings-panel .settings-item{grid-template-columns:minmax(0,1fr);gap:9px;padding:14px 0}
+ .settings-panel .settings-row-actions{justify-content:flex-end;width:100%;gap:7px}
+ .settings-panel .settings-item>.settings-pill{justify-self:end}
+ .settings-panel .settings-item-copy span{overflow-wrap:anywhere}
+ .settings-panel .settings-action{min-height:36px}
+ .settings-panel .admin-actions{gap:8px}
+ .settings-panel .admin-actions button{min-height:38px}
+ .settings-panel>.settings-primary{margin:12px 0 10px}
+ .message-search{display:grid;grid-template-columns:minmax(0,1fr) auto auto;grid-template-areas:"field field close" "count clear clear";gap:7px 8px;padding:9px 12px}
+ .message-search-field{grid-area:field;height:40px}
+ .message-search-count{grid-area:count;align-self:center}
+ .message-search-button{grid-area:clear;justify-self:end}
+ .message-search-close{grid-area:close;align-self:center}
+}

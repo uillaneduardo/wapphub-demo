@@ -1,9 +1,9 @@
 import {nameOf,avatar,editContact} from "./contact-identity.js?v=identity-1";
-import {showModule} from "./pages.js?v=inbox-1";
+import {showModule} from "./pages.js?v=mobile-polish-1";
 import {channels,getChannel} from "./channels.js?v=channels-1";
 import {setupD3,updateD3,canAccess,assertCanSend} from "./d3.js?v=inbox-1";
 import {appearance,setAppearance,openAppearanceSettings} from "./appearance.js?v=channels-1";
-import {renderD2,sendD2,setupD2,resetD2Selection} from "./d2.js?v=inbox-1";
+import {renderD2,sendD2,setupD2,resetD2Selection} from "./d2.js?v=mobile-polish-1";
 import {conversations} from "./data.js?v=channels-1";
 const $=s=>document.querySelector(s);const root=$("#app"),list=$("#conversation-list"),messages=$("#messages");
 const state={active:"mariana",filter:"all",channel:"all",query:"",theme:appearance.mode};

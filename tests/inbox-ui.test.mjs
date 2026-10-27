@@ -32,7 +32,7 @@ test("canal da conversa é exibido nos detalhes e imports são versionados",()=>
  const main=source("src/main.js");
  assert.match(html,/id="detail-channel"/);
  assert.match(main,/\$\("#detail-channel"\)\.textContent=getChannel\(c.channelId\)\.name/);
- assert.match(html,/main\.js\?v=inbox-1/);
+ assert.match(html,/main\.js\?v=mobile-polish-1/);
  assert.match(main,/d3\.js\?v=inbox-1/);
- assert.match(main,/d2\.js\?v=inbox-1/);
+ assert.match(main,/d2\.js\?v=mobile-polish-1/);
 });
