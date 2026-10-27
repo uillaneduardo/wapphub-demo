@@ -1,4 +1,4 @@
-import {showModule} from "./pages.js?v=d4-1";
+import {showModule} from "./pages.js?v=settings-1";
 import {channels,getChannel} from "./channels.js?v=channels-1";
 import {setupD3,updateD3,canAccess,assertCanSend} from "./d3.js?v=channels-1";
 import {appearance,setAppearance,openAppearanceSettings} from "./appearance.js?v=channels-1";
