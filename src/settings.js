@@ -5,7 +5,7 @@ import {roleAllows,setRoleGrant,assignConversation} from "./demo-access-store.js
 import {getChannel} from "./channels.js?v=channels-1";
 import {renderChannelManagement,renderProviderManagement} from "./channel-management.js?v=mobile-polish-1";
 import {organizationPanel,teamPanel,bindAdminRender} from "./admin-ui.js?v=mobile-polish-1";
-import {channels} from "./channels.js";
+import {channels} from "./channels.js?v=channels-1";
 import {openAppearanceSettings} from "./appearance.js";
 const sections=[
 ["organizacao","Organização","Identidade, dados gerais e preferências da organização"],
