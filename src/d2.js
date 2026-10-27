@@ -33,7 +33,7 @@ export function sendD2(c,value){ensure(c);const body=value.trim();if(!body&&!fil
  c.messages.push(msg);c.preview=body||"📎 "+msg.file.name;c.time=msg.time;pendingReply=null;updateDraft();return true;
 }
 let fileDraft=null;
-function updateDraft(){const old=$("#d2-draft");if(old)old.remove();if(!pendingReply&&!fileDraft)return;const bar=el("div","d2-draft"),label=el("span","",pendingReply?"↪ Respondendo: "+(pendingReply.body||pendingReply.file?.name):"📎 "+fileDraft.name),x=el("button","chip","Cancelar");x.type="button";x.onclick=()=>{pendingReply=null;fileDraft=null;updateDraft()};bar.append(label,x);$("#composer").prepend(bar)}
+function updateDraft(){document.querySelectorAll(".d2-draft").forEach(draft=>draft.remove());if(!pendingReply&&!fileDraft)return;const bar=el("div","d2-draft"),label=el("span","",pendingReply?"↪ Respondendo: "+(pendingReply.body||pendingReply.file?.name):"📎 "+fileDraft.name),x=el("button","chip","Cancelar");x.type="button";x.onclick=()=>{pendingReply=null;fileDraft=null;updateDraft()};bar.id="d2-draft";bar.append(label,x);$("#composer").prepend(bar)}
 function setupAttachment(){const input=el("input");input.type="file";input.accept="image/*,audio/*,video/*,.pdf,.txt,.csv,.doc,.docx";input.hidden=true;document.body.append(input);
  input.addEventListener("change",()=>{const f=input.files?.[0];if(!f)return;if(f.size>20*1024*1024){notify("Arquivo maior que 20 MB. Escolha outro.");input.value="";return}
  const kind=f.type.startsWith("image/")?"image":f.type.startsWith("audio/")?"audio":f.type.startsWith("video/")?"video":"document";
