@@ -551,3 +551,9 @@ html[data-animations="off"] *,html[data-animations="off"] *::before,html[data-an
  .media-blur-toggle{min-width:30px;min-height:30px}
  .detail-media-tile .media-blur-toggle{width:27px;height:27px}
 }
+
+/* R2 — contact detail and route-aware actions, same neutral design system */
+.module-contact-open{display:flex;align-items:center;gap:12px;flex:1 1 auto;min-width:0;padding:0;border:0;background:transparent;color:inherit;text-align:left;cursor:pointer}
+.module-contact-open:hover .module-contact-name strong{text-decoration:underline}
+.module-contact-open:focus-visible{outline:2px solid var(--brand-border);outline-offset:3px;border-radius:6px}
+.module-contact-open .module-contact-name{min-width:0}
