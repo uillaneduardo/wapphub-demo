@@ -18,8 +18,10 @@ test("D5: comandos do menu não são inertes e atualizam estado",()=>{
  const chat=src("src/d2.js");
  assert.doesNotMatch(chat,/Use o menu de uma mensagem para iniciar a seleção/);
  assert.doesNotMatch(chat,/\["Permissões",permissionsDialog\]/);
- assert.match(chat,/c\.status="Finalizado";refresh\(\)/);
- assert.match(chat,/c\.status="Em atendimento";refresh\(\)/);
+ assert.match(chat,/conversationActions\.setAttendanceStatus\(conversation\.id,kind==="close"\?"Finalizado":"Em atendimento"\)/);
+ assert.match(chat,/conversationActions\.markUnread\(conversation\.id\)/);
+ assert.doesNotMatch(chat,/c\.status="Finalizado";refresh\(\)/);
+ assert.doesNotMatch(chat,/c\.status="Em atendimento";refresh\(\)/);
  assert.match(chat,/if\(innerWidth<=760\)\$\("#app"\)\.classList\.remove\("chat-open"\)/);
 });
 
