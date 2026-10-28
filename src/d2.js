@@ -5,12 +5,11 @@ import {resolveReplyTarget} from "./reply-navigation.mjs?v=reply-1";
 import {createMediaPlayer,openMediaViewer} from "./media-player.js?v=motion-1";
 import {canAccess} from "./d3.js?v=d4-6";
 import {can} from "./permissions.js?v=d4-6";
+import {demoDeliveryLabels} from "./domain/message-status.mjs";
 const $=s=>document.querySelector(s), el=(tag,cl="",text)=>{const n=document.createElement(tag);n.className=cl;if(text!==undefined)n.textContent=text;return n};
-let reply=null,file=null,query="",selected=new Set(),selectionMode=false,menu=null,active=()=>null,all=()=>[],refresh=()=>{},commands=null,modal=null,touchTimer=0,touchStart=null,swipeGesture=null;
-const statuses=["sent","delivered","read","failed"], labels={sent:"Enviada",delivered:"Entregue",read:"Lida",failed:"Falha no envio"};
+let reply=null,file=null,query="",selected=new Set(),selectionMode=false,menu=null,active=()=>null,all=()=>[],refresh=()=>{},commands=null,conversationActions=null,modal=null,touchTimer=0,touchStart=null,swipeGesture=null;
 const newId=()=>globalThis.crypto?.randomUUID?.()||"msg-"+Date.now()+"-"+Math.random().toString(36).slice(2);
-const normalize=c=>{c.messages=c.messages.map((m,i)=>{const item=Array.isArray(m)?{direction:m[0],body:m[1],time:m[2],status:"sent"}:m;item.id??="demo:"+c.id+":"+i;item.conversationId=c.id;return item});return c};
-const byId=(c,id)=>normalize(c).messages.find(m=>m.id===id);
+const byId=(c,id)=>c?.messages?.find(m=>m.id===id);
 const notify=t=>{const n=el("div","toast",t);$("#toast-region").append(n);setTimeout(()=>n.remove(),3300)};
 const stamp=()=>new Intl.DateTimeFormat("pt-BR",{hour:"2-digit",minute:"2-digit"}).format(new Date());
 function draft(){document.querySelectorAll(".d2-draft").forEach(n=>n.remove());if(reply&&active()?.id!==reply.conversationId)reply=null;if(!reply&&!file)return;const bar=el("div","d2-draft");bar.id="d2-draft";bar.append(el("span","",reply?"↪ Respondendo: "+(reply.body||reply.file?.name||"Mídia"):"📎 "+file.name));const cancel=el("button","chip","Cancelar");cancel.type="button";cancel.onclick=e=>{e.preventDefault();e.stopPropagation();reply=null;file=null;draft()};bar.append(cancel);$("#composer").prepend(bar)}
@@ -20,9 +19,9 @@ function closeDialog(){modal?.remove();modal=null}
 function dialog(title,content){closeDialog();const backdrop=el("div","d2-overlay");const panel=el("section","d2-dialog");panel.setAttribute("role","dialog");panel.setAttribute("aria-modal","true");panel.setAttribute("aria-label",title);const head=el("header","d2-dialog-head");head.append(el("strong","",title));const x=el("button","chip","Fechar");x.type="button";x.onclick=closeDialog;head.append(x);panel.append(head,content);backdrop.append(panel);backdrop.addEventListener("click",e=>{if(e.target===backdrop)closeDialog()});document.body.append(backdrop);modal=backdrop;return panel}
 function choose(ids){selected=new Set(ids);selectionMode=selected.size>0;refresh();selectionBar()}
 function selectionBar(){document.querySelector("#d2-selection")?.remove();if(!selected.size&&!selectionMode)return;const bar=el("div","d2-selection");bar.id="d2-selection";bar.setAttribute("role","toolbar");bar.setAttribute("aria-label","Ações em mensagens selecionadas");bar.append(el("strong","",selected.size?selected.size+" selecionada(s)":"Toque para selecionar"));for(const [text,fn] of [["Encaminhar",()=>forward([...selected])],["Apagar para mim",()=>removeMessages(false)],["Apagar para todos",()=>removeMessages(true)],["Cancelar",()=>choose([])]]){const b=el("button","chip",text);b.type="button";b.disabled=text!=="Cancelar"&&!selected.size||text==="Encaminhar"&&!can("forward")||text==="Apagar para mim"&&!can("deleteMine")||text==="Apagar para todos"&&!can("deleteAll");b.onclick=fn;bar.append(b)}$("#workspace").append(bar)}
-function removeMessages(everyone){const key=everyone?"deleteAll":"deleteMine";if(!can(key)){notify("Ação não permitida para o perfil.");return}const c=normalize(active()),ids=[...selected];if(!ids.length)return;const content=el("div","d2-body");content.append(el("p","",everyone?"Apagar para todos? O conteúdo será substituído por um aviso.":"Apagar estas mensagens apenas da sua visualização?"));const btn=el("button","d2-primary","Confirmar exclusão");btn.onclick=async()=>{btn.disabled=true;try{await commands.remove(c.id,ids,everyone);selected.clear();selectionMode=false;closeDialog();selectionBar();refresh();notify("Mensagem removida da conversa.")}catch(error){notify("Falha na exclusão: "+error.message);btn.disabled=false}};content.append(btn);dialog(everyone?"Apagar para todos":"Apagar para mim",content)}
+function removeMessages(everyone){const key=everyone?"deleteAll":"deleteMine";if(!can(key)){notify("Ação não permitida para o perfil.");return}const c=active(),ids=[...selected];if(!ids.length)return;const content=el("div","d2-body");content.append(el("p","",everyone?"Apagar para todos? O conteúdo será substituído por um aviso.":"Apagar estas mensagens apenas da sua visualização?"));const btn=el("button","d2-primary","Confirmar exclusão");btn.onclick=async()=>{btn.disabled=true;try{await commands.remove(c.id,ids,everyone);selected.clear();selectionMode=false;closeDialog();selectionBar();refresh();notify("Mensagem removida da conversa.")}catch(error){notify("Falha na exclusão: "+error.message);btn.disabled=false}};content.append(btn);dialog(everyone?"Apagar para todos":"Apagar para mim",content)}
 function forward(ids){if(!can("forward")){notify("Encaminhamento bloqueado nas permissões.");return}
- const source=normalize(active()),items=ids.map(i=>byId(source,i)).filter(m=>m&&!m.hidden&&!m.deletedAll);if(!items.length)return;
+ const source=active(),items=ids.map(i=>byId(source,i)).filter(m=>m&&!m.hidden&&!m.deletedAll);if(!items.length)return;
  const content=el("div","d2-body"),summary=el("p","",items.length+" mensagem(ns) selecionada(s). Escolha os destinatários.");
  const search=el("input","d2-search");search.type="search";search.placeholder="Buscar por nome ou telefone";search.setAttribute("aria-label","Buscar destinatários");
  const results=el("div","d2-results"),picked=new Set(),footer=el("div","d2-footer"),count=el("span","","0 destinatários");
@@ -36,7 +35,6 @@ let recentlySentMessageId=null;
 function jumpToOriginal(reference){
  const conversation=active();
  if(!conversation||!reference)return;
- normalize(conversation);
  const original=resolveReplyTarget(conversation,reference);
  if(!original){notify("A mensagem original não está disponível nesta conversa.");return}
  // O filtro de busca pode ter ocultado a referência: restaurar o histórico.
@@ -56,18 +54,22 @@ function jumpToOriginal(reference){
  row.scrollIntoView({behavior:motion==="instant"?"auto":"smooth",block:"center"});
  replyJumpTimer=setTimeout(()=>{row.classList.remove("reply-jump-highlight");replyJumpTimer=null},1900);
 }
-function action(action,i){const c=normalize(active()),m=byId(c,i);if(!m)return;
+async function action(action,i){const c=active(),m=byId(c,i);if(!m||!canAccess(c))return;
  if(action==="reply"){reply={conversationId:c.id,messageId:m.id,body:m.body,direction:m.direction,file:m.file?{name:m.file.name}:undefined};draft();$("#message-input").focus()}
  if(action==="forward")forward([i]);
  if(action==="select")choose([...selected,i]);
  if(action==="deleteMine"){choose([i]);removeMessages(false)}
  if(action==="deleteAll"){choose([i]);removeMessages(true)}
  if(action==="copy")navigator.clipboard?.writeText(m.body||"").then(()=>notify("Texto copiado.")).catch(()=>notify("Não foi possível copiar."));
- if(action==="cycle"){m.status=statuses[(statuses.indexOf(m.status)+1)%statuses.length];refresh()}
- if(action==="retry"){m.status="sent";refresh();notify("Reenvio solicitado.")}
+ if(action==="cycle"||action==="retry"){
+  try{
+   const result=action==="cycle"?await commands.cycleDemoStatus(c.id,i):await commands.retryDemo(c.id,i);
+   refresh();notify(action==="cycle"?"Estado simulado: "+demoDeliveryLabels[result.status]:"Reenvio simulado (sem contato com o provider).");
+  }catch(error){notify("Não foi possível simular a ação: "+error.message)}
+ }
 }
-function context(i,x,y){const m=byId(active(),i);if(!m)return;openMenu([["Responder",()=>action("reply",i)],["Copiar texto",()=>action("copy",i),!m.body],["Encaminhar",()=>action("forward",i),!can("forward")],["Selecionar mensagens",()=>action("select",i)],["Apagar para mim",()=>action("deleteMine",i),!can("deleteMine")],["Apagar para todos",()=>action("deleteAll",i),!can("deleteAll")]],x,y)}
-export function renderD2(c,container){normalize(c);container.replaceChildren(el("div","date-separator","Hoje"));let n=0;c.messages.forEach((m,i)=>{if(m.hidden)return;if(query&&!(m.body+" "+(m.file?.name||"")).toLowerCase().includes(query))return;n++;const row=el("div","message-row"+(m.direction==="out"?" mine":"")+(selected.has(m.id)?" d2-picked":""));row.dataset.messageId=m.id;if(m.id===recentlySentMessageId)row.classList.add("message-just-sent");row.tabIndex=0;const b=el("div","bubble");if(m.file)b.classList.add("has-media");if(m.reply){
+function context(i,x,y){const m=byId(active(),i);if(!m)return;openMenu([["Responder",()=>action("reply",i)],["Copiar texto",()=>action("copy",i),!m.body],["Encaminhar",()=>action("forward",i),!can("forward")],["Selecionar mensagens",()=>action("select",i)],["Apagar para mim",()=>action("deleteMine",i),!can("deleteMine")],["Apagar para todos",()=>action("deleteAll",i),!can("deleteAll")],...(m.direction==="out"?[["Simular próximo estado",()=>action("cycle",i)],...(m.status==="failed"?[["Simular reenvio",()=>action("retry",i)]]:[])]:[] )],x,y)}
+export function renderD2(c,container){container.replaceChildren(el("div","date-separator","Hoje"));let n=0;c.messages.forEach((m,i)=>{if(m.hidden)return;if(query&&!(m.body+" "+(m.file?.name||"")).toLowerCase().includes(query))return;n++;const row=el("div","message-row"+(m.direction==="out"?" mine":"")+(selected.has(m.id)?" d2-picked":""));row.dataset.messageId=m.id;if(m.id===recentlySentMessageId)row.classList.add("message-just-sent");row.tabIndex=0;const b=el("div","bubble");if(m.file)b.classList.add("has-media");if(m.reply){
  const ref=el("button","reply-reference","↪ "+(m.reply.body||m.reply.file?.name||"Mídia"));
  ref.type="button";
  ref.dataset.replyTarget=m.reply.messageId||"";
@@ -93,14 +95,14 @@ export function renderD2(c,container){normalize(c);container.replaceChildren(el(
    if(m.file.url){const a=el("a","file-link","Abrir");a.href=m.file.url;a.download=m.file.name;f.append(a)}
    b.append(f);
  }
-}if(m.body)b.append(el("span","message-text",m.body));row.append(b,el("span","message-meta",m.time+(m.direction==="out"?" · "+(labels[m.status]||"Enviada"):"")));const controls=el("div","message-actions");for(const [text,a] of [["Responder","reply"],["Encaminhar","forward"],["Mais","context"]]){const btn=el("button","message-action",text);btn.type="button";btn.dataset.action=a;btn.dataset.msg=m.id;controls.append(btn)}row.append(controls);container.append(row)});if(!n)container.append(el("p","placeholder","Nenhuma mensagem encontrada."));container.scrollTop=query?0:container.scrollHeight;
+}if(m.body)b.append(el("span","message-text",m.body));row.append(b,el("span","message-meta",m.time+(m.direction==="out"?" · "+(demoDeliveryLabels[m.status]||"Estado simulado"):"")));const controls=el("div","message-actions");for(const [text,a] of [["Responder","reply"],["Encaminhar","forward"],["Mais","context"]]){const btn=el("button","message-action",text);btn.type="button";btn.dataset.action=a;btn.dataset.msg=m.id;controls.append(btn)}row.append(controls);container.append(row)});if(!n)container.append(el("p","placeholder","Nenhuma mensagem encontrada."));container.scrollTop=query?0:container.scrollHeight;
 const searchCount=$("#message-search-count"),clear=$("#message-search-clear");
 if(searchCount)searchCount.textContent=query?(n===1?"1 resultado":n+" resultados"):"";
 if(clear)clear.hidden=!query;
 selectionBar();recentlySentMessageId=null}
-export async function sendD2(c,value){normalize(c);const body=value.trim();if(!body&&!file)return false;const m={id:newId(),conversationId:c.id,direction:"out",body,time:stamp(),status:"sent"};if(reply&&reply.conversationId===c.id&&byId(c,reply.messageId))m.reply={...reply};if(file)m.file=file;await commands.send(c.id,m);file=null;recentlySentMessageId=m.id;reply=null;draft();return true}
+export async function sendD2(c,value){const body=value.trim();if(!body&&!file)return false;const m={id:newId(),conversationId:c.id,direction:"out",body,time:stamp(),status:"sent"};if(reply&&reply.conversationId===c.id&&byId(c,reply.messageId))m.reply={...reply};if(file)m.file=file;await commands.send(c.id,m);file=null;recentlySentMessageId=m.id;reply=null;draft();return true}
 export function resetD2Selection(){swipeGesture?.cancel();if(replyJumpTimer){clearTimeout(replyJumpTimer);replyJumpTimer=null}$("#messages")?.querySelectorAll(".reply-jump-highlight").forEach(row=>row.classList.remove("reply-jump-highlight"));reply=null;file=null;query="";selected.clear();selectionMode=false;const search=$("#message-search"),field=$("#message-search-input");if(search)search.hidden=true;if(field)field.value="";draft();closeDialog();closeMenu();selectionBar()}
-export function setupD2(getActive,getAll,onChange,messageCommands){active=getActive;all=getAll;refresh=onChange;commands=messageCommands;const area=$("#messages");
+export function setupD2(getActive,getAll,onChange,messageCommands,attendanceCommands){active=getActive;all=getAll;refresh=onChange;commands=messageCommands;conversationActions=attendanceCommands;const area=$("#messages");
  swipeGesture=setupSwipeReply({
   area,onReply:id=>action("reply",id),
   isSelectionActive:()=>selectionMode||selected.size>0,
