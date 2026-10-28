@@ -16,8 +16,8 @@ test("D6.3 session and QR lifecycle are clearly simulated",()=>{
   assert.ok(ui.includes(phrase),phrase);
  assert.match(ui,/window\.confirm/);
  assert.match(ui,/expiresAt/);
- assert.match(ui,/providerRepository\.updateSession/);
- assert.match(ui,/providerRepository\.setConnectionState/);
+ assert.match(ui,/providerService\.updateSession/);
+ assert.match(ui,/providerService\.setConnectionState/);
  assert.doesNotMatch(ui,/localStorage\.|\bfetch\(|XMLHttpRequest|WebSocket\(/);
 });
 test("D6.3 details use repository for editable identification, channels, metrics and events",()=>{
