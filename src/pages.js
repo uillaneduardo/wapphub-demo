@@ -4,7 +4,7 @@ import {canAccess} from "./d3.js?v=d4-6";
 import {getProfile,saveProfile} from "./profile-store.js?v=d4-7";
 import {renderProfilePage} from "./profile-panel.js?v=d4-7";
 import {nameOf,avatar,editContact} from "./contact-identity.js?v=channel-popover-1";
-import {renderSettings} from "./settings.js?v=origin-1";
+import {renderSettings} from "./settings.js?v=d6-2";
 import {conversations} from "./data.js?v=channels-1";
 import {channels,providers,getChannel} from "./channels.js?v=channels-1";
 const allowedConversation=c=>canAccess(c)&&channels.some(channel=>channel.id===c.channelId&&channel.enabled!==false);
