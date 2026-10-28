@@ -78,7 +78,7 @@ export function setupSwipeReply({area,onReply,isSelectionActive,onGestureStart})
  if(touchSupported){
   area.addEventListener("touchstart",e=>{
    if(e.touches.length!==1)return;
-   const t=e.changedTouches[0];start({...t,target:e.target},"touch",t.identifier);
+   const t=e.changedTouches[0];start({clientX:t.clientX,clientY:t.clientY,target:e.target},"touch",t.identifier);
   },{passive:true});
   area.addEventListener("touchmove",e=>{
    if(gesture?.kind!=="touch")return;
