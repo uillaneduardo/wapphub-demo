@@ -1,4 +1,5 @@
-import {providerRepository} from "./data/adapters/mock/provider-repository.js?v=d6-1";
+import {renderProviderDetails} from "./provider-details.js?v=d6-3";
+import {providerRepository} from "./data/adapters/mock/provider-repository.js?v=d6-3";
 import {STATE_LABELS} from "./data/contracts/provider-domain.mjs";
 import {providerPath} from "./router/routes.mjs";
 import {adminState} from "./admin-data.js?v=inbox-1";
@@ -126,8 +127,8 @@ export function renderProviderWorkspace(panel,{route={},onNavigate=()=>{}}={}){
  const view=route.providerView||"list";
  if(view==="new"){renderWizard(frame,onNavigate);return}
  if(view==="detail"){
-  frame.append(heading("Detalhes da conexão","Acompanhamento de sessão, canais e diagnóstico na próxima entrega (D6.3)."),
-   action("Voltar às conexões",()=>onNavigate(providerPath())));
+  renderProviderDetails(frame,{id:route.providerId,tab:route.providerTab||"overview",onNavigate})
+   .catch(e=>{frame.replaceChildren(E("p","provider-form-error",e.message||"Falha ao carregar conexão."))});
   return;
  }
  listing(frame,onNavigate,route.query||{}).catch(e=>{frame.append(E("p","provider-form-error",e.message||"Erro ao carregar conexões."))});

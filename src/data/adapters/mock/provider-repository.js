@@ -61,6 +61,19 @@ export function createMockProviderRepository(){
    writeEvent(id,"state-change","Estado atualizado na simulação: "+next,next==="failed"?"error":"info");
    persist();emit({type:"connection-state",id});return snapshot(item);
   },
+  async updateSession(id,command){
+   const item=current(id);if(!item)throw new Error("Conexão não encontrada.");
+   const next={...item.session};
+   if(command.state!==undefined){
+    if(!["not_authenticated","qr_pending","authenticated","disconnected","connecting","failed","legacy"].includes(command.state))
+     throw new Error("Estado da sessão inválido.");
+    next.state=command.state;
+   }
+   for(const name of ["expiresAt","lastSyncAt"])if(name in command)next[name]=command[name]||null;
+   next.updatedAt=iso();item.session=next;item.updatedAt=next.updatedAt;
+   writeEvent(id,"session","Sessão demonstrativa atualizada.");
+   persist();emit({type:"connection-session",id});return snapshot(item);
+  },
   async assignChannels(id,ids){
    const item=current(id);if(!item)throw new Error("Conexão não encontrada.");
    if(!Array.isArray(ids)||ids.some(v=>!knownChannelIds().has(v)))throw new Error("Canal inválido.");

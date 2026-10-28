@@ -30,5 +30,5 @@ test("R1: nginx serves SPA history routes but not missing assets",()=>{
  assert.match(nginx,/try_files \$uri =404/);
  assert.match(html,/<base href="\/"/);
  assert.match(html,/data-route/);
- assert.match(html,/main\.js\?v=d6-2/);
+ assert.match(html,/main\.js\?v=d6-3/);
 });

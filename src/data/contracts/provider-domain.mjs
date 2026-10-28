@@ -61,6 +61,7 @@ export function filteredConnections(items,{search="",state="all",type="all"}={})
  * updateConnection:(id:string,data:object)=>Promise<OrganizationConnection>,
  * setConnectionState:(id:string,state:string)=>Promise<OrganizationConnection>,
  * assignChannels:(id:string,ids:string[])=>Promise<OrganizationConnection>,
+ * updateSession:(id:string,command:object)=>Promise<OrganizationConnection>,
  * getHealth:(id:string)=>Promise<HealthSnapshot|null>,
  * listEvents:(id:string)=>Promise<ProviderEvent[]>,
  * subscribe:(fn:(event:object)=>void)=>()=>void

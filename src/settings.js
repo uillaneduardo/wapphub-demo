@@ -1,4 +1,4 @@
-import {renderProviderWorkspace} from "./provider-management.js?v=d6-2";
+import {renderProviderWorkspace} from "./provider-management.js?v=d6-3";
 import {renderAccessPanel} from "./access-panel.js?v=d4-6";
 import {adminState} from "./admin-data.js?v=inbox-1";
 import {conversations} from "./data.js?v=channels-1";
