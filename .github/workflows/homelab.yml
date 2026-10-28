@@ -29,7 +29,7 @@ jobs:
       - name: Validate interface and modules
         run: |
           node --test tests/*.test.mjs
-          find src -type f \\( -name '*.js' -o -name '*.mjs' \\) -print0 | while IFS= read -r -d '' file; do
+          for file in $(find src -type f -name '*.js' -o -name '*.mjs'); do
             node --input-type=module --check < "$file"
           done
       - name: Build image
