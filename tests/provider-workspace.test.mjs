@@ -19,9 +19,9 @@ test("D6.2 nested provider routes preserve section and detail ID",()=>{
 });
 test("D6.2 provider UI only consumes async repository; wizard never gathers real credentials",()=>{
  const ui=read("src/provider-management.js");
- assert.match(ui,/providerRepository\.listTypes\(\)/);
- assert.match(ui,/providerRepository\.listConnections\(current\)/);
- assert.match(ui,/providerRepository\.createConnection\(draft\)/);
+ assert.match(ui,/providerService\.listTypes\(\)/);
+ assert.match(ui,/providerService\.listConnections\(current\)/);
+ assert.match(ui,/providerService\.createConnection\(draft\)/);
  assert.match(ui,/Nova conexão/);
  assert.match(ui,/QR Code ilustrativo/);
  assert.match(ui,/Nenhuma credencial é solicitada/);
