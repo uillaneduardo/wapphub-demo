@@ -1,3 +1,4 @@
+import {checkRouteAccess} from "./router/guards.mjs";
 import {createRouter} from "./router/router.js?v=r2";
 import {pathFor,conversationPath,mediaPath,settingsPath} from "./router/routes.mjs";
 import {seedMediaFixtures} from "./media-fixtures.js?v=reply-1";
@@ -9,9 +10,9 @@ import {setupChannelPicker} from "./channel-picker.js?v=d5-1";
 import {conversationMatchesChannels} from "./channel-filter.mjs?v=d5-1";
 import {providers} from "./channels.js?v=channels-1";
 import {nameOf,avatar,editContact} from "./contact-identity.js?v=channel-popover-1";
-import {showModule,refreshCurrentMediaModule} from "./pages.js?v=r2";
+import {showModule,refreshCurrentMediaModule} from "./pages.js?v=r3";
 import {channels,getChannel} from "./channels.js?v=channels-1";
-import {setupD3,updateD3,canAccess,assertCanSend} from "./d3.js?v=d4-6";
+import {setupD3,updateD3,canAccess,currentState,assertCanSend} from "./d3.js?v=d4-6";
 import {appearance,setAppearance,openAppearanceSettings} from "./appearance.js?v=motion-1";
 import {renderD2,sendD2,setupD2,resetD2Selection} from "./d2.js?v=motion-1";
 import {conversations} from "./data.js?v=channels-1";
@@ -63,8 +64,8 @@ const channelPicker=setupChannelPicker({
  getProviders:()=>providers,
  onChange:onChannelSelection
 });
-window.addEventListener("demo-channels-updated",()=>channelPicker.refresh());
-window.addEventListener("demo-assignments-updated",()=>{onChannelSelection(channelPicker.getSelection());const current=active();if(current){$("#detail-agent").textContent=current.agent;$("#detail-status").textContent=current.status;}renderMessages();updateD3();refreshCurrentMediaModule()});
+window.addEventListener("demo-channels-updated",()=>{channelPicker.refresh();router?.refresh()});
+window.addEventListener("demo-assignments-updated",()=>{onChannelSelection(channelPicker.getSelection());const current=active();if(current){$("#detail-agent").textContent=current.agent;$("#detail-status").textContent=current.status;}renderMessages();updateD3();router?.refresh();refreshCurrentMediaModule()});
 list.addEventListener("click",e=>{const item=e.target.closest("[data-id]");if(item)router.navigate(conversationPath(item.dataset.id))});
 $("#search").addEventListener("input",e=>{state.query=e.target.value;renderList()});
 document.querySelectorAll("[data-filter]").forEach(b=>b.addEventListener("click",()=>{state.filter=b.dataset.filter;document.querySelectorAll("[data-filter]").forEach(x=>{x.classList.toggle("selected",x===b);x.setAttribute("aria-pressed",String(x===b))});renderList()}));
@@ -96,9 +97,19 @@ document.querySelectorAll("[data-nav]").forEach(b=>b.addEventListener("click",()
 
 document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();$("#search").focus()}if(e.key==="Escape"&&root.classList.contains("details-open"))setDetails(false)});
 setupD2(active,()=>conversations,()=>{const c=active();if(c){$("#detail-status").textContent=c.status;$("#detail-agent").textContent=c.agent;renderConversationMedia(c,$("#detail-media"),openConversationMedia);}renderMessages();renderList();updateD3()});
-setupD3(active,()=>{onChannelSelection(channelPicker.getSelection());renderMessages();refreshCurrentMediaModule()});
+setupD3(active,()=>{onChannelSelection(channelPicker.getSelection());renderMessages();router?.refresh();refreshCurrentMediaModule()});
 select(state.active,{openChat:false,markRead:window.matchMedia("(min-width:761px)").matches});onChannelSelection(channelPicker.getSelection());root.classList.remove("chat-open");
 const router=createRouter({render:route=>{
+ const gate=checkRouteAccess(route,{conversations,canAccess,channels,role:currentState().role});
+ if(gate.status==="redirect"){router.navigate(gate.path,{replace:true});return}
+ if(gate.status==="forbidden"||gate.status==="not-found"){
+  setDetails(false);root.classList.remove("chat-open");
+  clearActive();
+  showModule(gate.status==="forbidden"?"access-denied":"not-found");
+  document.title=(gate.status==="forbidden"?"Acesso restrito":"Página não encontrada")+" · WappHub";
+  document.querySelectorAll("[data-nav]").forEach(b=>{b.classList.remove("active");b.setAttribute("aria-current","false")});
+  return;
+ }
  document.querySelectorAll("[data-nav]").forEach(button=>{
   const isCurrent=button.dataset.nav===route.name;
   button.classList.toggle("active",isCurrent);
@@ -113,8 +124,10 @@ const router=createRouter({render:route=>{
    select(id,{openChat:true,markRead:true});
    setDetails(Boolean(route.params.details));
   }else{
+   if(active()&&(!canAccess(active())||getChannel(active().channelId).enabled===false))clearActive();
    root.classList.remove("chat-open");
    setDetails(false);
+   renderList();renderMessages();updateD3();
   }
   return;
  }
@@ -128,7 +141,7 @@ const router=createRouter({render:route=>{
  if(route.name==="configuracoes"){
   showModule("configuracoes",{
    sectionId:route.params.section||"organizacao",
-   onSectionChange:section=>router.navigate(settingsPath(section),{render:false})
+   onSectionChange:section=>router.navigate(settingsPath(section))
   });
   return;
  }

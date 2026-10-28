@@ -47,7 +47,7 @@ test("mídias têm acesso na navegação e nos detalhes da conversa",()=>{
  assert.match(main,/seedMediaFixtures\(conversations\)/);
  assert.match(main,/renderConversationMedia\(c,/);
  assert.match(pages,/name==="midias"/);
- assert.match(pages,/conversations\.filter\(canAccess\)/);
+ assert.match(pages,/conversations\.filter\(allowedConversation\)/);
  assert.match(chat,/createMediaPlayer\(m\.file/);
 });
 test("assets shipped by docker and CSP allows only the declared media origin",()=>{
