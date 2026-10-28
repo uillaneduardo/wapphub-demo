@@ -42,7 +42,7 @@ export function renderSettings(root){root.replaceChildren();const h=el("header",
     const info=el("span","settings-item-copy");
     info.append(el("strong","",title),el("span","",description));
     const toggle=el("input","settings-preference-toggle");
-    toggle.type="checkbox";toggle.checked=appearance[key];
+    toggle.type="checkbox";toggle.dataset.appearanceKey=key;toggle.checked=appearance[key];
     toggle.setAttribute("aria-label",title);
     toggle.onchange=()=>setAppearance({[key]:toggle.checked});
     row.append(info,toggle);panel.append(row);
@@ -53,3 +53,5 @@ export function renderSettings(root){root.replaceChildren();const h=el("header",
 }
  bindAdminRender(show);
  for(const [id,label] of sections){const b=el("button","settings-menu-item",label);b.type="button";b.dataset.section=id;b.onclick=()=>show(id);menu.append(b)}layout.append(menu,panel);root.append(layout);show("organizacao")}
+
+window.addEventListener("wapphub-appearance-changed",()=>{document.querySelectorAll(".settings-preference-toggle[data-appearance-key]").forEach(input=>{input.checked=Boolean(appearance[input.dataset.appearanceKey])})});
