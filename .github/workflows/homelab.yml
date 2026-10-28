@@ -43,6 +43,10 @@ jobs:
               curl -fsS http://127.0.0.1:18280/profile | grep -q 'id="app"'
               curl -fsS http://127.0.0.1:18280/inbox/mariana/details | grep -q 'id="app"'
               curl -fsS http://127.0.0.1:18280/settings/appearance | grep -q 'id="app"'
+              curl -fsS http://127.0.0.1:18280/settings/providers/new | grep -q 'id="app"'
+              curl -fsS http://127.0.0.1:18280/settings/providers/demo-baileys-commercial/diagnostics | grep -q 'id="app"'
+              curl -fsS http://127.0.0.1:18280/src/provider-details.js | grep -q 'renderProviderDetails'
+              curl -fsS http://127.0.0.1:18280/src/data/adapters/mock/provider-repository.js | grep -q 'updateSession'
               curl -fsS 'http://127.0.0.1:18280/media?conversation=mariana&type=video' | grep -q 'id="app"'
               test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:18280/src/missing-module.js)" = "404"
               test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:18280/assets/missing-video.mp4)" = "404"
