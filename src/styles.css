@@ -499,3 +499,55 @@ html[data-theme=dark] .status-banner[data-tone=warning]{background:#3a260e;color
 @media(prefers-reduced-motion:reduce){
  .message-row .bubble,.swipe-reply-cue{transition:none!important}
 }
+
+
+/* D5.6 — Preferências de animação e privacidade visual, sem mudar o design base */
+.settings-preference-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 0;border-bottom:1px solid var(--line);cursor:pointer;min-width:0}
+.settings-preference-row .settings-item-copy{flex:1;min-width:0}
+.settings-preference-toggle{appearance:none;flex:0 0 42px;width:42px;height:24px;position:relative;border:1px solid var(--line);border-radius:999px;background:var(--hover);cursor:pointer;transition:background-color .15s ease,border-color .15s ease}
+.settings-preference-toggle::after{content:"";display:block;position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:var(--panel);box-shadow:0 1px 2px #0002;transition:transform .15s ease}
+.settings-preference-toggle:checked{background:var(--brand-accent);border-color:var(--brand-accent)}
+.settings-preference-toggle:checked::after{transform:translateX(18px);background:var(--brand-text)}
+.settings-preference-toggle:focus-visible{outline:2px solid var(--brand-border);outline-offset:3px}
+
+/* O filtro se limita ao conteúdo da foto/vídeo: não alcança ações, texto ou controles. */
+.media-blur-surface{position:relative}
+.media-blur-content{transition:filter .22s ease,transform .22s ease}
+.media-blur-surface.is-media-blurred .media-blur-content{filter:blur(13px) brightness(.85);transform:scale(1.065)}
+.media-blur-toggle{position:absolute;z-index:5;top:9px;right:9px;display:grid;place-items:center;width:32px;height:32px;border:1px solid rgba(255,255,255,.28);border-radius:9px;background:rgba(21,25,30,.7);color:#fff;cursor:pointer;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.media-blur-toggle:hover{background:rgba(21,25,30,.86)}
+.media-blur-toggle svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.media-blur-toggle:focus-visible{outline:2px solid var(--brand-accent);outline-offset:3px}
+.media-blur-surface.is-media-blurred .media-blur-toggle{background:rgba(21,25,30,.78)}
+.message-image-frame{position:relative;min-width:0;width:100%;overflow:hidden;border-radius:8px}
+.media-card{position:relative}
+.media-card-open{display:flex;flex-direction:column;gap:11px;width:100%;min-width:0;text-align:left;padding:0;border:0;background:transparent;color:inherit;cursor:pointer}
+.media-card-open:focus-visible{outline:2px solid var(--brand-accent);outline-offset:2px;border-radius:8px}
+.media-card .media-blur-toggle{top:15px;right:15px}
+.detail-media-tile{position:relative}
+.detail-media-open{display:block;width:100%;border:0;padding:0;background:transparent;cursor:pointer}
+.detail-media-tile .media-blur-toggle{top:4px;right:4px;width:27px;height:27px;border-radius:7px}
+.detail-media-tile .media-blur-toggle svg{width:15px;height:15px}
+.media-video-stage .media-blur-toggle{top:8px;right:8px}
+.message-image-frame .media-blur-toggle{top:8px;right:8px}
+
+/* Animações discretas: nunca animar histórico antigo ou repetir efeitos em loop. */
+@keyframes wh-enter{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@keyframes wh-dialog-in{from{opacity:0;transform:translateY(7px) scale(.99)}to{opacity:1;transform:translateY(0) scale(1)}}
+.channel-filter-popover:not([hidden]),.profile-popover,.d2-menu{animation:wh-enter .15s ease-out both}
+.d2-dialog,.admin-dialog,.contact-editor-dialog,.media-lightbox-panel{animation:wh-dialog-in .18s ease-out both}
+.message-row.message-just-sent .bubble{animation:wh-enter .17s ease-out both}
+.media-type-tab,.media-play,.media-blur-toggle{transition:background-color .14s ease,color .14s ease,border-color .14s ease}
+
+/* O controle da interface e a preferência de acessibilidade sempre têm prioridade. */
+html[data-animations="off"] *,html[data-animations="off"] *::before,html[data-animations="off"] *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+@media(prefers-reduced-motion:reduce){
+ *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
+@media(max-width:760px){
+ .settings-preference-row{gap:12px;padding:15px 0}
+ .media-card-open{gap:8px}
+ .media-card .media-blur-toggle{top:11px;right:11px;width:30px;height:30px}
+ .media-blur-toggle{min-width:30px;min-height:30px}
+ .detail-media-tile .media-blur-toggle{width:27px;height:27px}
+}
