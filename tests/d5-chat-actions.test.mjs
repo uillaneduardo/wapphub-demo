@@ -28,5 +28,5 @@ test("D5: controles visíveis e compositor respeitam estado atual",()=>{
  assert.match(main,/\$\("#detail-status"\)\.textContent=c\.status/);
  assert.match(main,/updateD3\(\)/);
  assert.match(main,/d2\.js\?v=motion-1/);
- assert.match(src("index.html"),/main\.js\?v=d6-2/);
+ assert.match(src("index.html"),/main\.js\?v=d6-3/);
 });
