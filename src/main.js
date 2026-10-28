@@ -11,7 +11,7 @@ import {showModule,refreshCurrentMediaModule} from "./pages.js?v=media-1";
 import {channels,getChannel} from "./channels.js?v=channels-1";
 import {setupD3,updateD3,canAccess,assertCanSend} from "./d3.js?v=d4-6";
 import {appearance,setAppearance,openAppearanceSettings} from "./appearance.js?v=d5-1";
-import {renderD2,sendD2,setupD2,resetD2Selection} from "./d2.js?v=reply-1";
+import {renderD2,sendD2,setupD2,resetD2Selection} from "./d2.js?v=swipe-1";
 import {conversations} from "./data.js?v=channels-1";
 const $=s=>document.querySelector(s);const root=$("#app"),list=$("#conversation-list"),messages=$("#messages");
 const state={active:"mariana",filter:"all",selectedChannels:null,query:"",theme:appearance.mode};
@@ -95,6 +95,6 @@ const contactEditButton=document.createElement("button");contactEditButton.class
 document.querySelectorAll("[data-nav]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-nav]").forEach(x=>x.classList.toggle("active",x===b));showModule(b.dataset.nav);if(b.dataset.nav==="atendimento")root.classList.remove("chat-open")}));
 
 document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();$("#search").focus()}if(e.key==="Escape"&&root.classList.contains("details-open"))setDetails(false)});
-setupD2(active,()=>conversations,()=>{const c=active();if(c){$("#detail-status").textContent=c.status;$("#detail-agent").textContent=c.agentrenderConversationMedia(c,$("#detail-media"),openConversationMedia);}renderMessages();renderList();updateD3()});
+setupD2(active,()=>conversations,()=>{const c=active();if(c){$("#detail-status").textContent=c.status;$("#detail-agent").textContent=c.agent;renderConversationMedia(c,$("#detail-media"),openConversationMedia);}renderMessages();renderList();updateD3()});
 setupD3(active,()=>{onChannelSelection(channelPicker.getSelection());renderMessages();refreshCurrentMediaModule()});
 select(state.active,{openChat:false,markRead:window.matchMedia("(min-width:761px)").matches});onChannelSelection(channelPicker.getSelection());root.classList.remove("chat-open");
