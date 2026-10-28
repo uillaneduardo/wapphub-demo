@@ -31,7 +31,8 @@ export function setupSwipeReply({area,onReply,isSelectionActive,onGestureStart})
   if(gesture||isSelectionActive()||e.isPrimary===false||(e.pointerType==="mouse"&&e.button!==0))return;
   if(e.target.closest(excluded))return;
   const row=e.target.closest("[data-message-id]");
-  if(!row||!area.contains(row))return;
+  if(!row||!area.contains(row)||!e.target.closest(".bubble"))return;
+  if(e.pointerType==="mouse"&&e.cancelable)e.preventDefault();
   gesture={pointerId:e.pointerId,downX:e.clientX,downY:e.clientY,
    row,id:row.dataset.messageId,direction:row.classList.contains("mine")?"out":"in",
    started:false,captured:false};
@@ -66,8 +67,8 @@ export function setupSwipeReply({area,onReply,isSelectionActive,onGestureStart})
  area.addEventListener("pointerdown",onDown);
  area.addEventListener("pointermove",onMove);
  area.addEventListener("pointerup",onUp);
- area.addEventListener("pointercancel",clear);
- area.addEventListener("lostpointercapture",clear);
+ area.addEventListener("pointercancel",e=>{if(gesture?.pointerId===e.pointerId)clear()});
+ area.addEventListener("lostpointercapture",e=>{if(gesture?.pointerId===e.pointerId)clear()});
  area.addEventListener("scroll",()=>{if(gesture)clear()},{passive:true});
  // Evita selecionar mensagens ou abrir controles após arrastar.
  area.addEventListener("click",e=>{
