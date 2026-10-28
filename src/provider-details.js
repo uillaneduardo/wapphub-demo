@@ -1,4 +1,4 @@
-import {providerRepository} from "./data/adapters/mock/provider-repository.js?v=d6-3";
+import {providerService} from "./services/provider-service.js?v=d6-4";
 import {STATE_LABELS} from "./data/contracts/provider-domain.mjs";
 import {providerPath} from "./router/routes.mjs";
 import {channels} from "./channels.js?v=channels-1";
@@ -15,7 +15,7 @@ function message(root,text,type="status"){
 }
 export async function renderProviderDetails(root,{id,tab="overview",onNavigate=()=>{}}={}){
  root.replaceChildren(message(root,"Carregando detalhes…"));
- const [item,types]=await Promise.all([providerRepository.getConnection(id),providerRepository.listTypes()]);
+ const [item,types]=await Promise.all([providerService.getConnection(id),providerService.listTypes()]);
  if(!root.isConnected)return;
  root.replaceChildren();
  if(!item){
@@ -55,7 +55,7 @@ export async function renderProviderDetails(root,{id,tab="overview",onNavigate=(
   const teams=E("select","admin-input");teams.setAttribute("aria-label","Equipe responsável");
   for(const value of [{id:"",name:"Sem equipe"},...adminState().teams]){const opt=E("option","",value.name);opt.value=value.id;teams.append(opt)}teams.value=item.teamId||"";
   edit.append(E("h4","","Editar identificação"),name,description,teams,
-   act("Salvar alterações",()=>run(()=>providerRepository.updateConnection(id,{name:name.value,description:description.value,teamId:teams.value||null})),"settings-primary"));
+   act("Salvar alterações",()=>run(()=>providerService.updateConnection(id,{name:name.value,description:description.value,teamId:teams.value||null})),"settings-primary"));
   section.append(edit);
  }
  if(tab==="session"){
@@ -69,8 +69,8 @@ export async function renderProviderDetails(root,{id,tab="overview",onNavigate=(
    if(item.session.expiresAt)qr.append(E("small","",expired?"QR ilustrativo expirado":"Validade ilustrativa até "+format(item.session.expiresAt)));
    section.append(qr);
    section.append(act("Gerar / renovar QR ilustrativo",()=>run(async()=>{
-    await providerRepository.setConnectionState(id,"awaiting_auth");
-    await providerRepository.updateSession(id,{state:"qr_pending",expiresAt:new Date(Date.now()+120000).toISOString()});
+    await providerService.setConnectionState(id,"awaiting_auth");
+    await providerService.updateSession(id,{state:"qr_pending",expiresAt:new Date(Date.now()+120000).toISOString()});
    })));
   }else{
    section.append(E("p","settings-hint",type?.authMode==="api"?
@@ -79,15 +79,15 @@ export async function renderProviderDetails(root,{id,tab="overview",onNavigate=(
   }
   const actions=E("div","provider-action-strip");
   actions.append(
-   act("Simular reconexão",()=>run(()=>providerRepository.setConnectionState(id,"connecting"))),
+   act("Simular reconexão",()=>run(()=>providerService.setConnectionState(id,"connecting"))),
    act("Simular conexão estabelecida",()=>run(async()=>{
-    await providerRepository.setConnectionState(id,"connected");
-    await providerRepository.updateSession(id,{state:"authenticated",expiresAt:null,lastSyncAt:new Date().toISOString()});
+    await providerService.setConnectionState(id,"connected");
+    await providerService.updateSession(id,{state:"authenticated",expiresAt:null,lastSyncAt:new Date().toISOString()});
    })),
-   act("Simular falha",()=>run(()=>providerRepository.setConnectionState(id,"failed"))),
+   act("Simular falha",()=>run(()=>providerService.setConnectionState(id,"failed"))),
    act("Desvincular sessão",()=>{if(!window.confirm("Desvincular somente a sessão fictícia desta conexão?"))return;
-    run(async()=>{await providerRepository.setConnectionState(id,"awaiting_auth");
-      await providerRepository.updateSession(id,{state:"not_authenticated",expiresAt:null})})})
+    run(async()=>{await providerService.setConnectionState(id,"awaiting_auth");
+      await providerService.updateSession(id,{state:"not_authenticated",expiresAt:null})})})
   );
   section.append(actions,E("p","settings-hint","As ações alteram exclusivamente o mock; nenhuma sessão real será reiniciada ou recuperada."));
  }
@@ -101,10 +101,10 @@ export async function renderProviderDetails(root,{id,tab="overview",onNavigate=(
    label.append(input,E("span","",ch.name));form.append(label);
   }
   if(!form.childElementCount)form.append(E("p","provider-empty","Nenhum canal cadastrado."));
-  section.append(form,act("Salvar associações",()=>run(()=>providerRepository.assignChannels(id,[...selected])),"settings-primary"));
+  section.append(form,act("Salvar associações",()=>run(()=>providerService.assignChannels(id,[...selected])),"settings-primary"));
  }
  if(tab==="diagnostics"){
-  const health=await providerRepository.getHealth(id);if(!section.isConnected)return;
+  const health=await providerService.getHealth(id);if(!section.isConnected)return;
   section.append(E("h4","","Diagnóstico ilustrativo"),
    E("p","settings-hint","Valores de exemplo determinísticos, NÃO são métricas reais do serviço ou frontend."));
   const grid=E("div","provider-health-grid");
@@ -119,7 +119,7 @@ export async function renderProviderDetails(root,{id,tab="overview",onNavigate=(
   section.append(grid);
  }
  if(tab==="events"){
-  const events=await providerRepository.listEvents(id);if(!section.isConnected)return;
+  const events=await providerService.listEvents(id);if(!section.isConnected)return;
   section.append(E("h4","","Eventos da conexão"),E("p","settings-hint","Timeline fictícia sem conteúdo de mensagens ou dados sensíveis."));
   const list=E("ol","provider-event-list");
   for(const event of [...events].reverse()){
