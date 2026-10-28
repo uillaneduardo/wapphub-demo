@@ -1,6 +1,8 @@
+import {attachMediaBlur} from "./media-blur.js?v=motion-1";
+import {mediaVisibilityKey} from "./media-visibility-store.js?v=motion-1";
 import {setupSwipeReply} from "./swipe-reply.js?v=swipe-2";
 import {resolveReplyTarget} from "./reply-navigation.mjs?v=reply-1";
-import {createMediaPlayer,openMediaViewer} from "./media-player.js?v=media-1";
+import {createMediaPlayer,openMediaViewer} from "./media-player.js?v=motion-1";
 import {canAccess} from "./d3.js?v=d4-6";
 import {can} from "./permissions.js?v=d4-6";
 const $=s=>document.querySelector(s), el=(tag,cl="",text)=>{const n=document.createElement(tag);n.className=cl;if(text!==undefined)n.textContent=text;return n};
@@ -49,7 +51,7 @@ function jumpToOriginal(reference){
  for(const previous of area.querySelectorAll(".reply-jump-highlight"))previous.classList.remove("reply-jump-highlight");
  row.classList.add("reply-jump-highlight");
  row.focus({preventScroll:true});
- const motion=window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches?"instant":"smooth";
+ const motion=document.documentElement.dataset.animations==="off"||window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches?"instant":"smooth";
  row.scrollIntoView({behavior:motion==="instant"?"auto":"smooth",block:"center"});
  replyJumpTimer=setTimeout(()=>{row.classList.remove("reply-jump-highlight");replyJumpTimer=null},1900);
 }
@@ -74,13 +76,17 @@ export function renderD2(c,container){normalize(c);container.replaceChildren(el(
 }if(m.forwarded)b.append(el("div","d2-forwarded","Encaminhada"));if(m.file){
  const mediaKind=m.file.kind;
  if(mediaKind==="audio"||mediaKind==="video"){
-   b.append(createMediaPlayer(m.file,{compact:true}));
+   b.append(createMediaPlayer(m.file,{compact:true,visibilityKey:mediaVisibilityKey(c.id,m.id)}));
  }else if(mediaKind==="image"&&m.file.url){
    const preview=el("button","message-image");preview.type="button";
    preview.setAttribute("aria-label","Ver imagem: "+m.file.name);
    const img=el("img");img.src=m.file.url;img.alt=m.file.name||"Imagem recebida";img.loading="lazy";
-   preview.append(img);preview.onclick=()=>openMediaViewer({...m.file,kind:"image",caption:m.body||""});
-   b.append(preview);
+   preview.append(img);
+   preview.onclick=()=>openMediaViewer({...m.file,kind:"image",caption:m.body||"",conversationId:c.id,id:m.id});
+   const frame=el("div","message-image-frame");
+   frame.append(preview);
+   attachMediaBlur(frame,img,mediaVisibilityKey(c.id,m.id));
+   b.append(frame);
  }else{
    const f=el("div","file-card");f.append(el("span","file-type",(m.file.kind||"Arquivo").toUpperCase()),el("span","file-label",m.file.name));
    if(m.file.url){const a=el("a","file-link","Abrir");a.href=m.file.url;a.download=m.file.name;f.append(a)}
