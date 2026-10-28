@@ -39,7 +39,7 @@ async function listing(root,onNavigate,query={}){
  for(const [value,label] of [["all","Todos os estados"],...Object.entries(STATE_LABELS)]){const el=E("option","",label);el.value=value;state.append(el)}
  type.value=types.some(t=>t.id===query.type)?query.type:"all";
  state.value=STATE_LABELS[query.state]?query.state:"all";
- const status=E("p","settings-hint");status.setAttribute("role","status");
+ const status=E("p","settings-hint","Carregando conexões…");status.setAttribute("role","status");
  const results=E("div","provider-connection-list");
  const update=async()=>{
   const current={search:search.value,state:state.value,type:type.value};
@@ -72,7 +72,6 @@ function renderWizard(root,onNavigate){
  root.append(progress);
  const body=E("div","provider-wizard-body");root.append(body);
  const footer=E("div","provider-wizard-footer");root.append(footer);
- const alert=E("p","provider-form-error");alert.setAttribute("role","alert");body.append(alert);
  const typeInfo=[
   {id:"baileys",label:"QR Code ilustrativo",hint:"Conexão via sessão Web. O Core gerenciará expiração, pareamento e reconexão."},
   {id:"cloud-api",label:"Autorização por API (ilustrativa)",hint:"Tokens e webhooks serão configurados em uma integração real, jamais nesta demo."},
@@ -81,6 +80,7 @@ function renderWizard(root,onNavigate){
  ];
  const paint=async()=>{
   body.replaceChildren();footer.replaceChildren();
+  const feedback=E("p","provider-form-error");feedback.setAttribute("role","alert");body.append(feedback);
   if(step===0){
    body.append(E("p","settings-description","Escolha a tecnologia antes de configurar a conexão."));
    const types=await providerRepository.listTypes();if(!body.isConnected)return;
