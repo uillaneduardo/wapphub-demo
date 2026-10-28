@@ -24,7 +24,7 @@ test("mensagens enviadas respondem ao arrastar para a esquerda",()=>{
 test("movimento vertical e arrastos curtos não disparam resposta",()=>{
  assert.equal(swipeIntent(7,65,"in"),"vertical");
  assert.equal(swipeIntent(-8,-49,"out"),"vertical");
- assert.equal(swipeIntent(9,3,"in"),"pending");
+ assert.equal(swipeIntent(7,3,"in"),"pending");
  assert.equal(shouldReplyFromSwipe(78,71,"in"),false);
  assert.equal(shouldReplyFromSwipe(20,0,"in"),false);
 });
