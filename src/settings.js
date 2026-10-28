@@ -6,14 +6,14 @@ import {getChannel} from "./channels.js?v=channels-1";
 import {renderChannelManagement,renderProviderManagement} from "./channel-management.js?v=d4-6";
 import {organizationPanel,teamPanel,bindAdminRender} from "./admin-ui.js?v=mobile-polish-1";
 import {channels} from "./channels.js?v=channels-1";
-import {openAppearanceSettings} from "./appearance.js?v=d5-1";
+import {appearance,setAppearance,openAppearanceSettings} from "./appearance.js?v=motion-1";
 const sections=[
 ["organizacao","Organização","Identidade, dados gerais e preferências da organização"],
 ["equipe","Usuários e equipes","Membros, convites e composição das equipes"],
 ["permissoes","Permissões e atribuições","Perfis, restrições e distribuição de atendimentos"],
 ["canais","Canais","Instâncias de mensagens e sua situação operacional"],
 ["providers","Providers e integrações","Serviços de transporte independentes e capacidades"],
-["aparencia","Aparência","Tema e cor de destaque da organização"]
+["aparencia","Aparência","Tema, movimento e privacidade visual das mídias"]
 ];
 const el=(tag,cls="",value)=>{const n=document.createElement(tag);n.className=cls;if(value!==undefined)n.textContent=value;return n};
 function line(title,description,extra){const row=el("div","settings-item");const copy=el("div","settings-item-copy");copy.append(el("strong","",title),el("span","",description));row.append(copy);if(extra)row.append(extra);return row}
@@ -34,7 +34,22 @@ export function renderSettings(root){root.replaceChildren();const h=el("header",
  if(id==="permissoes")renderAccessPanel(panel,{getMembers:()=>adminState().members,getConversations:()=>conversations,getChannel,getGrant:roleAllows,setGrant:setRoleGrant,assign:(conversationId,memberId)=>assignConversation(conversations,adminState().members,conversationId,memberId)});
  if(id==="canais")renderChannelManagement(panel,show)
  if(id==="providers")renderProviderManagement(panel,show)
- if(id==="aparencia"){panel.append(line("Personalização organizacional","Personalize a cor de destaque e o modo claro ou escuro."));const b=el("button","settings-primary","Personalizar aparência");b.type="button";b.onclick=openAppearanceSettings;panel.append(b)}
+ if(id==="aparencia"){
+  panel.append(line("Tema e cores","Personalize o modo claro ou escuro e a cor de destaque."));
+  const b=el("button","settings-primary","Personalizar aparência");b.type="button";b.onclick=openAppearanceSettings;panel.append(b);
+  function preference(title,description,key){
+    const row=el("label","settings-preference-row");
+    const info=el("span","settings-item-copy");
+    info.append(el("strong","",title),el("span","",description));
+    const toggle=el("input","settings-preference-toggle");
+    toggle.type="checkbox";toggle.checked=appearance[key];
+    toggle.setAttribute("aria-label",title);
+    toggle.onchange=()=>setAppearance({[key]:toggle.checked});
+    row.append(info,toggle);panel.append(row);
+  }
+  preference("Animações da interface","Ativar transições discretas em menus, ações e mensagens. A opção do dispositivo para reduzir movimento continua sendo respeitada.","animations");
+  preference("Desfocar prévias de mídias","Aplicar desfoque por padrão a imagens e vídeos. O botão de olho permite ajustar cada mídia individualmente.","blurMedia");
+}
 }
  bindAdminRender(show);
  for(const [id,label] of sections){const b=el("button","settings-menu-item",label);b.type="button";b.dataset.section=id;b.onclick=()=>show(id);menu.append(b)}layout.append(menu,panel);root.append(layout);show("organizacao")}
