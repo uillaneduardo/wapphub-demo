@@ -30,7 +30,7 @@ function itemCard(item){
  }
  return card;
 }
-export function renderMediaLibrary(root,{getConversations,conversationId="all"}){
+export function renderMediaLibrary(root,{getConversations,conversationId="all",type="all",query="",onFilterChange=()=>{}}){
  root.replaceChildren();
  const head=el("header","module-head");
  head.append(el("h1","","Mídias"),el("p","","Encontre e visualize arquivos compartilhados nas conversas."));
@@ -43,27 +43,28 @@ export function renderMediaLibrary(root,{getConversations,conversationId="all"})
  select.value=[...select.options].some(x=>x.value===conversationId)?conversationId:"all";
  selectLabel.append(select);
  const search=el("input","module-search media-library-search");search.type="search";
- search.placeholder="Buscar arquivos...";search.setAttribute("aria-label","Buscar mídias");
+ search.placeholder="Buscar arquivos...";search.setAttribute("aria-label","Buscar mídias");search.value=query;
  toolbar.append(selectLabel,search);root.append(toolbar);
  const filters=el("div","media-library-types");filters.setAttribute("role","group");filters.setAttribute("aria-label","Tipo de mídia");
  const status=el("p","media-library-status");status.setAttribute("role","status");status.setAttribute("aria-live","polite");
  const cards=el("div","media-library-grid");
- let type="all";
+ let selectedType=type in labels?type:"all";
  const update=()=>{
   const accessible=mediaEntries(getConversations());
-  const narrowed=filterMedia(accessible,{conversationId:select.value,kind:type,query:search.value});
+  const narrowed=filterMedia(accessible,{conversationId:select.value,kind:selectedType,query:search.value});
   status.textContent=narrowed.length===1?"1 arquivo encontrado":narrowed.length+" arquivos encontrados";
   const totals=mediaTotals(filterMedia(accessible,{conversationId:select.value,query:search.value}));
-  for(const b of filters.querySelectorAll("button")){b.classList.toggle("selected",b.dataset.type===type);b.setAttribute("aria-pressed",String(b.dataset.type===type));b.querySelector("span").textContent=String(totals[b.dataset.type]||0)}
+  for(const b of filters.querySelectorAll("button")){b.classList.toggle("selected",b.dataset.type===selectedType);b.setAttribute("aria-pressed",String(b.dataset.type===type));b.querySelector("span").textContent=String(totals[b.dataset.type]||0)}
   cards.replaceChildren();
   if(!narrowed.length){cards.append(el("p","media-library-empty","Nenhuma mídia encontrada para esses filtros."));return}
   for(const item of narrowed)cards.append(itemCard(item));
  };
  for(const [id,label] of Object.entries(labels)){
-  const b=el("button","media-type-tab");b.type="button";b.dataset.type=id;b.setAttribute("aria-pressed",String(id==="all"));
-  b.append(el("strong","",label),el("span","","0"));b.onclick=()=>{type=id;update()};filters.append(b);
+  const b=el("button","media-type-tab");b.type="button";b.dataset.type=id;b.setAttribute("aria-pressed",String(id===selectedType));
+  b.append(el("strong","",label),el("span","","0"));b.onclick=()=>{selectedType=id;update();onFilterChange({conversationId:select.value,type:selectedType,query:search.value},false)};filters.append(b);
  }
- select.onchange=update;search.oninput=update;
+ select.onchange=()=>{update();onFilterChange({conversationId:select.value,type:selectedType,query:search.value},false)};
+ search.oninput=()=>{update();onFilterChange({conversationId:select.value,type:selectedType,query:search.value},true)};
  root.append(filters,status,cards);update();
 }
 export function renderConversationMedia(conversation,container,onViewAll){
