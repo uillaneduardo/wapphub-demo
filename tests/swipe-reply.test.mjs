@@ -58,7 +58,7 @@ test("compositor e detalhes atualizam sem erro de callback",()=>{
  const main=src("src/main.js");
  assert.match(main,/\$\("#detail-agent"\)\.textContent=c\.agent;renderConversationMedia\(/);
  assert.doesNotMatch(main,/c\.agentrenderConversationMedia/);
- assert.match(main,/d2\.js\?v=swipe-1/);
+ assert.match(main,/d2\.js\?v=swipe-2/);
 });
 
 test("Android ativa a resposta com percurso menor e libera mais deslocamento visual",()=>{
