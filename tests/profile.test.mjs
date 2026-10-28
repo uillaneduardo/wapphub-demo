@@ -19,5 +19,5 @@ test("a apresentação não depende da persistência",()=>{
 });
 test("versão cacheada da interface reflete a nova tela",()=>{
  assert.match(src("index.html"),/main\.js\?v=r1/);
- assert.match(src("src/main.js"),/pages\.js\?v=r1/);
+ assert.match(src("src/main.js"),/pages\.js\?v=motion-1/);
 });
