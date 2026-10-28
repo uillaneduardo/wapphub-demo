@@ -1,7 +1,7 @@
 import {attachMediaBlur} from "./media-blur.js?v=motion-1";
 import {mediaVisibilityKey} from "./media-visibility-store.js?v=motion-1";
 import {mediaEntries,filterMedia,mediaTotals} from "./media-catalog.mjs";
-import {openMediaViewer} from "./media-player.js?v=media-1";
+import {openMediaViewer} from "./media-player.js?v=motion-1";
 const el=(tag,cls="",text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n};
 const labels={all:"Todas",image:"Imagens",audio:"Áudios",video:"Vídeos",document:"Documentos"};
 function thumb(item,small=false){
