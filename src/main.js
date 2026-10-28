@@ -18,11 +18,14 @@ import {setupD3,updateD3,canAccess,currentState,assertCanSend} from "./d3.js?v=d
 import {appearance,setAppearance,openAppearanceSettings} from "./appearance.js?v=motion-1";
 import {renderD2,sendD2,setupD2,resetD2Selection} from "./d2.js?v=motion-1";
 import {conversations} from "./data.js?v=channels-1";
+import {createMessageCommandService} from "./services/message-commands.mjs";
+import {createMockMessageCommandRepository} from "./data/adapters/mock/message-commands.mjs";
 import {createConversationReadService} from "./services/conversation-read.mjs";
 import {createMockConversationReadRepository} from "./data/adapters/mock/conversation-read.mjs";
 const $=s=>document.querySelector(s);const root=$("#app"),list=$("#conversation-list"),messages=$("#messages");
 const state={active:"mariana",filter:"all",selectedChannels:null,query:"",theme:appearance.mode};
 const conversationReadService=createConversationReadService(createMockConversationReadRepository(conversations));
+const messageCommands=createMessageCommandService(createMockMessageCommandRepository(conversations));
 seedMediaFixtures(conversations);
 initializeAssignments(conversations,adminState().members);
 
@@ -102,7 +105,7 @@ $("#details-toggle").addEventListener("click",()=>{if(active())router.navigate(c
 $("#details-close").addEventListener("click",()=>{if(active())router.navigate(conversationPath(active().id))});
 $("#back-button").addEventListener("click",()=>router.navigate("/inbox"));
 $("#theme-toggle").addEventListener("click",()=>setAppearance({mode:appearance.mode==="light"?"dark":"light"}));
-$("#composer").addEventListener("submit",e=>{e.preventDefault();const input=$("#message-input");if(!active()||!assertCanSend(active())||!sendD2(active(),input.value))return;input.value="";input.style.height="";renderMessages();renderList();});
+$("#composer").addEventListener("submit",async e=>{e.preventDefault();const input=$("#message-input"),conversation=active();if(!conversation||!assertCanSend(conversation))return;const submit=$("#composer").querySelector('button[type="submit"]');if(submit?.disabled)return;if(submit)submit.disabled=true;try{if(!await sendD2(conversation,input.value))return;input.value="";input.style.height="";renderMessages();renderList()}catch(error){toast("Falha ao enviar mensagem: "+error.message)}finally{if(submit)submit.disabled=false}});
 $("#message-input").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){e.preventDefault();$("#composer").requestSubmit()}});
 $("#message-input").addEventListener("input",e=>{e.target.style.height="auto";e.target.style.height=Math.min(e.target.scrollHeight,144)+"px"});
 function renderProfileAvatar(){
@@ -121,7 +124,7 @@ const contactEditButton=document.createElement("button");contactEditButton.class
 document.querySelectorAll("[data-nav]").forEach(b=>b.addEventListener("click",()=>router.navigate(pathFor(b.dataset.nav))));
 
 document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();$("#search").focus()}if(e.key==="Escape"&&root.classList.contains("details-open"))setDetails(false)});
-setupD2(active,()=>conversations,()=>{const c=active();if(c){$("#detail-status").textContent=c.status;$("#detail-agent").textContent=c.agent;renderConversationMedia(c,$("#detail-media"),openConversationMedia);}renderMessages();renderList();updateD3()});
+setupD2(active,()=>conversations,()=>{const c=active();if(c){$("#detail-status").textContent=c.status;$("#detail-agent").textContent=c.agent;renderConversationMedia(c,$("#detail-media"),openConversationMedia);}renderMessages();renderList();updateD3()},messageCommands);
 setupD3(active,()=>{onChannelSelection(channelPicker.getSelection());renderMessages();router?.refresh();refreshCurrentMediaModule()});
 select(state.active,{openChat:false,markRead:window.matchMedia("(min-width:761px)").matches});onChannelSelection(channelPicker.getSelection());root.classList.remove("chat-open");
 const router=createRouter({render:route=>{
