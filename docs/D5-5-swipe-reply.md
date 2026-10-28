@@ -17,7 +17,7 @@
 - Quando a conversa muda, o gesto pendente é cancelado. Gestos descartados não disparam cliques ou seleção acidental.
 
 ## Organização do código
-- `src/swipe-reply.mjs`: regras puras para eixo, direção, deslocamento e ativação (12 px para início horizontal, 62 px para executar resposta, limite visual de 86 px). Não acessa DOM, armazenamento ou Core.
+- `src/swipe-reply.mjs`: regras puras para eixo, direção, deslocamento e ativação (8 px para início horizontal, 38 px para executar no touch ou 52 px no mouse/caneta, limite visual de 120 px). Não acessa DOM, armazenamento ou Core.
 - `src/swipe-reply.js`: eventos do navegador e UI temporária; recebe `{area,onReply,isSelectionActive,onGestureStart}`; não conhece as entidades do provider ou persistência.
 - `src/d2.js`: conecta `onReply(id)` à mesma ação `action("reply",id)` existente, com a mesma estrutura `reply:{conversationId,messageId,...}`.
 - `src/styles.css`: translação de balão e affordance visual.
@@ -37,3 +37,15 @@
 
 ## Integração futura
 Não requer endpoint novo. A interface continuará chamando a ação responder fornecendo o `messageId` e `conversationId` originais; o Core deve validar a referência e a permissão quando a mensagem for efetivamente enviada.
+
+## Ajuste D5.5.1 — Homologação Android
+O gesto anterior era encerrado prematuramente em alguns celulares porque a interpretação de rolagem e os `pointercancel` do navegador podiam interromper o arrasto. Além disso, o gatilho de 62 px exigia deslocamento excessivo.
+
+- No mobile com suporte a Touch Events, eventos de `touchmove` são tratados com `passive:false` e `preventDefault()` **somente depois** de identificar um movimento horizontal intencional; rolagem vertical segue nativa. Mouse e caneta continuam com Pointer Events.
+- O limite foi reduzido para **38 px no toque** e **52 px no mouse/caneta**. A translação máxima visual é de **120 px**.
+- Ao alcançar o limite, a opção fica **armada** até a soltura mesmo se o dedo recuar ligeiramente, evitando perder a resposta por retorno curto. Arrastar para o lado errado, rolar verticalmente ou interromper o toque ainda cancela.
+- Os controles de áudio/vídeo, botões, respostas citadas, links e o modo de seleção múltipla continuam excluídos.
+- Arquivos JavaScript e CSS receberam nova versão na URL para impedir carregamento do gesto anterior pelo cache.
+
+### Critérios práticos de homologação
+No Android, abra uma mensagem de texto recebida e arraste **um pequeno trecho à direita**, até o indicador de resposta mudar de cor. Solte para abrir o rascunho de resposta. Repita para mensagens enviadas deslizando à esquerda, depois teste rolagem longa, gesto curto, áudio/vídeo e seleção múltipla. Se o navegador cancelar mesmo assim, registrar modelo do aparelho, navegador e gravação de tela com a sequência de movimento.
