@@ -1,5 +1,5 @@
 import {createRouter} from "./router/router.js?v=r1";
-import {pathFor} from "./router/routes.mjs";
+import {pathFor,conversationPath,mediaPath,settingsPath} from "./router/routes.mjs";
 import {seedMediaFixtures} from "./media-fixtures.js?v=reply-1";
 import {renderConversationMedia} from "./media-gallery.js?v=motion-1";
 import {getProfile,initials} from "./profile-store.js?v=d4-7";
@@ -65,18 +65,16 @@ const channelPicker=setupChannelPicker({
 });
 window.addEventListener("demo-channels-updated",()=>channelPicker.refresh());
 window.addEventListener("demo-assignments-updated",()=>{onChannelSelection(channelPicker.getSelection());const current=active();if(current){$("#detail-agent").textContent=current.agent;$("#detail-status").textContent=current.status;}renderMessages();updateD3();refreshCurrentMediaModule()});
-list.addEventListener("click",e=>{const item=e.target.closest("[data-id]");if(item)select(item.dataset.id)});
+list.addEventListener("click",e=>{const item=e.target.closest("[data-id]");if(item)router.navigate(conversationPath(item.dataset.id))});
 $("#search").addEventListener("input",e=>{state.query=e.target.value;renderList()});
 document.querySelectorAll("[data-filter]").forEach(b=>b.addEventListener("click",()=>{state.filter=b.dataset.filter;document.querySelectorAll("[data-filter]").forEach(x=>{x.classList.toggle("selected",x===b);x.setAttribute("aria-pressed",String(x===b))});renderList()}));
 function openConversationMedia(conversationId){
- setDetails(false);
- showModule("midias",{conversationId});
- document.querySelectorAll("[data-nav]").forEach(b=>b.classList.toggle("active",b.dataset.nav==="midias"));
+ router.navigate(mediaPath({conversationId}));
 }
 function setDetails(open){root.classList.toggle("details-open",open);$("#details").hidden=!open;$("#details-toggle").setAttribute("aria-expanded",String(open))}
-$("#details-toggle").addEventListener("click",()=>setDetails($("#details").hidden));
-$("#details-close").addEventListener("click",()=>setDetails(false));
-$("#back-button").addEventListener("click",()=>{root.classList.remove("chat-open");setDetails(false)});
+$("#details-toggle").addEventListener("click",()=>{if(active())router.navigate(conversationPath(active().id,{details:$("#details").hidden}))});
+$("#details-close").addEventListener("click",()=>{if(active())router.navigate(conversationPath(active().id))});
+$("#back-button").addEventListener("click",()=>router.navigate("/inbox"));
 $("#theme-toggle").addEventListener("click",()=>setAppearance({mode:appearance.mode==="light"?"dark":"light"}));
 $("#composer").addEventListener("submit",e=>{e.preventDefault();const input=$("#message-input");if(!active()||!assertCanSend(active())||!sendD2(active(),input.value))return;input.value="";input.style.height="";renderMessages();renderList();});
 $("#message-input").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){e.preventDefault();$("#composer").requestSubmit()}});
@@ -101,12 +99,42 @@ setupD2(active,()=>conversations,()=>{const c=active();if(c){$("#detail-status")
 setupD3(active,()=>{onChannelSelection(channelPicker.getSelection());renderMessages();refreshCurrentMediaModule()});
 select(state.active,{openChat:false,markRead:window.matchMedia("(min-width:761px)").matches});onChannelSelection(channelPicker.getSelection());root.classList.remove("chat-open");
 const router=createRouter({render:route=>{
- const moduleName=route.name==="not-found"?"not-found":route.name;
  document.querySelectorAll("[data-nav]").forEach(button=>{
-  const active=button.dataset.nav===route.name;
-  button.classList.toggle("active",active);
-  button.setAttribute("aria-current",active?"page":"false");
+  const isCurrent=button.dataset.nav===route.name;
+  button.classList.toggle("active",isCurrent);
+  button.setAttribute("aria-current",isCurrent?"page":"false");
  });
- showModule(moduleName);
- if(moduleName==="atendimento"){root.classList.remove("chat-open");setDetails(false)}
+ if(route.name==="atendimento"){
+  showModule("atendimento");
+  const id=route.params.conversationId;
+  if(id){
+   const conversation=conversations.find(c=>c.id===id);
+   if(!conversation){showModule("not-found");return}
+   select(id,{openChat:true,markRead:true});
+   setDetails(Boolean(route.params.details));
+  }else{
+   root.classList.remove("chat-open");
+   setDetails(false);
+  }
+  return;
+ }
+ if(route.name==="midias"){
+  showModule("midias",{
+   conversationId:route.query.conversation||"all",type:route.query.type||"all",query:route.query.q||"",
+   onFilterChange:(filters,replace=false)=>router.navigate(mediaPath(filters),{replace,render:false})
+  });
+  setDetails(false);return;
+ }
+ if(route.name==="configuracoes"){
+  showModule("configuracoes",{
+   sectionId:route.params.section||"organizacao",
+   onSectionChange:section=>router.navigate(settingsPath(section),{render:false})
+  });
+  return;
+ }
+ if(route.name==="contatos"){
+  showModule("contatos",{contactId:route.params.contactId||null,onNavigate:url=>router.navigate(url)});
+  return;
+ }
+ showModule(route.name==="not-found"?"not-found":route.name);
 }});
