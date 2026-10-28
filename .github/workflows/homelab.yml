@@ -41,6 +41,9 @@ jobs:
               curl -fsS http://127.0.0.1:18280/ >/dev/null
               curl -fsS http://127.0.0.1:18280/dashboard | grep -q 'id="app"'
               curl -fsS http://127.0.0.1:18280/profile | grep -q 'id="app"'
+              curl -fsS http://127.0.0.1:18280/inbox/mariana/details | grep -q 'id="app"'
+              curl -fsS http://127.0.0.1:18280/settings/appearance | grep -q 'id="app"'
+              curl -fsS 'http://127.0.0.1:18280/media?conversation=mariana&type=video' | grep -q 'id="app"'
               test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:18280/src/missing-module.js)" = "404"
               curl -fsS http://127.0.0.1:18280/src/main.js | grep -q 'setupChannelPicker'
               curl -fsS http://127.0.0.1:18280/src/channel-filter.mjs | grep -q 'normalizeSelection'
