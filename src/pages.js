@@ -1,11 +1,12 @@
-import {renderMediaLibrary} from "./media-gallery.js?v=r2";
+import {channelIdentity} from "./channel-identity.mjs";
+import {renderMediaLibrary} from "./media-gallery.js?v=origin-1";
 import {canAccess} from "./d3.js?v=d4-6";
 import {getProfile,saveProfile} from "./profile-store.js?v=d4-7";
 import {renderProfilePage} from "./profile-panel.js?v=d4-7";
 import {nameOf,avatar,editContact} from "./contact-identity.js?v=channel-popover-1";
 import {renderSettings} from "./settings.js?v=r2";
 import {conversations} from "./data.js?v=channels-1";
-import {channels,getChannel} from "./channels.js?v=channels-1";
+import {channels,providers,getChannel} from "./channels.js?v=channels-1";
 const allowedConversation=c=>canAccess(c)&&channels.some(channel=>channel.id===c.channelId&&channel.enabled!==false);
 const make=(tag,className="",value)=>{const n=document.createElement(tag);n.className=className;if(value!==undefined)n.textContent=value;return n};
 let view=null,currentModule="atendimento",currentOptions={};
@@ -87,6 +88,6 @@ export function showModule(name,options={}){currentModule=name;currentOptions=op
   const link=make("a","settings-primary","Voltar à caixa de entrada");
   link.href="/inbox";link.dataset.route="";root.append(link);
  }
- if(name==="visao-geral")overview();if(name==="contatos")contacts(options);if(name==="midias")renderMediaLibrary(root,{getConversations:()=>conversations.filter(allowedConversation),conversationId:options.conversationId||"all",type:options.type||"all",query:options.query||"",onFilterChange:options.onFilterChange});if(name==="configuracoes")renderSettings(root,options);if(name==="perfil")renderProfilePage(root,{getProfile,saveProfile});root.hidden=false;root.scrollTop=0}
+ if(name==="visao-geral")overview();if(name==="contatos")contacts(options);if(name==="midias")renderMediaLibrary(root,{getConversations:()=>conversations.filter(allowedConversation),conversationId:options.conversationId||"all",type:options.type||"all",query:options.query||"",onFilterChange:options.onFilterChange,getOriginForItem:item=>channelIdentity(channels.find(c=>c.id===item.channelId),providers)});if(name==="configuracoes")renderSettings(root,options);if(name==="perfil")renderProfilePage(root,{getProfile,saveProfile});root.hidden=false;root.scrollTop=0}
 
 export function refreshCurrentMediaModule(){if(currentModule==="midias")showModule(currentModule,currentOptions)}
