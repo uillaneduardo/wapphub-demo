@@ -1,3 +1,4 @@
+import {renderProviderWorkspace} from "./provider-management.js?v=d6-2";
 import {renderAccessPanel} from "./access-panel.js?v=d4-6";
 import {adminState} from "./admin-data.js?v=inbox-1";
 import {conversations} from "./data.js?v=channels-1";
@@ -18,7 +19,7 @@ const sections=[
 const el=(tag,cls="",value)=>{const n=document.createElement(tag);n.className=cls;if(value!==undefined)n.textContent=value;return n};
 function line(title,description,extra){const row=el("div","settings-item");const copy=el("div","settings-item-copy");copy.append(el("strong","",title),el("span","",description));row.append(copy);if(extra)row.append(extra);return row}
 function pill(t){return el("span","settings-pill",t)}
-export function renderSettings(root,{sectionId="organizacao",onSectionChange=()=>{}}={}){root.replaceChildren();const h=el("header","module-head");h.append(el("h1","","Configurações"),el("p","","Gerencie a organização, as integrações e a experiência de atendimento."));root.append(h);
+export function renderSettings(root,{sectionId="organizacao",onSectionChange=()=>{},providerRoute={},onProviderNavigate=()=>{}}={}){root.replaceChildren();const h=el("header","module-head");h.append(el("h1","","Configurações"),el("p","","Gerencie a organização, as integrações e a experiência de atendimento."));root.append(h);
  const layout=el("div","settings-layout"),menu=el("nav","settings-menu"),panel=el("section","settings-panel");
  menu.setAttribute("aria-label","Seções de configurações");
  panel.setAttribute("aria-live","polite");
@@ -33,7 +34,7 @@ export function renderSettings(root,{sectionId="organizacao",onSectionChange=()=
  if(id==="equipe")teamPanel(panel)
  if(id==="permissoes")renderAccessPanel(panel,{getMembers:()=>adminState().members,getConversations:()=>conversations,getChannel,getGrant:roleAllows,setGrant:setRoleGrant,assign:(conversationId,memberId)=>assignConversation(conversations,adminState().members,conversationId,memberId)});
  if(id==="canais")renderChannelManagement(panel,show)
- if(id==="providers")renderProviderManagement(panel,show)
+ if(id==="providers")renderProviderWorkspace(panel,{route:providerRoute,onNavigate:onProviderNavigate})
  if(id==="aparencia"){
   panel.append(line("Tema e cores","Personalize o modo claro ou escuro e a cor de destaque."));
   const b=el("button","settings-primary","Personalizar aparência");b.type="button";b.onclick=openAppearanceSettings;panel.append(b);
