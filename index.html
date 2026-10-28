@@ -1,16 +1,17 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
+<base href="/">
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#fafafa"><meta name="description" content="WappHub — atendimento multicanal">
 <title>Atendimento · WappHub</title>
-<link rel="stylesheet" href="./src/styles.css?v=motion-1">
-<script type="module" src="./src/main.js?v=motion-1"></script>
+<link rel="stylesheet" href="./src/styles.css?v=r1">
+<script type="module" src="./src/main.js?v=r1"></script>
 </head>
 <body>
 <div id="app" class="shell">
   <nav class="rail" aria-label="Navegação principal">
-    <a class="brand" href="#atendimento" aria-label="WappHub início">W<span>.</span></a>
+    <a class="brand" href="/inbox" data-route aria-label="WappHub início">W<span>.</span></a>
     <div class="rail-links">
       <button class="icon-button active" data-nav="atendimento" aria-label="Atendimento" title="Atendimento"><svg><use href="#i-message"/></svg></button>
       <button class="icon-button" data-nav="visao-geral" aria-label="Visão geral" title="Visão geral"><svg><use href="#i-grid"/></svg></button>
