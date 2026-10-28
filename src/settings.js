@@ -18,7 +18,7 @@ const sections=[
 const el=(tag,cls="",value)=>{const n=document.createElement(tag);n.className=cls;if(value!==undefined)n.textContent=value;return n};
 function line(title,description,extra){const row=el("div","settings-item");const copy=el("div","settings-item-copy");copy.append(el("strong","",title),el("span","",description));row.append(copy);if(extra)row.append(extra);return row}
 function pill(t){return el("span","settings-pill",t)}
-export function renderSettings(root){root.replaceChildren();const h=el("header","module-head");h.append(el("h1","","Configurações"),el("p","","Gerencie a organização, as integrações e a experiência de atendimento."));root.append(h);
+export function renderSettings(root,{sectionId="organizacao",onSectionChange=()=>{}}={}){root.replaceChildren();const h=el("header","module-head");h.append(el("h1","","Configurações"),el("p","","Gerencie a organização, as integrações e a experiência de atendimento."));root.append(h);
  const layout=el("div","settings-layout"),menu=el("nav","settings-menu"),panel=el("section","settings-panel");
  menu.setAttribute("aria-label","Seções de configurações");
  panel.setAttribute("aria-live","polite");
@@ -27,7 +27,7 @@ export function renderSettings(root){root.replaceChildren();const h=el("header",
  sectionSelect.setAttribute("aria-label","Selecionar seção de configurações");
  for(const [id,label] of sections){const option=el("option","",label);option.value=id;sectionSelect.append(option)}
  mobileSwitch.append(sectionSelect);root.append(mobileSwitch);
- sectionSelect.addEventListener("change",()=>show(sectionSelect.value));
+ sectionSelect.addEventListener("change",()=>{show(sectionSelect.value);onSectionChange(sectionSelect.value)});
  function show(id){sectionSelect.value=id;menu.querySelectorAll("button").forEach(b=>{const active=b.dataset.section===id;b.classList.toggle("active",active);b.setAttribute("aria-current",active?"page":"false")});panel.replaceChildren();const meta=sections.find(s=>s[0]===id);panel.append(el("h2","",meta[1]),el("p","settings-description",meta[2]));
  if(id==="organizacao")organizationPanel(panel)
  if(id==="equipe")teamPanel(panel)
@@ -52,6 +52,6 @@ export function renderSettings(root){root.replaceChildren();const h=el("header",
 }
 }
  bindAdminRender(show);
- for(const [id,label] of sections){const b=el("button","settings-menu-item",label);b.type="button";b.dataset.section=id;b.onclick=()=>show(id);menu.append(b)}layout.append(menu,panel);root.append(layout);show("organizacao")}
+ for(const [id,label] of sections){const b=el("button","settings-menu-item",label);b.type="button";b.dataset.section=id;b.onclick=()=>{show(id);onSectionChange(id)};menu.append(b)}layout.append(menu,panel);root.append(layout);show(sections.some(([id])=>id===sectionId)?sectionId:"organizacao")}
 
 window.addEventListener("wapphub-appearance-changed",()=>{document.querySelectorAll(".settings-preference-toggle[data-appearance-key]").forEach(input=>{input.checked=Boolean(appearance[input.dataset.appearanceKey])})});

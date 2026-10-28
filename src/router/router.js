@@ -9,14 +9,14 @@ export function createRouter({render}){
   document.title=route.title+" · WappHub";
   render(route);
  };
- function navigate(url,{replace=false}={}){
+ function navigate(url,{replace=false,render=true}={}){
   const target=new URL(url,location.origin);
   if(target.origin!==location.origin)return false;
   const href=target.pathname+target.search+target.hash;
   if(href!==(location.pathname+location.search+location.hash)){
    history[replace?"replaceState":"pushState"]({}, "",href);
   }
-  dispatch();return true;
+  if(render)dispatch();return true;
  }
  document.addEventListener("click",event=>{
   const anchor=event.target.closest?.("a[data-route]");
