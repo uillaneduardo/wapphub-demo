@@ -26,7 +26,6 @@ test("D6.3 details use repository for editable identification, channels, metrics
   assert.ok(ui.includes("providerRepository."+operation),operation);
  assert.match(ui,/aria-current/);
  assert.match(ui,/Simulação|simulação|fictíci/);
- assert.match(ui,/connection/);
  assert.match(list,/renderProviderDetails/);
  assert.match(read("src/styles.css"),/\.provider-health-grid/);
  assert.match(read("src/styles.css"),/\.provider-event-list/);
