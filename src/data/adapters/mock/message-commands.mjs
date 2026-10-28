@@ -1,3 +1,4 @@
+import {nextDemoDeliveryStatus} from "../../../domain/message-status.mjs";
 /**
  * Adaptador temporário da demo para o catálogo mutável legado.
  * Nunca emite mensagens externas. Em implementação Core, autorização e
@@ -29,6 +30,20 @@ export function createMockMessageCommandRepository(conversations) {
         target.time=time;count++;
       }
       return {messages:messages.length,destinations:count};
+    },
+    async cycleDemoStatus(id,messageId) {
+      const c=ensure(id);
+      const message=c.messages.find(m=>!Array.isArray(m)&&m.id===messageId);
+      if(!message||message.direction!=="out"||message.hidden||message.deletedAll) throw new Error("Mensagem enviada não encontrada");
+      message.status=nextDemoDeliveryStatus(message.status);
+      return {id:message.id,status:message.status,simulated:true};
+    },
+    async retryDemo(id,messageId) {
+      const c=ensure(id);
+      const message=c.messages.find(m=>!Array.isArray(m)&&m.id===messageId);
+      if(!message||message.direction!=="out"||message.status!=="failed"||message.hidden||message.deletedAll) throw new Error("Somente mensagens com falha podem ser simuladas novamente");
+      message.status="sent";
+      return {id:message.id,status:message.status,simulated:true};
     },
     async remove(id,ids,everyone) {
       const conversation=ensure(id);
