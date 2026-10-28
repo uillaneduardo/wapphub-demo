@@ -18,8 +18,11 @@ import {setupD3,updateD3,canAccess,currentState,assertCanSend} from "./d3.js?v=d
 import {appearance,setAppearance,openAppearanceSettings} from "./appearance.js?v=motion-1";
 import {renderD2,sendD2,setupD2,resetD2Selection} from "./d2.js?v=motion-1";
 import {conversations} from "./data.js?v=channels-1";
+import {createConversationReadService} from "./services/conversation-read.mjs";
+import {createMockConversationReadRepository} from "./data/adapters/mock/conversation-read.mjs";
 const $=s=>document.querySelector(s);const root=$("#app"),list=$("#conversation-list"),messages=$("#messages");
 const state={active:"mariana",filter:"all",selectedChannels:null,query:"",theme:appearance.mode};
+const conversationReadService=createConversationReadService(createMockConversationReadRepository(conversations));
 seedMediaFixtures(conversations);
 initializeAssignments(conversations,adminState().members);
 
@@ -57,7 +60,7 @@ function renderList(){
  $("#conversation-count").textContent=String(shown.length);
 }
 function renderMessages(){if(!active()){messages.replaceChildren(node("p","placeholder","Nenhuma conversa disponível nos canais selecionados."));return}if(!canAccess(active())){messages.replaceChildren(node("p","placeholder","Conversa não atribuída. Aguarde autorização de um OWNER ou SUPERVISOR."));return}renderD2(active(),messages)}
-function select(id,{openChat=true,markRead=openChat}={}){resetD2Selection();state.active=id;const c=active();if(markRead)c.unread=0;$("#chat-title").textContent=nameOf(c);$("#chat-avatar").replaceWith(Object.assign(avatar(c),{id:"chat-avatar"}));$("#chat-subtitle").textContent=c.status+" · "+originOf(c).channelName;$("#detail-avatar").replaceWith(Object.assign(avatar(c,"avatar large"),{id:"detail-avatar"}));$("#detail-name").textContent=nameOf(c);$("#detail-phone").textContent=c.phone;$("#detail-agent").textContent=c.agent;$("#detail-status").textContent=c.status;$("#detail-channel").textContent=getChannel(c.channelId).name;renderOrigin(c);renderConversationMedia(c,$("#detail-media"),openConversationMedia);$("#message-input").value="";renderList();renderMessages();$("#details-toggle").disabled=false;$("#find-messages").disabled=false;$("#chat-menu").disabled=false;if(openChat)root.classList.add("chat-open");updateD3()}
+function select(id,{openChat=true,markRead=openChat}={}){resetD2Selection();state.active=id;const c=active();if(markRead)void conversationReadService.markRead(id).then(()=>renderList()).catch(error=>toast("Falha ao marcar conversa como lida: "+error.message));$("#chat-title").textContent=nameOf(c);$("#chat-avatar").replaceWith(Object.assign(avatar(c),{id:"chat-avatar"}));$("#chat-subtitle").textContent=c.status+" · "+originOf(c).channelName;$("#detail-avatar").replaceWith(Object.assign(avatar(c,"avatar large"),{id:"detail-avatar"}));$("#detail-name").textContent=nameOf(c);$("#detail-phone").textContent=c.phone;$("#detail-agent").textContent=c.agent;$("#detail-status").textContent=c.status;$("#detail-channel").textContent=getChannel(c.channelId).name;renderOrigin(c);renderConversationMedia(c,$("#detail-media"),openConversationMedia);$("#message-input").value="";renderList();renderMessages();$("#details-toggle").disabled=false;$("#find-messages").disabled=false;$("#chat-menu").disabled=false;if(openChat)root.classList.add("chat-open");updateD3()}
 function clearActive(){
  resetD2Selection();state.active=null;
  $("#chat-title").textContent="Selecione uma conversa";
