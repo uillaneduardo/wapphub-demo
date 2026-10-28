@@ -69,8 +69,8 @@ export async function renderProviderDetails(root,{id,tab="overview",onNavigate=(
    if(item.session.expiresAt)qr.append(E("small","",expired?"QR ilustrativo expirado":"Validade ilustrativa até "+format(item.session.expiresAt)));
    section.append(qr);
    section.append(act("Gerar / renovar QR ilustrativo",()=>run(async()=>{
-    await providerRepository.updateSession(id,{state:"qr_pending",expiresAt:new Date(Date.now()+120000).toISOString()});
     await providerRepository.setConnectionState(id,"awaiting_auth");
+    await providerRepository.updateSession(id,{state:"qr_pending",expiresAt:new Date(Date.now()+120000).toISOString()});
    })));
   }else{
    section.append(E("p","settings-hint",type?.authMode==="api"?
@@ -86,8 +86,8 @@ export async function renderProviderDetails(root,{id,tab="overview",onNavigate=(
    })),
    act("Simular falha",()=>run(()=>providerRepository.setConnectionState(id,"failed"))),
    act("Desvincular sessão",()=>{if(!window.confirm("Desvincular somente a sessão fictícia desta conexão?"))return;
-    run(async()=>{await providerRepository.updateSession(id,{state:"not_authenticated",expiresAt:null});
-      await providerRepository.setConnectionState(id,"awaiting_auth")})})
+    run(async()=>{await providerRepository.setConnectionState(id,"awaiting_auth");
+      await providerRepository.updateSession(id,{state:"not_authenticated",expiresAt:null})})})
   );
   section.append(actions,E("p","settings-hint","As ações alteram exclusivamente o mock; nenhuma sessão real será reiniciada ou recuperada."));
  }
