@@ -35,7 +35,7 @@ function renderOrigin(c){
   return;
  }
  const identity=originOf(c);
- header.replaceChildren(createOriginBadge(identity,{status:true}));
+ header.replaceChildren(createOriginBadge(identity,{provider:true,status:true}));
  $("#detail-platform").replaceChildren(createOriginBadge(identity,{compact:true}));
  $("#detail-provider").textContent=identity.providerName;
  const status=node("span","origin-connection",identity.statusLabel);
