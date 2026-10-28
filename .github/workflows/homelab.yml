@@ -29,7 +29,9 @@ jobs:
       - name: Validate interface and modules
         run: |
           node --test tests/*.test.mjs
-          for file in src/*.js; do node --input-type=module --check < "$file"; done
+          for file in $(find src -type f -name '*.js' -o -name '*.mjs'); do
+            node --input-type=module --check < "$file"
+          done
       - name: Build image
         run: docker build --pull -t wapphub-demo:ci .
       - name: Smoke test
@@ -46,6 +48,8 @@ jobs:
               curl -fsS http://127.0.0.1:18280/settings/providers/new | grep -q 'id="app"'
               curl -fsS http://127.0.0.1:18280/settings/providers/demo-baileys-commercial/diagnostics | grep -q 'id="app"'
               curl -fsS http://127.0.0.1:18280/src/provider-details.js | grep -q 'renderProviderDetails'
+              curl -fsS http://127.0.0.1:18280/src/services/provider-service.js | grep -q 'createProviderService'
+              curl -fsS http://127.0.0.1:18280/src/data/create-provider-repository.js | grep -q 'createProviderRepository'
               curl -fsS http://127.0.0.1:18280/src/data/adapters/mock/provider-repository.js | grep -q 'updateSession'
               curl -fsS 'http://127.0.0.1:18280/media?conversation=mariana&type=video' | grep -q 'id="app"'
               test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:18280/src/missing-module.js)" = "404"
