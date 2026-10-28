@@ -1,5 +1,5 @@
 import {renderProviderDetails} from "./provider-details.js?v=d6-3";
-import {providerRepository} from "./data/adapters/mock/provider-repository.js?v=d6-3";
+import {providerService} from "./services/provider-service.js?v=d6-4";
 import {STATE_LABELS} from "./data/contracts/provider-domain.mjs";
 import {providerPath} from "./router/routes.mjs";
 import {adminState} from "./admin-data.js?v=inbox-1";
@@ -34,7 +34,7 @@ async function listing(root,onNavigate,query={}){
  const search=E("input","admin-input");search.type="search";search.placeholder="Buscar conexão";search.setAttribute("aria-label","Buscar conexão");search.value=query.q||"";
  const type=E("select","admin-input");type.setAttribute("aria-label","Filtrar por tipo");
  const state=E("select","admin-input");state.setAttribute("aria-label","Filtrar por estado");
- const types=await providerRepository.listTypes();
+ const types=await providerService.listTypes();
  if(!root.isConnected)return;
  for(const option of [{id:"all",name:"Todos os tipos"},...types]){const el=E("option","",option.name);el.value=option.id;type.append(el)}
  for(const [value,label] of [["all","Todos os estados"],...Object.entries(STATE_LABELS)]){const el=E("option","",label);el.value=value;state.append(el)}
@@ -44,7 +44,7 @@ async function listing(root,onNavigate,query={}){
  const results=E("div","provider-connection-list");
  const update=async()=>{
   const current={search:search.value,state:state.value,type:type.value};
-  const {items}=await providerRepository.listConnections(current);
+  const {items}=await providerService.listConnections(current);
   if(!results.isConnected)return;
   results.replaceChildren();status.textContent=items.length+" conexão(ões) nesta visualização · valores operacionais fictícios";
   if(!items.length){results.append(E("p","provider-empty","Nenhuma conexão encontrada. Ajuste os filtros ou crie uma conexão."));return}
@@ -84,7 +84,7 @@ function renderWizard(root,onNavigate){
   const feedback=E("p","provider-form-error");feedback.setAttribute("role","alert");body.append(feedback);
   if(step===0){
    body.append(E("p","settings-description","Escolha a tecnologia antes de configurar a conexão."));
-   const types=await providerRepository.listTypes();if(!body.isConnected)return;
+   const types=await providerService.listTypes();if(!body.isConnected)return;
    const grid=E("div","provider-type-grid");
    for(const t of types){const tile=action("",()=>{draft.typeId=t.id;paint()},"provider-type-card"+(draft.typeId===t.id?" selected":""));
     tile.append(E("strong","",t.name),E("span","",t.description),E("small","",t.capabilities.join(" · ")));
@@ -115,7 +115,7 @@ function renderWizard(root,onNavigate){
    const error=body.querySelector(".provider-form-error");
    if(step===1&&draft.name.trim().length<3){error.textContent="Informe um nome com pelo menos 3 caracteres.";return}
    if(step<3){step++;paint();return}
-   try{const result=await providerRepository.createConnection(draft);
+   try{const result=await providerService.createConnection(draft);
     draft={typeId:"baileys",name:"",description:"",teamId:""};step=0;onNavigate(providerPath(result.id));
    }catch(e){error.textContent=e.message||"Não foi possível salvar."}
   },"settings-primary"));
