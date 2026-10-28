@@ -5,8 +5,8 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#fafafa"><meta name="description" content="WappHub — atendimento multicanal">
 <title>Atendimento · WappHub</title>
-<link rel="stylesheet" href="./src/styles.css?v=r3">
-<script type="module" src="./src/main.js?v=r3"></script>
+<link rel="stylesheet" href="./src/styles.css?v=origin-1">
+<script type="module" src="./src/main.js?v=origin-1"></script>
 </head>
 <body>
 <div id="app" class="shell">
@@ -52,7 +52,7 @@
     <header class="chat-header">
       <button class="icon-button mobile-back" id="back-button" aria-label="Voltar às conversas"><svg><use href="#i-back"/></svg></button>
       <div class="avatar" id="chat-avatar" aria-hidden="true">MC</div>
-      <div class="chat-heading"><strong id="chat-title">Mariana Costa</strong><small id="chat-subtitle">Atendimento em andamento</small></div>
+      <div class="chat-heading"><strong id="chat-title">Mariana Costa</strong><div class="chat-origin-line"><span id="chat-origin"></span><small id="chat-subtitle">Atendimento em andamento</small></div></div>
       <div class="header-actions">
         <button class="icon-button" id="find-messages" aria-label="Buscar mensagens" title="Buscar mensagens"><svg><use href="#i-search"/></svg></button>
         <button class="icon-button" id="details-toggle" aria-label="Mostrar detalhes" aria-expanded="false" title="Detalhes"><svg><use href="#i-sidebar"/></svg></button>
@@ -83,12 +83,17 @@
   <aside class="details" id="details" aria-label="Detalhes da conversa" hidden>
     <div class="details-head"><strong>Detalhes</strong><button class="icon-button" id="details-close" aria-label="Fechar detalhes"><svg><use href="#i-close"/></svg></button></div>
     <div class="contact-card"><div class="avatar large" id="detail-avatar">MC</div><strong id="detail-name">Mariana Costa</strong><span id="detail-phone" class="muted"></span></div>
-    <div class="detail-section"><span class="eyebrow">Atendimento</span><div class="detail-row"><span>Situação</span><strong id="detail-status"></strong></div><div class="detail-row"><span>Responsável</span><strong id="detail-agent"></strong></div><div class="detail-row"><span>Canal</span><strong id="detail-channel"></strong></div></div>
+    <div class="detail-section"><span class="eyebrow">Atendimento</span><div class="detail-row"><span>Situação</span><strong id="detail-status"></strong></div><div class="detail-row"><span>Responsável</span><strong id="detail-agent"></strong></div></div>
+    <section class="detail-section origin-detail-section" aria-label="Origem da conversa"><span class="eyebrow">Origem da conversa</span><div class="detail-row"><span>Plataforma</span><strong id="detail-platform"></strong></div><div class="detail-row"><span>Canal</span><strong id="detail-channel"></strong></div><div class="detail-row"><span>Provider</span><strong id="detail-provider"></strong></div><div class="detail-row"><span>Conexão</span><strong id="detail-connection"></strong></div></section>
     <section id="detail-media" class="detail-media" aria-label="Mídias desta conversa"></section>
   </aside>
 </div>
 <div id="toast-region" class="toast-region" role="status" aria-live="polite"></div>
-<svg class="svg-defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><symbol id="i-settings" viewBox="0 0 24 24">
+<svg class="svg-defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><symbol id="i-origin-whatsapp" viewBox="0 0 24 24"><path d="M20 11.8a8 8 0 0 1-11.7 7.1L4 20l1.1-4.3A8 8 0 1 1 20 11.8Z"/><path d="m9 9 1.2 1.1-.7 1.2a6 6 0 0 0 3.3 3.2l1.2-.6 1.1 1.1"/></symbol>
+<symbol id="i-origin-web" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 3.7 5.5 3.7 9s-1.2 6.5-3.7 9C9.5 18.5 8.3 15.5 8.3 12S9.5 5.5 12 3Z"/></symbol>
+<symbol id="i-origin-internal" viewBox="0 0 24 24"><path d="M4 6h16v11H9l-5 3V6Z"/><path d="M8 10h8M8 13h6"/></symbol>
+<symbol id="i-origin-unknown" viewBox="0 0 24 24"><path d="M8 9V5h8v4M8 15v4h8v-4M5 9h14v6H5V9Z"/><path d="M9 12h6"/></symbol>
+<symbol id="i-settings" viewBox="0 0 24 24">
   <path d="M14 17H5" />
   <path d="M19 7h-9" />
   <circle cx="17" cy="17" r="3" />
