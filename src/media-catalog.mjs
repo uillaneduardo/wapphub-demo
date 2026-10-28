@@ -22,7 +22,7 @@ export function mediaEntries(conversations){
    const file=message.file,kind=mediaKind(file);
    if(!kind||!file?.url)continue;
    result.push({
-    id:String(message.id||c.id+":"+index),conversationId:c.id,
+    id:String(message.id||c.id+":"+index),conversationId:c.id,channelId:c.channelId||null,
     conversationName:c.name||c.phone||"Contato",kind,name:file.name||"Arquivo",
     url:file.url,poster:file.poster||null,caption:message.body||"",
     time:message.time||c.time||"",direction:message.direction||"in",
