@@ -1,5 +1,7 @@
+import {attachMediaBlur} from "./media-blur.js?v=motion-1";
+import {mediaVisibilityKey} from "./media-visibility-store.js?v=motion-1";
 import {mediaEntries,filterMedia,mediaTotals} from "./media-catalog.mjs";
-import {openMediaViewer} from "./media-player.js?v=media-1";
+import {openMediaViewer} from "./media-player.js?v=motion-1";
 const el=(tag,cls="",text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n};
 const labels={all:"Todas",image:"Imagens",audio:"Áudios",video:"Vídeos",document:"Documentos"};
 function thumb(item,small=false){
@@ -14,12 +16,19 @@ function thumb(item,small=false){
  box.append(icon);return box;
 }
 function itemCard(item){
- const button=el("button","media-card");button.type="button";
- button.setAttribute("aria-label","Abrir "+labels[item.kind]?.toLocaleLowerCase("pt-BR")+": "+item.name+" de "+item.conversationName);
+ const card=el("div","media-card");
+ const open=el("button","media-card-open");open.type="button";
+ open.setAttribute("aria-label","Abrir "+labels[item.kind]?.toLocaleLowerCase("pt-BR")+": "+item.name+" de "+item.conversationName);
+ const picture=thumb(item);
  const meta=el("span","media-card-meta");
  meta.append(el("strong","",item.name),el("small","",item.conversationName+" · "+item.time));
- button.append(thumb(item),meta);button.onclick=()=>openMediaViewer(item);
- return button;
+ open.append(picture,meta);
+ open.onclick=()=>openMediaViewer(item);
+ card.append(open);
+ if((item.kind==="image"||item.kind==="video")&&picture.querySelector("img")){
+  attachMediaBlur(card,picture.querySelector("img"),mediaVisibilityKey(item.conversationId,item.id));
+ }
+ return card;
 }
 export function renderMediaLibrary(root,{getConversations,conversationId="all"}){
  root.replaceChildren();
@@ -67,7 +76,16 @@ export function renderConversationMedia(conversation,container,onViewAll){
  if(!items.length){container.append(el("p","detail-media-empty","Nenhum arquivo compartilhado nesta conversa."));return}
  const grid=el("div","detail-media-grid");
  for(const item of items.slice(-4).reverse()){
-  const b=el("button","detail-media-tile");b.type="button";b.setAttribute("aria-label","Abrir "+item.name);b.title=item.name;b.append(thumb(item,true));b.onclick=()=>openMediaViewer(item);grid.append(b);
+  const tile=el("div","detail-media-tile");
+  const open=el("button","detail-media-open");open.type="button";
+  open.setAttribute("aria-label","Abrir "+item.name);open.title=item.name;
+  const picture=thumb(item,true);
+  open.append(picture);open.onclick=()=>openMediaViewer(item);
+  tile.append(open);
+  if((item.kind==="image"||item.kind==="video")&&picture.querySelector("img")){
+   attachMediaBlur(tile,picture.querySelector("img"),mediaVisibilityKey(item.conversationId,item.id));
+  }
+  grid.append(tile);
  }
  container.append(grid);
  const all=el("button","detail-media-all","Ver todas as mídias");

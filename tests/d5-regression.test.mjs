@@ -41,8 +41,8 @@ test("D5: módulos compartilham a mesma preferência de aparência",()=>{
  const main=source("src/main.js");
  const settings=source("src/settings.js");
  const appearance=source("src/appearance.js");
- assert.match(main,/appearance\.js\?v=d5-1/);
- assert.match(settings,/appearance\.js\?v=d5-1/);
+ assert.match(main,/appearance\.js\?v=motion-1/);
+ assert.match(settings,/appearance\.js\?v=motion-1/);
  assert.match(main,/appearance\.mode==="light"\?"dark":"light"/);
  assert.match(appearance,/try\{localStorage\.setItem\(KEY/);
  assert.doesNotMatch(appearance,/Simulação de personalização pelo OWNER/);

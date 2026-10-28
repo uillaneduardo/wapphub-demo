@@ -1,6 +1,8 @@
+import {attachMediaBlur} from "./media-blur.js?v=motion-1";
+import {mediaVisibilityKey} from "./media-visibility-store.js?v=motion-1";
 import {setupSwipeReply} from "./swipe-reply.js?v=swipe-2";
 import {resolveReplyTarget} from "./reply-navigation.mjs?v=reply-1";
-import {createMediaPlayer,openMediaViewer} from "./media-player.js?v=media-1";
+import {createMediaPlayer,openMediaViewer} from "./media-player.js?v=motion-1";
 import {canAccess} from "./d3.js?v=d4-6";
 import {can} from "./permissions.js?v=d4-6";
 const $=s=>document.querySelector(s), el=(tag,cl="",text)=>{const n=document.createElement(tag);n.className=cl;if(text!==undefined)n.textContent=text;return n};
@@ -30,6 +32,7 @@ function forward(ids){if(!can("forward")){notify("Encaminhamento bloqueado nas p
  footer.append(count,confirm);content.append(summary,search,results,footer);dialog("Encaminhar mensagens",content);render();search.focus();
 }
 let replyJumpTimer=null;
+let recentlySentMessageId=null;
 function jumpToOriginal(reference){
  const conversation=active();
  if(!conversation||!reference)return;
@@ -49,7 +52,7 @@ function jumpToOriginal(reference){
  for(const previous of area.querySelectorAll(".reply-jump-highlight"))previous.classList.remove("reply-jump-highlight");
  row.classList.add("reply-jump-highlight");
  row.focus({preventScroll:true});
- const motion=window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches?"instant":"smooth";
+ const motion=document.documentElement.dataset.animations==="off"||window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches?"instant":"smooth";
  row.scrollIntoView({behavior:motion==="instant"?"auto":"smooth",block:"center"});
  replyJumpTimer=setTimeout(()=>{row.classList.remove("reply-jump-highlight");replyJumpTimer=null},1900);
 }
@@ -64,7 +67,7 @@ function action(action,i){const c=normalize(active()),m=byId(c,i);if(!m)return;
  if(action==="retry"){m.status="sent";refresh();notify("Reenvio solicitado.")}
 }
 function context(i,x,y){const m=byId(active(),i);if(!m)return;openMenu([["Responder",()=>action("reply",i)],["Copiar texto",()=>action("copy",i),!m.body],["Encaminhar",()=>action("forward",i),!can("forward")],["Selecionar mensagens",()=>action("select",i)],["Apagar para mim",()=>action("deleteMine",i),!can("deleteMine")],["Apagar para todos",()=>action("deleteAll",i),!can("deleteAll")]],x,y)}
-export function renderD2(c,container){normalize(c);container.replaceChildren(el("div","date-separator","Hoje"));let n=0;c.messages.forEach((m,i)=>{if(m.hidden)return;if(query&&!(m.body+" "+(m.file?.name||"")).toLowerCase().includes(query))return;n++;const row=el("div","message-row"+(m.direction==="out"?" mine":"")+(selected.has(m.id)?" d2-picked":""));row.dataset.messageId=m.id;row.tabIndex=0;const b=el("div","bubble");if(m.file)b.classList.add("has-media");if(m.reply){
+export function renderD2(c,container){normalize(c);container.replaceChildren(el("div","date-separator","Hoje"));let n=0;c.messages.forEach((m,i)=>{if(m.hidden)return;if(query&&!(m.body+" "+(m.file?.name||"")).toLowerCase().includes(query))return;n++;const row=el("div","message-row"+(m.direction==="out"?" mine":"")+(selected.has(m.id)?" d2-picked":""));row.dataset.messageId=m.id;if(m.id===recentlySentMessageId)row.classList.add("message-just-sent");row.tabIndex=0;const b=el("div","bubble");if(m.file)b.classList.add("has-media");if(m.reply){
  const ref=el("button","reply-reference","↪ "+(m.reply.body||m.reply.file?.name||"Mídia"));
  ref.type="button";
  ref.dataset.replyTarget=m.reply.messageId||"";
@@ -74,13 +77,17 @@ export function renderD2(c,container){normalize(c);container.replaceChildren(el(
 }if(m.forwarded)b.append(el("div","d2-forwarded","Encaminhada"));if(m.file){
  const mediaKind=m.file.kind;
  if(mediaKind==="audio"||mediaKind==="video"){
-   b.append(createMediaPlayer(m.file,{compact:true}));
+   b.append(createMediaPlayer(m.file,{compact:true,visibilityKey:mediaVisibilityKey(c.id,m.id)}));
  }else if(mediaKind==="image"&&m.file.url){
    const preview=el("button","message-image");preview.type="button";
    preview.setAttribute("aria-label","Ver imagem: "+m.file.name);
    const img=el("img");img.src=m.file.url;img.alt=m.file.name||"Imagem recebida";img.loading="lazy";
-   preview.append(img);preview.onclick=()=>openMediaViewer({...m.file,kind:"image",caption:m.body||""});
-   b.append(preview);
+   preview.append(img);
+   preview.onclick=()=>openMediaViewer({...m.file,kind:"image",caption:m.body||"",conversationId:c.id,id:m.id});
+   const frame=el("div","message-image-frame");
+   frame.append(preview);
+   attachMediaBlur(frame,img,mediaVisibilityKey(c.id,m.id));
+   b.append(frame);
  }else{
    const f=el("div","file-card");f.append(el("span","file-type",(m.file.kind||"Arquivo").toUpperCase()),el("span","file-label",m.file.name));
    if(m.file.url){const a=el("a","file-link","Abrir");a.href=m.file.url;a.download=m.file.name;f.append(a)}
@@ -90,8 +97,8 @@ export function renderD2(c,container){normalize(c);container.replaceChildren(el(
 const searchCount=$("#message-search-count"),clear=$("#message-search-clear");
 if(searchCount)searchCount.textContent=query?(n===1?"1 resultado":n+" resultados"):"";
 if(clear)clear.hidden=!query;
-selectionBar()}
-export function sendD2(c,value){normalize(c);const body=value.trim();if(!body&&!file)return false;const m={id:newId(),conversationId:c.id,direction:"out",body,time:stamp(),status:"sent"};if(reply&&reply.conversationId===c.id&&byId(c,reply.messageId))m.reply={...reply};if(file){m.file=file;file=null}c.messages.push(m);c.preview=body||"📎 "+m.file.name;c.time=m.time;reply=null;draft();return true}
+selectionBar();recentlySentMessageId=null}
+export function sendD2(c,value){normalize(c);const body=value.trim();if(!body&&!file)return false;const m={id:newId(),conversationId:c.id,direction:"out",body,time:stamp(),status:"sent"};if(reply&&reply.conversationId===c.id&&byId(c,reply.messageId))m.reply={...reply};if(file){m.file=file;file=null}c.messages.push(m);recentlySentMessageId=m.id;c.preview=body||"📎 "+m.file.name;c.time=m.time;reply=null;draft();return true}
 export function resetD2Selection(){swipeGesture?.cancel();if(replyJumpTimer){clearTimeout(replyJumpTimer);replyJumpTimer=null}$("#messages")?.querySelectorAll(".reply-jump-highlight").forEach(row=>row.classList.remove("reply-jump-highlight"));reply=null;file=null;query="";selected.clear();selectionMode=false;const search=$("#message-search"),field=$("#message-search-input");if(search)search.hidden=true;if(field)field.value="";draft();closeDialog();closeMenu();selectionBar()}
 export function setupD2(getActive,getAll,onChange){active=getActive;all=getAll;refresh=onChange;const area=$("#messages");
  swipeGesture=setupSwipeReply({
