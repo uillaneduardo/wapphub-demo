@@ -36,5 +36,5 @@ test("canal da conversa é exibido nos detalhes e imports são versionados",()=>
  assert.match(main,/\$\("#detail-channel"\)\.textContent=getChannel\(c.channelId\)\.name/);
  assert.match(html,/main\.js\?v=r1/);
  assert.match(main,/d3\.js\?v=d4-6/);
- assert.match(main,/d2\.js\?v=r1/);
+ assert.match(main,/d2\.js\?v=motion-1/);
 });
