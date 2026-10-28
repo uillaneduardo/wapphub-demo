@@ -475,3 +475,27 @@ html[data-theme=dark] .status-banner[data-tone=warning]{background:#3a260e;color
 @media(prefers-reduced-motion:reduce){
  .message-row.reply-jump-highlight .bubble{transition:none}
 }
+
+
+/* D5.5 — deslizar para responder: discreto, sem linhas laterais ou sombras */
+.message-row .bubble{transition:transform .17s ease-out}
+.message-row .bubble:not(.has-media),.message-row .message-text{touch-action:pan-y}
+.message-row.swipe-reply-active .bubble{transform:translate3d(var(--swipe-reply-translate,0px),0,0);transition:none}
+.message-row.swipe-reply-active .message-actions{pointer-events:none;opacity:0}
+.swipe-reply-cue{
+ position:absolute;left:9px;top:14px;
+ display:grid;place-items:center;
+ width:35px;height:35px;border-radius:50%;
+ background:var(--brand-soft);color:var(--brand-accent);
+ opacity:0;transform:scale(.8);pointer-events:none;
+ transition:opacity .13s ease,transform .13s ease,background-color .13s ease;
+}
+.swipe-reply-cue svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.message-row.mine .swipe-reply-cue{left:auto;right:9px;transform:scaleX(-1) scale(.8)}
+.message-row.swipe-reply-active .swipe-reply-cue{opacity:1;transform:scale(1)}
+.message-row.mine.swipe-reply-active .swipe-reply-cue{transform:scaleX(-1) scale(1)}
+.message-row.swipe-reply-ready .swipe-reply-cue{background:var(--brand-accent);color:var(--brand-text)}
+.is-swipe-reply-dragging,.is-swipe-reply-dragging *{user-select:none!important;-webkit-user-select:none!important}
+@media(prefers-reduced-motion:reduce){
+ .message-row .bubble,.swipe-reply-cue{transition:none!important}
+}
