@@ -1,9 +1,10 @@
+import {setupSwipeReply} from "./swipe-reply.js?v=swipe-1";
 import {resolveReplyTarget} from "./reply-navigation.mjs?v=reply-1";
 import {createMediaPlayer,openMediaViewer} from "./media-player.js?v=media-1";
 import {canAccess} from "./d3.js?v=d4-6";
 import {can} from "./permissions.js?v=d4-6";
 const $=s=>document.querySelector(s), el=(tag,cl="",text)=>{const n=document.createElement(tag);n.className=cl;if(text!==undefined)n.textContent=text;return n};
-let reply=null,file=null,query="",selected=new Set(),selectionMode=false,menu=null,active=()=>null,all=()=>[],refresh=()=>{},modal=null,touchTimer=0,touchStart=null;
+let reply=null,file=null,query="",selected=new Set(),selectionMode=false,menu=null,active=()=>null,all=()=>[],refresh=()=>{},modal=null,touchTimer=0,touchStart=null,swipeGesture=null;
 const statuses=["sent","delivered","read","failed"], labels={sent:"Enviada",delivered:"Entregue",read:"Lida",failed:"Falha no envio"};
 const newId=()=>globalThis.crypto?.randomUUID?.()||"msg-"+Date.now()+"-"+Math.random().toString(36).slice(2);
 const normalize=c=>{c.messages=c.messages.map((m,i)=>{const item=Array.isArray(m)?{direction:m[0],body:m[1],time:m[2],status:"sent"}:m;item.id??="demo:"+c.id+":"+i;item.conversationId=c.id;return item});return c};
@@ -91,8 +92,13 @@ if(searchCount)searchCount.textContent=query?(n===1?"1 resultado":n+" resultados
 if(clear)clear.hidden=!query;
 selectionBar()}
 export function sendD2(c,value){normalize(c);const body=value.trim();if(!body&&!file)return false;const m={id:newId(),conversationId:c.id,direction:"out",body,time:stamp(),status:"sent"};if(reply&&reply.conversationId===c.id&&byId(c,reply.messageId))m.reply={...reply};if(file){m.file=file;file=null}c.messages.push(m);c.preview=body||"📎 "+m.file.name;c.time=m.time;reply=null;draft();return true}
-export function resetD2Selection(){if(replyJumpTimer){clearTimeout(replyJumpTimer);replyJumpTimer=null}$("#messages")?.querySelectorAll(".reply-jump-highlight").forEach(row=>row.classList.remove("reply-jump-highlight"));reply=null;file=null;query="";selected.clear();selectionMode=false;const search=$("#message-search"),field=$("#message-search-input");if(search)search.hidden=true;if(field)field.value="";draft();closeDialog();closeMenu();selectionBar()}
+export function resetD2Selection(){swipeGesture?.cancel();if(replyJumpTimer){clearTimeout(replyJumpTimer);replyJumpTimer=null}$("#messages")?.querySelectorAll(".reply-jump-highlight").forEach(row=>row.classList.remove("reply-jump-highlight"));reply=null;file=null;query="";selected.clear();selectionMode=false;const search=$("#message-search"),field=$("#message-search-input");if(search)search.hidden=true;if(field)field.value="";draft();closeDialog();closeMenu();selectionBar()}
 export function setupD2(getActive,getAll,onChange){active=getActive;all=getAll;refresh=onChange;const area=$("#messages");
+ swipeGesture=setupSwipeReply({
+  area,onReply:id=>action("reply",id),
+  isSelectionActive:()=>selectionMode||selected.size>0,
+  onGestureStart:()=>{clearTimeout(touchTimer);touchStart=null;closeMenu()}
+ });
  area.addEventListener("click",e=>{
   const quote=e.target.closest("[data-reply-target]");
   if(!quote)return;
@@ -105,7 +111,7 @@ export function setupD2(getActive,getAll,onChange){active=getActive;all=getAll;r
  area.addEventListener("click",e=>{if((!selected.size&&!selectionMode)||e.target.closest("[data-action],[data-reply-target],a,button,input,video,audio"))return;const row=e.target.closest("[data-message-id]");if(!row)return;const id=row.dataset.messageId;selected.has(id)?selected.delete(id):selected.add(id);refresh()});
  area.addEventListener("contextmenu",e=>{const row=e.target.closest("[data-message-id]");if(!row)return;e.preventDefault();context(row.dataset.messageId,e.clientX,e.clientY)});
  area.addEventListener("keydown",e=>{const row=e.target.closest("[data-message-id]");if(row&&(e.key==="ContextMenu"||(e.shiftKey&&e.key==="F10"))){e.preventDefault();const r=row.getBoundingClientRect();context(row.dataset.messageId,r.left,r.top)}});
- area.addEventListener("touchstart",e=>{if(e.target.closest("[data-reply-target],button,input,video,audio"))return;const row=e.target.closest("[data-message-id]");if(!row)return;touchStart={x:e.touches[0].clientX,y:e.touches[0].clientY};clearTimeout(touchTimer);touchTimer=setTimeout(()=>{touchTimer=0;context(row.dataset.messageId,touchStart.x,touchStart.y)},550)},{passive:true});
+ area.addEventListener("touchstart",e=>{if(e.target.closest("[data-reply-target],button,input,video,audio"))return;const row=e.target.closest("[data-message-id]");if(!row)return;touchStart={x:e.touches[0].clientX,y:e.touches[0].clientY};clearTimeout(touchTimer);touchTimer=setTimeout(()=>{touchTimer=0;swipeGesture?.cancel();if(touchStart)context(row.dataset.messageId,touchStart.x,touchStart.y)},550)},{passive:true});
  area.addEventListener("touchmove",e=>{if(touchStart&&Math.hypot(e.touches[0].clientX-touchStart.x,e.touches[0].clientY-touchStart.y)>12)clearTimeout(touchTimer)},{passive:true});
  area.addEventListener("touchend",()=>clearTimeout(touchTimer));
  const upload=el("input");upload.type="file";upload.hidden=true;document.body.append(upload);$("#attach-button").onclick=()=>upload.click();upload.addEventListener("change",()=>{const f=upload.files[0];if(!f)return;if(f.size>20*1024*1024){notify("Tamanho máximo permitido: 20 MB.");return}const kind=f.type.startsWith("image/")?"image":f.type.startsWith("audio/")?"audio":f.type.startsWith("video/")?"video":"document";file={name:f.name,kind,url:URL.createObjectURL(f)};draft();upload.value=""});
