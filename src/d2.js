@@ -1,4 +1,4 @@
-import {setupSwipeReply} from "./swipe-reply.js?v=swipe-1";
+import {setupSwipeReply} from "./swipe-reply.js?v=swipe-2";
 import {resolveReplyTarget} from "./reply-navigation.mjs?v=reply-1";
 import {createMediaPlayer,openMediaViewer} from "./media-player.js?v=media-1";
 import {canAccess} from "./d3.js?v=d4-6";
