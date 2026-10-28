@@ -1,3 +1,4 @@
+import {createOriginBadge} from "./channel-identity-ui.js?v=origin-1";
 import {attachMediaBlur} from "./media-blur.js?v=motion-1";
 import {mediaVisibilityKey} from "./media-visibility-store.js?v=motion-1";
 import {mediaEntries,filterMedia,mediaTotals} from "./media-catalog.mjs";
@@ -15,13 +16,16 @@ function thumb(item,small=false){
  const icon=el("span","media-thumb-icon",sym);icon.setAttribute("aria-hidden","true");
  box.append(icon);return box;
 }
-function itemCard(item){
+function itemCard(item,getOriginForItem){
  const card=el("div","media-card");
  const open=el("button","media-card-open");open.type="button";
  open.setAttribute("aria-label","Abrir "+labels[item.kind]?.toLocaleLowerCase("pt-BR")+": "+item.name+" de "+item.conversationName);
  const picture=thumb(item);
  const meta=el("span","media-card-meta");
  meta.append(el("strong","",item.name),el("small","",item.conversationName+" · "+item.time));
+ const identity=getOriginForItem(item);
+ if(identity)meta.append(createOriginBadge(identity));
+
  open.append(picture,meta);
  open.onclick=()=>openMediaViewer(item);
  card.append(open);
@@ -30,7 +34,7 @@ function itemCard(item){
  }
  return card;
 }
-export function renderMediaLibrary(root,{getConversations,conversationId="all",type="all",query="",onFilterChange=()=>{}}){
+export function renderMediaLibrary(root,{getConversations,conversationId="all",type="all",query="",onFilterChange=()=>{},getOriginForItem=()=>null}){
  root.replaceChildren();
  const head=el("header","module-head");
  head.append(el("h1","","Mídias"),el("p","","Encontre e visualize arquivos compartilhados nas conversas."));
@@ -54,10 +58,10 @@ export function renderMediaLibrary(root,{getConversations,conversationId="all",t
   const narrowed=filterMedia(accessible,{conversationId:select.value,kind:selectedType,query:search.value});
   status.textContent=narrowed.length===1?"1 arquivo encontrado":narrowed.length+" arquivos encontrados";
   const totals=mediaTotals(filterMedia(accessible,{conversationId:select.value,query:search.value}));
-  for(const b of filters.querySelectorAll("button")){b.classList.toggle("selected",b.dataset.type===selectedType);b.setAttribute("aria-pressed",String(b.dataset.type===type));b.querySelector("span").textContent=String(totals[b.dataset.type]||0)}
+  for(const b of filters.querySelectorAll("button")){b.classList.toggle("selected",b.dataset.type===selectedType);b.setAttribute("aria-pressed",String(b.dataset.type===selectedType));b.querySelector("span").textContent=String(totals[b.dataset.type]||0)}
   cards.replaceChildren();
   if(!narrowed.length){cards.append(el("p","media-library-empty","Nenhuma mídia encontrada para esses filtros."));return}
-  for(const item of narrowed)cards.append(itemCard(item));
+  for(const item of narrowed)cards.append(itemCard(item,getOriginForItem));
  };
  for(const [id,label] of Object.entries(labels)){
   const b=el("button","media-type-tab");b.type="button";b.dataset.type=id;b.setAttribute("aria-pressed",String(id===selectedType));

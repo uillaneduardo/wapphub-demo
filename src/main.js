@@ -1,8 +1,10 @@
+import {channelIdentity} from "./channel-identity.mjs";
+import {createOriginBadge} from "./channel-identity-ui.js?v=origin-1";
 import {checkRouteAccess} from "./router/guards.mjs";
 import {createRouter} from "./router/router.js?v=r2";
 import {pathFor,conversationPath,mediaPath,settingsPath} from "./router/routes.mjs";
 import {seedMediaFixtures} from "./media-fixtures.js?v=reply-1";
-import {renderConversationMedia} from "./media-gallery.js?v=motion-1";
+import {renderConversationMedia} from "./media-gallery.js?v=origin-1";
 import {getProfile,initials} from "./profile-store.js?v=d4-7";
 import {initializeAssignments} from "./demo-access-store.js?v=d4-6";
 import {adminState} from "./admin-data.js?v=inbox-1";
@@ -10,7 +12,7 @@ import {setupChannelPicker} from "./channel-picker.js?v=d5-1";
 import {conversationMatchesChannels} from "./channel-filter.mjs?v=d5-1";
 import {providers} from "./channels.js?v=channels-1";
 import {nameOf,avatar,editContact} from "./contact-identity.js?v=channel-popover-1";
-import {showModule,refreshCurrentMediaModule} from "./pages.js?v=r3";
+import {showModule,refreshCurrentMediaModule} from "./pages.js?v=origin-1";
 import {channels,getChannel} from "./channels.js?v=channels-1";
 import {setupD3,updateD3,canAccess,currentState,assertCanSend} from "./d3.js?v=d4-6";
 import {appearance,setAppearance,openAppearanceSettings} from "./appearance.js?v=motion-1";
@@ -24,22 +26,42 @@ initializeAssignments(conversations,adminState().members);
 const active=()=>conversations.find(c=>c.id===state.active);
 const node=(tag,cls,text)=>{const x=document.createElement(tag);if(cls)x.className=cls;if(text!==undefined)x.textContent=text;return x};
 const toast=text=>{const item=node("div","toast",text);$("#toast-region").append(item);setTimeout(()=>item.remove(),3800)};
+const originOf=c=>channelIdentity(channels.find(channel=>channel.id===c?.channelId),providers);
+function renderOrigin(c){
+ const header=$("#chat-origin");
+ if(!c){
+  header.replaceChildren();
+  for(const id of ["detail-platform","detail-channel","detail-provider","detail-connection"])$("#"+id).replaceChildren();
+  return;
+ }
+ const identity=originOf(c);
+ header.replaceChildren(createOriginBadge(identity,{provider:true,status:true}));
+ $("#detail-platform").replaceChildren(createOriginBadge(identity,{compact:true}));
+ $("#detail-channel").textContent=identity.channelName;
+ $("#detail-provider").textContent=identity.providerName;
+ const status=node("span","origin-connection",identity.statusLabel);
+ status.dataset.state=identity.status;
+ $("#detail-connection").replaceChildren(status);
+}
+
 function renderList(){
  const shown=conversations.filter(c=>canAccess(c)&&conversationMatchesChannels(c,state.selectedChannels,channels)&&(state.filter==="all"||state.filter==="unread"&&c.unread>0||state.filter==="mine"&&c.assigned)&&[nameOf(c),c.phone,c.preview].some(v=>v.toLocaleLowerCase("pt-BR").includes(state.query.toLocaleLowerCase("pt-BR"))));
  list.replaceChildren();
  for(const c of shown){const b=node("button","conversation"+(state.active===c.id?" selected":""));b.type="button";b.dataset.id=c.id;b.setAttribute("aria-label",nameOf(c)+(c.unread?", "+c.unread+" não lidas":""));b.setAttribute("aria-current",state.active===c.id?"true":"false");
  const av=avatar(c),body=node("span","conversation-content"),head=node("span","conversation-head"),preview=node("span","conversation-preview");
  head.append(node("strong","",nameOf(c)),node("time","",c.time));preview.append(node("span","",c.preview));if(c.unread)preview.append(node("span","unread",String(c.unread)));
- body.append(head,preview);b.append(av,body);list.append(b)}
+ const origin=createOriginBadge(originOf(c),{status:true});origin.classList.add("conversation-origin");
+ b.setAttribute("aria-label",b.getAttribute("aria-label")+", canal "+originOf(c).channelName);
+ body.append(head,preview,origin);b.append(av,body);list.append(b)}
  if(!shown.length)list.append(node("p","placeholder","Nenhuma conversa encontrada."));
  $("#conversation-count").textContent=String(shown.length);
 }
 function renderMessages(){if(!active()){messages.replaceChildren(node("p","placeholder","Nenhuma conversa disponível nos canais selecionados."));return}if(!canAccess(active())){messages.replaceChildren(node("p","placeholder","Conversa não atribuída. Aguarde autorização de um OWNER ou SUPERVISOR."));return}renderD2(active(),messages)}
-function select(id,{openChat=true,markRead=openChat}={}){resetD2Selection();state.active=id;const c=active();if(markRead)c.unread=0;$("#chat-title").textContent=nameOf(c);$("#chat-avatar").replaceWith(Object.assign(avatar(c),{id:"chat-avatar"}));$("#chat-subtitle").textContent=c.status+" · "+getChannel(c.channelId).name;$("#detail-avatar").replaceWith(Object.assign(avatar(c,"avatar large"),{id:"detail-avatar"}));$("#detail-name").textContent=nameOf(c);$("#detail-phone").textContent=c.phone;$("#detail-agent").textContent=c.agent;$("#detail-status").textContent=c.status;$("#detail-channel").textContent=getChannel(c.channelId).name;renderConversationMedia(c,$("#detail-media"),openConversationMedia);$("#message-input").value="";renderList();renderMessages();$("#details-toggle").disabled=false;$("#find-messages").disabled=false;$("#chat-menu").disabled=false;if(openChat)root.classList.add("chat-open");updateD3()}
+function select(id,{openChat=true,markRead=openChat}={}){resetD2Selection();state.active=id;const c=active();if(markRead)c.unread=0;$("#chat-title").textContent=nameOf(c);$("#chat-avatar").replaceWith(Object.assign(avatar(c),{id:"chat-avatar"}));$("#chat-subtitle").textContent=c.status+" · "+originOf(c).channelName;$("#detail-avatar").replaceWith(Object.assign(avatar(c,"avatar large"),{id:"detail-avatar"}));$("#detail-name").textContent=nameOf(c);$("#detail-phone").textContent=c.phone;$("#detail-agent").textContent=c.agent;$("#detail-status").textContent=c.status;$("#detail-channel").textContent=getChannel(c.channelId).name;renderOrigin(c);renderConversationMedia(c,$("#detail-media"),openConversationMedia);$("#message-input").value="";renderList();renderMessages();$("#details-toggle").disabled=false;$("#find-messages").disabled=false;$("#chat-menu").disabled=false;if(openChat)root.classList.add("chat-open");updateD3()}
 function clearActive(){
  resetD2Selection();state.active=null;
  $("#chat-title").textContent="Selecione uma conversa";
- $("#chat-subtitle").textContent="";
+ $("#chat-subtitle").textContent="";renderOrigin(null);
  $("#details").hidden=true;$("#detail-media").replaceChildren();
  root.classList.remove("details-open","chat-open");
  $("#details-toggle").setAttribute("aria-expanded","false");
@@ -64,7 +86,7 @@ const channelPicker=setupChannelPicker({
  getProviders:()=>providers,
  onChange:onChannelSelection
 });
-window.addEventListener("demo-channels-updated",()=>{channelPicker.refresh();router?.refresh()});
+window.addEventListener("demo-channels-updated",()=>{channelPicker.refresh();renderOrigin(active());renderList();router?.refresh()});
 window.addEventListener("demo-assignments-updated",()=>{onChannelSelection(channelPicker.getSelection());const current=active();if(current){$("#detail-agent").textContent=current.agent;$("#detail-status").textContent=current.status;}renderMessages();updateD3();router?.refresh();refreshCurrentMediaModule()});
 list.addEventListener("click",e=>{const item=e.target.closest("[data-id]");if(item)router.navigate(conversationPath(item.dataset.id))});
 $("#search").addEventListener("input",e=>{state.query=e.target.value;renderList()});

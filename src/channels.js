@@ -5,10 +5,10 @@ const initialProviders=[
 {id:"external",name:"WhatsApp (API)",kind:"external",description:"Adaptador de mensagens externo"}
 ];
 const initialChannels=[
-{id:"wa-sales",name:"WhatsApp · Comercial",provider:"external",state:"connected",enabled:true},
-{id:"web-support",name:"Chat · Suporte",provider:"native",state:"connected",enabled:true},
-{id:"team",name:"WappHub · Equipe",provider:"native",state:"connected",enabled:true},
-{id:"wa-help",name:"WhatsApp · Suporte",provider:"external",state:"disconnected",enabled:true}
+{id:"wa-sales",name:"WhatsApp · Comercial",platform:"whatsapp",provider:"external",state:"connected",enabled:true},
+{id:"web-support",name:"Chat · Suporte",platform:"web",provider:"native",state:"connected",enabled:true},
+{id:"team",name:"WappHub · Equipe",platform:"internal",provider:"native",state:"connected",enabled:true},
+{id:"wa-help",name:"WhatsApp · Suporte",platform:"whatsapp",provider:"external",state:"disconnected",enabled:true}
 ];
 let stored=null;try{stored=JSON.parse(localStorage.getItem(KEY)||"null")}catch{}
 export const providers=Array.isArray(stored?.providers)?stored.providers:structuredClone(initialProviders);
@@ -16,5 +16,5 @@ export const channels=[{id:"all",name:"Todas as caixas",provider:null,state:"agg
 const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify({providers,channels:channels.filter(c=>c.id!=="all")}))}catch(e){console.warn("Falha ao salvar configuração fictícia",e)};window.dispatchEvent(new Event("demo-channels-updated"))};
 export const getChannel=id=>channels.find(c=>c.id===id)||channels[0];
 export function upsertProvider(data,id){const old=providers.find(p=>p.id===id);if(old)Object.assign(old,{name:data.name,description:data.description});else providers.push({id:"p-"+crypto.randomUUID(),name:data.name,kind:"external",description:data.description});persist()}
-export function upsertChannel(data,id){const old=channels.find(c=>c.id===id);if(old)Object.assign(old,{name:data.name,provider:data.provider});else channels.push({id:"c-"+crypto.randomUUID(),name:data.name,provider:data.provider,state:"disconnected",enabled:false});persist()}
+export function upsertChannel(data,id){const old=channels.find(c=>c.id===id);if(old)Object.assign(old,{name:data.name,provider:data.provider,platform:data.platform||old.platform||"other"});else channels.push({id:"c-"+crypto.randomUUID(),name:data.name,platform:data.platform||"other",provider:data.provider,state:"disconnected",enabled:false});persist()}
 export function setChannelEnabled(id,enabled){const c=channels.find(c=>c.id===id&&c.id!=="all");if(!c)return;c.enabled=Boolean(enabled);persist()}

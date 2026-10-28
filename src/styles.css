@@ -557,3 +557,41 @@ html[data-animations="off"] *,html[data-animations="off"] *::before,html[data-an
 .module-contact-open:hover .module-contact-name strong{text-decoration:underline}
 .module-contact-open:focus-visible{outline:2px solid var(--brand-border);outline-offset:3px;border-radius:6px}
 .module-contact-open .module-contact-name{min-width:0}
+
+
+/* Identificação da origem: plataforma, canal e provider independentes.
+ * Neutro por padrão; status é informado também por texto (nunca só cor). */
+.origin-identity{display:inline-flex;align-items:center;min-width:0;max-width:100%;gap:5px;vertical-align:middle;color:var(--muted);font-size:11px;font-weight:500;line-height:1.35}
+.origin-icon{width:14px;height:14px;flex:0 0 14px;stroke-width:1.8}
+.origin-identity-label{min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.origin-identity-provider{color:var(--muted);font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.origin-identity-status{flex:0 0 auto;font-size:10px;white-space:nowrap;color:var(--muted)}
+.origin-identity-status::before{content:"·";padding-right:5px}
+.conversation-origin{display:flex;width:100%;margin-top:6px;max-width:100%;font-size:10px}
+.conversation-origin .origin-icon{width:13px;height:13px;flex-basis:13px}
+.conversation-origin .origin-identity-label{font-size:10px}
+.chat-origin-line{display:flex;align-items:center;gap:7px;min-width:0;max-width:100%;white-space:nowrap}
+#chat-origin{display:flex;min-width:0;flex:0 1 auto;max-width:80%}
+#chat-origin .origin-identity-label{flex:0 1 auto}
+#chat-subtitle{flex:0 1 auto;min-width:0;max-width:38%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.origin-detail-section .detail-row{align-items:center}
+.origin-detail-section .detail-row strong{min-width:0;max-width:64%;overflow-wrap:anywhere;font-size:12px}
+.origin-detail-section .origin-identity{justify-content:flex-end;color:var(--text)}
+.origin-detail-section .origin-identity-label{white-space:normal;text-align:right;overflow-wrap:anywhere}
+.origin-connection{display:inline-flex;align-items:center;gap:6px;color:var(--text)}
+.origin-connection::before{content:"";width:7px;height:7px;border:1px solid var(--muted);border-radius:50%;background:var(--muted)}
+.origin-connection[data-state="connected"]::before{background:#238a65;border-color:#238a65}
+.origin-connection[data-state="disconnected"]::before,.origin-connection[data-state="failed"]::before{background:#b85a48;border-color:#b85a48}
+.origin-connection[data-state="reconnecting"]::before,.origin-connection[data-state="syncing"]::before{background:#ba8a34;border-color:#ba8a34}
+.media-card-meta .origin-identity{display:flex;margin-top:3px;font-size:10px;max-width:100%;width:100%}
+.media-card-meta .origin-icon{width:13px;height:13px;flex-basis:13px}
+.media-card-meta .origin-identity-label{font-size:10px}
+@media(max-width:760px){
+ #chat-origin{max-width:72%}
+ #chat-origin .origin-identity-provider{display:none}
+ .chat-origin-line{gap:6px}
+ .chat-origin-line .origin-identity-status{display:none}
+ #chat-subtitle{max-width:31%}
+ .conversation-origin{margin-top:5px}
+ .origin-detail-section .detail-row strong{max-width:62%}
+}
