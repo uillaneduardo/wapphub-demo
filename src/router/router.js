@@ -18,6 +18,13 @@ export function createRouter({render}){
   }
   dispatch();return true;
  }
+ document.addEventListener("click",event=>{
+  const anchor=event.target.closest?.("a[data-route]");
+  if(!anchor||event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey||anchor.target||anchor.hasAttribute("download"))return;
+  const target=new URL(anchor.href,location.href);
+  if(target.origin!==location.origin)return;
+  event.preventDefault();navigate(target.href);
+ });
  window.addEventListener("popstate",dispatch);
  dispatch();
  return {navigate,current,refresh:dispatch};
