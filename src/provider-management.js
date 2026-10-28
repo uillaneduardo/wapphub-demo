@@ -1,4 +1,4 @@
-import {renderProviderDetails} from "./provider-details.js?v=d6-3";
+import {renderProviderDetails} from "./provider-details.js?v=d6-4";
 import {providerService} from "./services/provider-service.js?v=d6-4";
 import {STATE_LABELS} from "./data/contracts/provider-domain.mjs";
 import {providerPath} from "./router/routes.mjs";
