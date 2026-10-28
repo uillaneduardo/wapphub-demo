@@ -20,13 +20,18 @@ import {renderD2,sendD2,setupD2,resetD2Selection} from "./d2.js?v=motion-1";
 import {conversations} from "./data.js?v=channels-1";
 import {createMessageCommandService} from "./services/message-commands.mjs";
 import {createMockMessageCommandRepository} from "./data/adapters/mock/message-commands.mjs";
+import {normalizeMockConversations} from "./data/adapters/mock/message-store.mjs";
+import {createConversationActionService} from "./services/conversation-actions.mjs";
+import {createMockConversationActionRepository} from "./data/adapters/mock/conversation-actions.mjs";
 import {createConversationReadService} from "./services/conversation-read.mjs";
 import {createMockConversationReadRepository} from "./data/adapters/mock/conversation-read.mjs";
 const $=s=>document.querySelector(s);const root=$("#app"),list=$("#conversation-list"),messages=$("#messages");
 const state={active:"mariana",filter:"all",selectedChannels:null,query:"",theme:appearance.mode};
 const conversationReadService=createConversationReadService(createMockConversationReadRepository(conversations));
 const messageCommands=createMessageCommandService(createMockMessageCommandRepository(conversations));
+const conversationActions=createConversationActionService(createMockConversationActionRepository(conversations));
 seedMediaFixtures(conversations);
+normalizeMockConversations(conversations);
 initializeAssignments(conversations,adminState().members);
 
 const active=()=>conversations.find(c=>c.id===state.active);
@@ -124,7 +129,7 @@ const contactEditButton=document.createElement("button");contactEditButton.class
 document.querySelectorAll("[data-nav]").forEach(b=>b.addEventListener("click",()=>router.navigate(pathFor(b.dataset.nav))));
 
 document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();$("#search").focus()}if(e.key==="Escape"&&root.classList.contains("details-open"))setDetails(false)});
-setupD2(active,()=>conversations,()=>{const c=active();if(c){$("#detail-status").textContent=c.status;$("#detail-agent").textContent=c.agent;renderConversationMedia(c,$("#detail-media"),openConversationMedia);}renderMessages();renderList();updateD3()},messageCommands);
+setupD2(active,()=>conversations,()=>{const c=active();if(c){$("#detail-status").textContent=c.status;$("#detail-agent").textContent=c.agent;renderConversationMedia(c,$("#detail-media"),openConversationMedia);}renderMessages();renderList();updateD3()},messageCommands,conversationActions);
 setupD3(active,()=>{onChannelSelection(channelPicker.getSelection());renderMessages();router?.refresh();refreshCurrentMediaModule()});
 select(state.active,{openChat:false,markRead:window.matchMedia("(min-width:761px)").matches});onChannelSelection(channelPicker.getSelection());root.classList.remove("chat-open");
 const router=createRouter({render:route=>{
