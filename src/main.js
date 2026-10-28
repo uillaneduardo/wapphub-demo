@@ -10,8 +10,11 @@ import {initializeAssignments} from "./demo-access-store.js?v=d4-6";
 import {adminState} from "./admin-data.js?v=inbox-1";
 import {setupChannelPicker} from "./channel-picker.js?v=d5-1";
 import {conversationMatchesChannels} from "./channel-filter.mjs?v=d5-1";
+import {filterInboxConversations} from "./domain/conversation-query.mjs";
 import {providers} from "./channels.js?v=channels-1";
-import {nameOf,avatar,editContact} from "./contact-identity.js?v=channel-popover-1";
+import {nameOf,avatar,editContact,configureContactIdentity} from "./contact-identity.js?v=channel-popover-1";
+import {createContactService} from "./services/contacts.mjs";
+import {createMockContactRepository} from "./data/adapters/mock/contact-storage.mjs";
 import {showModule,refreshCurrentMediaModule} from "./pages.js?v=d6-4";
 import {channels,getChannel} from "./channels.js?v=channels-1";
 import {setupD3,updateD3,canAccess,currentState,assertCanSend} from "./d3.js?v=d4-6";
@@ -27,6 +30,7 @@ import {createConversationReadService} from "./services/conversation-read.mjs";
 import {createMockConversationReadRepository} from "./data/adapters/mock/conversation-read.mjs";
 const $=s=>document.querySelector(s);const root=$("#app"),list=$("#conversation-list"),messages=$("#messages");
 const state={active:"mariana",filter:"all",selectedChannels:null,query:"",theme:appearance.mode};
+configureContactIdentity(createContactService(createMockContactRepository()));
 const conversationReadService=createConversationReadService(createMockConversationReadRepository(conversations));
 const messageCommands=createMessageCommandService(createMockMessageCommandRepository(conversations));
 const conversationActions=createConversationActionService(createMockConversationActionRepository(conversations));
@@ -56,7 +60,7 @@ function renderOrigin(c){
 }
 
 function renderList(){
- const shown=conversations.filter(c=>canAccess(c)&&conversationMatchesChannels(c,state.selectedChannels,channels)&&(state.filter==="all"||state.filter==="unread"&&c.unread>0||state.filter==="mine"&&c.assigned)&&[nameOf(c),c.phone,c.preview].some(v=>v.toLocaleLowerCase("pt-BR").includes(state.query.toLocaleLowerCase("pt-BR"))));
+ const shown=filterInboxConversations(conversations,{canAccess,channels,selectedChannels:state.selectedChannels,filter:state.filter,query:state.query,nameOf,conversationMatchesChannels});
  list.replaceChildren();
  for(const c of shown){const b=node("button","conversation"+(state.active===c.id?" selected":""));b.type="button";b.dataset.id=c.id;b.setAttribute("aria-label",nameOf(c)+(c.unread?", "+c.unread+" não lidas":""));b.setAttribute("aria-current",state.active===c.id?"true":"false");
  const av=avatar(c),body=node("span","conversation-content"),head=node("span","conversation-head"),preview=node("span","conversation-preview");
@@ -83,7 +87,7 @@ function clearActive(){
 }
 function onChannelSelection(next){
  state.selectedChannels=next;
- const candidates=conversations.filter(c=>canAccess(c)&&conversationMatchesChannels(c,next,channels));
+ const candidates=filterInboxConversations(conversations,{canAccess,channels,selectedChannels:next,filter:"all",nameOf,conversationMatchesChannels});
  if(!candidates.some(c=>c.id===state.active))clearActive();
  renderList();
 }
