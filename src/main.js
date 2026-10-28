@@ -1,3 +1,5 @@
+import {createRouter} from "./router/router.js?v=r1";
+import {pathFor} from "./router/routes.mjs";
 import {seedMediaFixtures} from "./media-fixtures.js?v=reply-1";
 import {renderConversationMedia} from "./media-gallery.js?v=motion-1";
 import {getProfile,initials} from "./profile-store.js?v=d4-7";
@@ -89,12 +91,22 @@ function renderProfileAvatar(){
 }
 window.addEventListener("demo-profile-updated",renderProfileAvatar);
 renderProfileAvatar();
-$("#profile-button").addEventListener("click",()=>{document.querySelector("#profile-popover")?.remove();const menu=document.createElement("div");menu.id="profile-popover";menu.className="profile-popover";menu.setAttribute("role","menu");for(const [label,handler] of [["Meu perfil",()=>{showModule("perfil");document.querySelectorAll("[data-nav]").forEach(b=>b.classList.remove("active"))}],["Sair",()=>toast("O encerramento de sessão estará disponível após a autenticação.")]]){const button=document.createElement("button");button.type="button";button.textContent=label;button.setAttribute("role","menuitem");button.onclick=()=>{menu.remove();handler()};menu.append(button)}document.body.append(menu);menu.querySelector("button")?.focus();const dismiss=e=>{if(!menu.contains(e.target)&&e.target!==$("#profile-button")){menu.remove();document.removeEventListener("pointerdown",dismiss)}};document.addEventListener("pointerdown",dismiss)});
+$("#profile-button").addEventListener("click",()=>{document.querySelector("#profile-popover")?.remove();const menu=document.createElement("div");menu.id="profile-popover";menu.className="profile-popover";menu.setAttribute("role","menu");for(const [label,handler] of [["Meu perfil",()=>router.navigate("/profile")],["Sair",()=>toast("O encerramento de sessão estará disponível após a autenticação.")]]){const button=document.createElement("button");button.type="button";button.textContent=label;button.setAttribute("role","menuitem");button.onclick=()=>{menu.remove();handler()};menu.append(button)}document.body.append(menu);menu.querySelector("button")?.focus();const dismiss=e=>{if(!menu.contains(e.target)&&e.target!==$("#profile-button")){menu.remove();document.removeEventListener("pointerdown",dismiss)}};document.addEventListener("pointerdown",dismiss)});
 const contactEditButton=document.createElement("button");contactEditButton.className="chip";contactEditButton.type="button";contactEditButton.textContent="Editar contato";contactEditButton.onclick=()=>{if(!active())return;editContact(active(),()=>{const id=state.active;select(id);renderList()})};document.querySelector(".contact-card")?.append(contactEditButton);
 
-document.querySelectorAll("[data-nav]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-nav]").forEach(x=>x.classList.toggle("active",x===b));showModule(b.dataset.nav);if(b.dataset.nav==="atendimento")root.classList.remove("chat-open")}));
+document.querySelectorAll("[data-nav]").forEach(b=>b.addEventListener("click",()=>router.navigate(pathFor(b.dataset.nav))));
 
 document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();$("#search").focus()}if(e.key==="Escape"&&root.classList.contains("details-open"))setDetails(false)});
 setupD2(active,()=>conversations,()=>{const c=active();if(c){$("#detail-status").textContent=c.status;$("#detail-agent").textContent=c.agent;renderConversationMedia(c,$("#detail-media"),openConversationMedia);}renderMessages();renderList();updateD3()});
 setupD3(active,()=>{onChannelSelection(channelPicker.getSelection());renderMessages();refreshCurrentMediaModule()});
 select(state.active,{openChat:false,markRead:window.matchMedia("(min-width:761px)").matches});onChannelSelection(channelPicker.getSelection());root.classList.remove("chat-open");
+const router=createRouter({render:route=>{
+ const moduleName=route.name==="not-found"?"not-found":route.name;
+ document.querySelectorAll("[data-nav]").forEach(button=>{
+  const active=button.dataset.nav===route.name;
+  button.classList.toggle("active",active);
+  button.setAttribute("aria-current",active?"page":"false");
+ });
+ showModule(moduleName);
+ if(moduleName==="atendimento"){root.classList.remove("chat-open");setDetails(false)}
+}});
