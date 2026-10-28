@@ -29,7 +29,8 @@ test("D5: menu desfaz a seleção global sem marcar o item excluído",()=>{
 
 test("D5: seleção automática no mobile não zera não lidas",()=>{
  const main=source("src/main.js");
- assert.match(main,/if\(markRead\)c\.unread=0/);
+ assert.match(main,/if\(markRead\)void conversationReadService\.markRead\(id\)/);
+ assert.doesNotMatch(main,/if\(markRead\)c\.unread=0/);
  assert.match(main,/markRead:window\.matchMedia\("\(min-width:761px\)"\)\.matches/);
  assert.match(main,/if\(!candidates\.some\(c=>c\.id===state\.active\)\)clearActive\(\)/);
  assert.match(main,/root\.classList\.remove\("details-open","chat-open"\)/);
