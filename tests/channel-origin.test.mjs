@@ -46,6 +46,7 @@ test("renderização reusa o componente sem buscar dados nem persistir na view",
  const management=source("src/channel-management.js");
  for(const js of [ui,source("src/channel-identity.mjs")])assert.doesNotMatch(js,/localStorage|fetch\(|XMLHttpRequest/);
  assert.match(main,/function renderOrigin\(c\)/);
+ assert.match(main,/\$\("#detail-channel"\)\.textContent=identity\.channelName/);
  assert.match(main,/createOriginBadge\(originOf\(c\),\{status:true\}\)/);
  assert.match(main,/header\.replaceChildren\(createOriginBadge\(identity,\{provider:true,status:true\}\)\)/);
  for(const id of ["chat-origin","detail-platform","detail-channel","detail-provider","detail-connection"])
