@@ -644,3 +644,50 @@ html[data-animations="off"] *,html[data-animations="off"] *::before,html[data-an
  .provider-connection-row>.settings-action{margin-left:auto}
  .provider-wizard-footer button{min-height:42px}
 }
+
+
+/* D6.3: detalhes, abas, sessão e diagnósticos — informação antes de decoração */
+.provider-detail-header{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;min-width:0}
+.provider-detail-heading{flex:1;min-width:0}
+.provider-detail-heading h3{font-size:16px;line-height:1.35;margin:0 0 5px;overflow-wrap:anywhere}
+.provider-detail-heading p{margin:0}
+.provider-detail-tabs{display:flex;gap:3px;overflow-x:auto;max-width:100%;border-bottom:1px solid var(--line);padding-bottom:5px;scrollbar-width:thin}
+.provider-detail-tab{flex:0 0 auto;background:transparent;color:var(--muted);border:0;border-bottom:2px solid transparent;padding:9px 12px;font-size:12px}
+.provider-detail-tab:hover{color:var(--text);background:var(--hover)}
+.provider-detail-tab.active{font-weight:650;color:var(--text);border-color:var(--brand-accent)}
+.provider-detail-tab:focus-visible{outline:2px solid var(--brand-border);outline-offset:-2px}
+.provider-detail-body{display:grid;gap:13px;min-width:0}
+.provider-detail-body h4{font-size:13px;font-weight:650;margin:3px 0 2px}
+.provider-detail-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:12px}
+.provider-detail-row span{color:var(--muted)}
+.provider-detail-row strong{text-align:right;max-width:62%;overflow-wrap:anywhere;font-size:12px}
+.provider-feedback{font-size:12px;margin:0;color:var(--text)}
+.provider-feedback:empty{display:none}
+.provider-detail-editor{display:grid;gap:9px;margin-top:8px}
+.provider-detail-editor .admin-input{min-width:0;width:100%;max-width:100%;box-sizing:border-box}
+.provider-detail-editor textarea{min-height:78px;resize:vertical}
+.provider-detail-editor>.settings-primary{justify-self:start}
+.provider-action-strip{display:flex;flex-wrap:wrap;gap:8px}
+.provider-qr-placeholder{min-height:150px;border:1px dashed var(--line);border-radius:10px;background:var(--subtle);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;text-align:center;padding:20px}
+.provider-qr-placeholder strong{font-size:15px;letter-spacing:.04em}
+.provider-qr-placeholder small{font-size:11px;color:var(--muted)}
+.provider-channel-list{display:grid;gap:5px}
+.provider-channel-choice{display:flex;align-items:center;gap:10px;min-height:43px;padding:8px;border:1px solid var(--line);border-radius:8px;font-size:12px;cursor:pointer}
+.provider-channel-choice:hover{background:var(--hover)}
+.provider-channel-choice input{width:16px;height:16px;accent-color:var(--brand-accent)}
+.provider-health-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.provider-health-card{display:flex;flex-direction:column;gap:9px;border:1px solid var(--line);border-radius:9px;padding:13px;min-width:0}
+.provider-health-card span{font-size:11px;color:var(--muted)}
+.provider-health-card strong{font-size:14px;font-weight:650;overflow-wrap:anywhere}
+.provider-event-list{list-style:none;display:grid;gap:10px;padding:0;margin:0}
+.provider-event{display:grid;gap:5px;border-left:2px solid var(--line);padding:7px 12px}
+.provider-event strong{font-size:12px;font-weight:550}
+.provider-event small{color:var(--muted);font-size:10px}
+@media(max-width:760px){
+ .provider-detail-header{flex-wrap:wrap}
+ .provider-detail-header>.settings-action{margin-left:auto}
+ .provider-health-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .provider-action-strip>button{min-height:42px}
+ .provider-detail-tabs{margin-right:-8px}
+}
+@media(max-width:360px){.provider-health-grid{grid-template-columns:minmax(0,1fr)}}
