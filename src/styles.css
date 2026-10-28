@@ -595,3 +595,52 @@ html[data-animations="off"] *,html[data-animations="off"] *::before,html[data-an
  .conversation-origin{margin-top:5px}
  .origin-detail-section .detail-row strong{max-width:62%}
 }
+
+
+/* D6 — Gerenciamento de conexões: neutralidade, respiro e usabilidade móvel */
+.provider-workspace{display:flex;flex-direction:column;gap:15px;min-width:0;margin-top:12px}
+.provider-page-head{display:grid;gap:4px}
+.provider-page-head h3{font-size:15px;font-weight:650;margin:0}
+.provider-page-head p{margin:0}
+.provider-toolbar{display:grid;grid-template-columns:minmax(120px,1.6fr) minmax(100px,1fr) minmax(110px,1fr);gap:10px;min-width:0}
+.provider-toolbar .admin-input{width:100%;min-width:0;max-width:100%;box-sizing:border-box}
+.provider-connection-list{display:grid;gap:8px}
+.provider-connection-row{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--panel);min-width:0}
+.provider-connection-copy{display:grid;min-width:0;gap:6px;flex:1}
+.provider-connection-heading{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.provider-connection-heading strong{font-size:13px;overflow-wrap:anywhere}
+.provider-connection-description{font-size:11px;line-height:1.5;color:var(--muted)}
+.provider-state{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:10px;white-space:nowrap}
+.provider-state::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.provider-state[data-state="connected"]{color:var(--brand-accent);background:var(--brand-soft)}
+.provider-state[data-state="failed"],.provider-state[data-state="disconnected"],.provider-state[data-state="degraded"]{border-style:dashed}
+.provider-empty{padding:24px;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-size:12px}
+.provider-wizard-progress{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;align-items:center}
+.provider-wizard-progress span{padding:9px 6px;text-align:center;border-bottom:2px solid var(--line);font-size:10px;color:var(--muted)}
+.provider-wizard-progress span.is-active{color:var(--text);font-weight:650;border-color:var(--brand-accent)}
+.provider-wizard-body{display:grid;gap:12px;min-width:0}
+.provider-type-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.provider-type-card{display:flex;flex-direction:column;gap:9px;align-items:flex-start;padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--panel);text-align:left;color:var(--text);min-height:116px}
+.provider-type-card span{font-size:12px;color:var(--muted);line-height:1.45}
+.provider-type-card small{font-size:10px;color:var(--muted)}
+.provider-type-card.selected{border-color:var(--brand-accent);background:var(--brand-soft)}
+.provider-type-card:focus-visible{outline:2px solid var(--brand-border);outline-offset:2px}
+.provider-form-field{display:grid;gap:6px;min-width:0;font-size:12px}
+.provider-form-field .admin-input{width:100%;max-width:100%;box-sizing:border-box}
+.provider-form-field textarea{min-height:80px;resize:vertical}
+.provider-form-error{color:var(--text);font-size:12px;margin:0}
+.provider-form-error:empty{display:none}
+.provider-auth-preview{border:1px dashed var(--line);background:var(--subtle);padding:16px;border-radius:10px;line-height:1.6}
+.provider-auth-preview strong{font-size:12px}
+.provider-auth-preview p{font-size:12px;color:var(--muted)}
+.provider-wizard-footer{display:flex;justify-content:space-between;gap:10px}
+.provider-review-line{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);padding:10px 0;font-size:12px}
+.provider-review-line span{color:var(--muted)}
+@media(max-width:760px){
+ .provider-toolbar{grid-template-columns:minmax(0,1fr)}
+ .provider-wizard-progress span{font-size:9px}
+ .provider-type-grid{grid-template-columns:minmax(0,1fr)}
+ .provider-connection-row{align-items:flex-start;flex-wrap:wrap}
+ .provider-connection-row>.settings-action{margin-left:auto}
+ .provider-wizard-footer button{min-height:42px}
+}
