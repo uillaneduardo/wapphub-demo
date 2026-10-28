@@ -16,7 +16,8 @@ const sanitize=value=>{
  * Único acesso às preferências legadas dos contatos. Mantém a chave v1.
  * Erro de escrita é propagado para o formulário: não simular persistência.
  */
-export function createMockContactRepository(storage=globalThis.localStorage) {
+export function createMockContactRepository(storage) {
+ if(arguments.length===0){try{storage=globalThis.localStorage}catch{storage=null}}
  let records=Object.create(null);
  try{records=sanitize(JSON.parse(storage?.getItem(KEY)||"{}"))}catch{records=Object.create(null)}
  return {
