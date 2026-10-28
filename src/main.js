@@ -37,6 +37,7 @@ function renderOrigin(c){
  const identity=originOf(c);
  header.replaceChildren(createOriginBadge(identity,{provider:true,status:true}));
  $("#detail-platform").replaceChildren(createOriginBadge(identity,{compact:true}));
+ $("#detail-channel").textContent=identity.channelName;
  $("#detail-provider").textContent=identity.providerName;
  const status=node("span","origin-connection",identity.statusLabel);
  status.dataset.state=identity.status;
@@ -56,7 +57,7 @@ function renderList(){
  $("#conversation-count").textContent=String(shown.length);
 }
 function renderMessages(){if(!active()){messages.replaceChildren(node("p","placeholder","Nenhuma conversa disponível nos canais selecionados."));return}if(!canAccess(active())){messages.replaceChildren(node("p","placeholder","Conversa não atribuída. Aguarde autorização de um OWNER ou SUPERVISOR."));return}renderD2(active(),messages)}
-function select(id,{openChat=true,markRead=openChat}={}){resetD2Selection();state.active=id;const c=active();if(markRead)c.unread=0;$("#chat-title").textContent=nameOf(c);$("#chat-avatar").replaceWith(Object.assign(avatar(c),{id:"chat-avatar"}));$("#chat-subtitle").textContent=c.status+" · "+getChannel(c.channelId).name;$("#detail-avatar").replaceWith(Object.assign(avatar(c,"avatar large"),{id:"detail-avatar"}));$("#detail-name").textContent=nameOf(c);$("#detail-phone").textContent=c.phone;$("#detail-agent").textContent=c.agent;$("#detail-status").textContent=c.status;$("#detail-channel").textContent=getChannel(c.channelId).name;renderOrigin(c);renderConversationMedia(c,$("#detail-media"),openConversationMedia);$("#message-input").value="";renderList();renderMessages();$("#details-toggle").disabled=false;$("#find-messages").disabled=false;$("#chat-menu").disabled=false;if(openChat)root.classList.add("chat-open");updateD3()}
+function select(id,{openChat=true,markRead=openChat}={}){resetD2Selection();state.active=id;const c=active();if(markRead)c.unread=0;$("#chat-title").textContent=nameOf(c);$("#chat-avatar").replaceWith(Object.assign(avatar(c),{id:"chat-avatar"}));$("#chat-subtitle").textContent=c.status+" · "+originOf(c).channelName;$("#detail-avatar").replaceWith(Object.assign(avatar(c,"avatar large"),{id:"detail-avatar"}));$("#detail-name").textContent=nameOf(c);$("#detail-phone").textContent=c.phone;$("#detail-agent").textContent=c.agent;$("#detail-status").textContent=c.status;$("#detail-channel").textContent=getChannel(c.channelId).name;renderOrigin(c);renderConversationMedia(c,$("#detail-media"),openConversationMedia);$("#message-input").value="";renderList();renderMessages();$("#details-toggle").disabled=false;$("#find-messages").disabled=false;$("#chat-menu").disabled=false;if(openChat)root.classList.add("chat-open");updateD3()}
 function clearActive(){
  resetD2Selection();state.active=null;
  $("#chat-title").textContent="Selecione uma conversa";
