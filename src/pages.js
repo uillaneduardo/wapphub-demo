@@ -11,7 +11,25 @@ let view=null,currentModule="atendimento",currentOptions={};
 function ensure(){if(view)return view;view=make("section","module-view");view.id="module-view";view.setAttribute("aria-label","Módulo");document.body.append(view);return view}
 function heading(title,subtitle){const wrap=make("header","module-head");wrap.append(make("h1","",title),make("p","",subtitle));return wrap}
 function stat(label,value){const card=make("div","module-stat");card.append(make("span","",label),make("strong","",String(value)));return card}
-function overview(){const root=ensure();root.replaceChildren(heading("Visão geral","Acompanhe os principais indicadores dos atendimentos."));const grid=make("div","module-stats");const unread=conversations.reduce((n,c)=>n+(c.unread||0),0);grid.append(stat("Conversas",conversations.length),stat("Não lidas",unread),stat("Em atendimento",conversations.filter(c=>c.status==="Em atendimento").length),stat("Sem atribuição",conversations.filter(c=>!c.assigned).length));root.append(grid);const section=make("section","module-section");section.append(make("h2","","Canais"));for(const c of [...new Set(conversations.map(c=>c.channelId))]){const row=make("div","module-row");row.append(make("strong","",getChannel(c).name),make("span","",String(conversations.filter(x=>x.channelId===c).length)+" conversas"));section.append(row)}root.append(section)}
+function overview(){
+ const root=ensure(),visible=conversations.filter(canAccess);
+ root.replaceChildren(heading("Visão geral","Acompanhe os principais indicadores dos atendimentos."));
+ const grid=make("div","module-stats");
+ const unread=visible.reduce((n,c)=>n+(c.unread||0),0);
+ grid.append(stat("Conversas",visible.length),stat("Não lidas",unread),
+  stat("Em atendimento",visible.filter(c=>c.status==="Em atendimento").length),
+  stat("Sem atribuição",visible.filter(c=>!c.assigned).length));
+ root.append(grid);
+ const section=make("section","module-section");
+ section.append(make("h2","","Canais"));
+ for(const channelId of [...new Set(visible.map(c=>c.channelId))]){
+  const row=make("div","module-row");
+  row.append(make("strong","",getChannel(channelId).name),
+   make("span","",String(visible.filter(c=>c.channelId===channelId).length)+" conversas"));
+  section.append(row);
+ }
+ root.append(section);
+}
 function contacts({contactId=null,onNavigate=()=>{}}={}){
  const root=ensure();
  if(contactId){
@@ -58,7 +76,12 @@ function contacts({contactId=null,onNavigate=()=>{}}={}){
  search.addEventListener("input",render);
  root.append(search,results);render();
 }
-export function showModule(name,options={}){currentModule=name;currentOptions=options;const root=ensure();const isChat=name==="atendimento";document.body.classList.toggle("module-active",!isChat);root.hidden=isChat;if(isChat)return;if(name==="not-found"){
+export function showModule(name,options={}){currentModule=name;currentOptions=options;const root=ensure();const isChat=name==="atendimento";document.body.classList.toggle("module-active",!isChat);root.hidden=isChat;if(isChat)return;if(name==="access-denied"){
+  root.replaceChildren(heading("Acesso restrito","Você não tem permissão para abrir este recurso."));
+  const link=make("a","settings-primary","Voltar à caixa de entrada");
+  link.href="/inbox";link.dataset.route="";root.append(link);
+ }
+ if(name==="not-found"){
   root.replaceChildren(heading("Página não encontrada","O endereço solicitado não corresponde a uma página disponível."));
   const link=make("a","settings-primary","Voltar à caixa de entrada");
   link.href="/inbox";link.dataset.route="";root.append(link);
