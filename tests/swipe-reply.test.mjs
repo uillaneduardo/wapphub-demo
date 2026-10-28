@@ -36,8 +36,8 @@ test("adaptador suporta touch, mouse e pen sem conflitar com ações existentes"
  assert.match(adapter,/e\.pointerType==="mouse"&&e\.button!==0/);
  assert.match(adapter,/isSelectionActive\(\)/);
  assert.match(adapter,/\.media-player,\.file-card/);
- assert.match(adapter,/e\.target\.closest\("\.bubble"\)/);
- assert.match(adapter,/area\.setPointerCapture\(e\.pointerId\)/);
+ assert.ok(adapter.includes('target.closest(".bubble")'));
+ assert.ok(adapter.includes("area.setPointerCapture(g.pointerId)"));
  assert.match(adapter,/e\.preventDefault\(\);e\.stopImmediatePropagation\(\)/);
  assert.match(chat,/swipeGesture=setupSwipeReply/);
  assert.match(chat,/onReply:id=>action\("reply",id\)/);
@@ -73,14 +73,13 @@ test("Android ativa a resposta com percurso menor e libera mais deslocamento vis
 
 test("no mobile um touchmove não passivo controla arrasto horizontal, sem impedir scroll vertical",()=>{
  const adapter=src("src/swipe-reply.js");
- assert.match(adapter,/area\\.addEventListener\\("touchmove",/);
- assert.match(adapter,/\\{passive:false\\}/);
- assert.match(adapter,/area\\.addEventListener\\("touchstart",/);
- assert.match(adapter,/area\\.addEventListener\\("touchend",/);
- assert.match(adapter,/const intent=swipeIntent\\(dx,dy,g.direction\\)/);
- assert.match(adapter,/if\\(intent==="vertical"\\|\\|intent==="opposite"\\)\\{clear\\(\\);return\\}/);
- assert.match(adapter,/if\\(event\\?\\.cancelable\\)event\\.preventDefault\\(\\)/);
- assert.match(adapter,/if\\(dx\\*swipeDirection\\(g.direction\\)>=swipeThreshold/);
- assert.match(adapter,/g\\.started&&g\\.armed&&/);
- assert.match(adapter,/if\\(gesture&&!gesture\\.started\\)clear\\(\\)/);
+ for(const event of ["touchstart","touchmove","touchend","touchcancel"])
+  assert.ok(adapter.includes('addEventListener("'+event+'"'),event);
+ assert.ok(adapter.includes("{passive:false}"));
+ assert.ok(adapter.includes("const intent=swipeIntent(dx,dy,g.direction)"));
+ assert.ok(adapter.includes('if(intent==="vertical"||intent==="opposite"){clear();return}'));
+ assert.ok(adapter.includes("if(event?.cancelable)event.preventDefault()"));
+ assert.ok(adapter.includes("if(dx*swipeDirection(g.direction)>=swipeThreshold"));
+ assert.ok(adapter.includes("g.started&&g.armed&&"));
+ assert.ok(adapter.includes("if(gesture&&!gesture.started)clear()"));
 });
