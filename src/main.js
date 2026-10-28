@@ -124,7 +124,7 @@ const router=createRouter({render:route=>{
    select(id,{openChat:true,markRead:true});
    setDetails(Boolean(route.params.details));
   }else{
-   if(active()&&!canAccess(active()))clearActive();
+   if(active()&&(!canAccess(active())||getChannel(active().channelId).enabled===false))clearActive();
    root.classList.remove("chat-open");
    setDetails(false);
    renderList();renderMessages();updateD3();
@@ -141,7 +141,7 @@ const router=createRouter({render:route=>{
  if(route.name==="configuracoes"){
   showModule("configuracoes",{
    sectionId:route.params.section||"organizacao",
-   onSectionChange:section=>router.navigate(settingsPath(section),{render:false})
+   onSectionChange:section=>router.navigate(settingsPath(section))
   });
   return;
  }
