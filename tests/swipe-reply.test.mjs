@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
-import {swipeDirection,swipeIntent,swipeOffset,shouldReplyFromSwipe,SWIPE_REPLY_PX} from "../src/swipe-reply.mjs";
+import {swipeDirection,swipeIntent,swipeOffset,shouldReplyFromSwipe,swipeThreshold,SWIPE_REPLY_PX,SWIPE_REPLY_TOUCH_PX,SWIPE_MAX_PX} from "../src/swipe-reply.mjs";
 const src=p=>readFileSync(new URL("../"+p,import.meta.url),"utf8");
 
 test("mensagens recebidas respondem ao arrastar para a direita",()=>{
@@ -17,8 +17,8 @@ test("mensagens enviadas respondem ao arrastar para a esquerda",()=>{
  assert.equal(swipeIntent(-25,4,"out"),"horizontal");
  assert.equal(shouldReplyFromSwipe(-SWIPE_REPLY_PX-3,0,"out"),true);
  assert.equal(shouldReplyFromSwipe(77,1,"out"),false);
- assert.equal(swipeOffset(-230,"out"),-86);
- assert.equal(swipeOffset(240,"in"),86);
+ assert.equal(swipeOffset(-230,"out"),-120);
+ assert.equal(swipeOffset(240,"in"),120);
 });
 
 test("movimento vertical e arrastos curtos não disparam resposta",()=>{
@@ -59,4 +59,28 @@ test("compositor e detalhes atualizam sem erro de callback",()=>{
  assert.match(main,/\$\("#detail-agent"\)\.textContent=c\.agent;renderConversationMedia\(/);
  assert.doesNotMatch(main,/c\.agentrenderConversationMedia/);
  assert.match(main,/d2\.js\?v=swipe-1/);
+});
+
+test("Android ativa a resposta com percurso menor e libera mais deslocamento visual",()=>{
+ assert.equal(swipeThreshold("touch"),SWIPE_REPLY_TOUCH_PX);
+ assert.ok(SWIPE_REPLY_TOUCH_PX<SWIPE_REPLY_PX);
+ assert.ok(SWIPE_MAX_PX>=2*SWIPE_REPLY_TOUCH_PX);
+ assert.equal(shouldReplyFromSwipe(39,3,"in","touch"),true);
+ assert.equal(shouldReplyFromSwipe(-39,2,"out","touch"),true);
+ assert.equal(shouldReplyFromSwipe(31,1,"in","touch"),false);
+ assert.equal(shouldReplyFromSwipe(39,45,"in","touch"),false);
+});
+
+test("no mobile um touchmove não passivo controla arrasto horizontal, sem impedir scroll vertical",()=>{
+ const adapter=src("src/swipe-reply.js");
+ assert.match(adapter,/area\\.addEventListener\\("touchmove",/);
+ assert.match(adapter,/\\{passive:false\\}/);
+ assert.match(adapter,/area\\.addEventListener\\("touchstart",/);
+ assert.match(adapter,/area\\.addEventListener\\("touchend",/);
+ assert.match(adapter,/const intent=swipeIntent\\(dx,dy,g.direction\\)/);
+ assert.match(adapter,/if\\(intent==="vertical"\\|\\|intent==="opposite"\\)\\{clear\\(\\);return\\}/);
+ assert.match(adapter,/if\\(event\\?\\.cancelable\\)event\\.preventDefault\\(\\)/);
+ assert.match(adapter,/if\\(dx\\*swipeDirection\\(g.direction\\)>=swipeThreshold/);
+ assert.match(adapter,/g\\.started&&g\\.armed&&/);
+ assert.match(adapter,/if\\(gesture&&!gesture\\.started\\)clear\\(\\)/);
 });
