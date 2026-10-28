@@ -5,8 +5,8 @@ import {renderProfilePage} from "./profile-panel.js?v=d4-7";
 import {nameOf,avatar,editContact} from "./contact-identity.js?v=channel-popover-1";
 import {renderSettings} from "./settings.js?v=r2";
 import {conversations} from "./data.js?v=channels-1";
-import {getChannel} from "./channels.js?v=channels-1";
-const allowedConversation=c=>canAccess(c)&&getChannel(c.channelId).enabled!==false;
+import {channels,getChannel} from "./channels.js?v=channels-1";
+const allowedConversation=c=>canAccess(c)&&channels.some(channel=>channel.id===c.channelId&&channel.enabled!==false);
 const make=(tag,className="",value)=>{const n=document.createElement(tag);n.className=className;if(value!==undefined)n.textContent=value;return n};
 let view=null,currentModule="atendimento",currentOptions={};
 function ensure(){if(view)return view;view=make("section","module-view");view.id="module-view";view.setAttribute("aria-label","Módulo");document.body.append(view);return view}
