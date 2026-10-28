@@ -29,6 +29,15 @@ export function parseRoute(value="/"){
  if(segments[0]==="contacts"&&segments.length===2&&idOk(segments[1])){
   return {name:"contatos",path,title:"Contato",params:{contactId:segments[1]},query};
  }
+ if(segments[0]==="settings"&&segments[1]==="providers"&&segments.length>=3&&segments.length<=4){
+  if(segments.length===3&&segments[2]==="new")
+   return {name:"configuracoes",path,title:"Nova conexão",params:{section:"providers",providerView:"new"},query};
+  const id=segments[2];
+  if(!idOk(id))return error(path);
+  const tab=segments[3]||"overview";
+  if(!["overview","session","channels","diagnostics","events"].includes(tab))return error(path);
+  return {name:"configuracoes",path,title:"Conexão de Provider",params:{section:"providers",providerView:"detail",providerId:id,providerTab:tab},query};
+ }
  if(segments[0]==="settings"&&segments.length===2){
   const entry=Object.entries(settingPaths).find(([,slug])=>slug===segments[1]);
   if(entry)return {name:"configuracoes",path,title:titles.configuracoes,params:{section:entry[0]},query};
@@ -41,6 +50,12 @@ export function conversationPath(id,{details=false}={}){
 }
 export function contactPath(id){return idOk(id)?"/contacts/"+encodeURIComponent(id):null}
 export function settingsPath(section){return section in settingPaths?"/settings/"+settingPaths[section]:null}
+export function providerPath(id=null,tab="overview"){
+ if(id===null)return "/settings/providers";
+ if(id==="new")return "/settings/providers/new";
+ if(!idOk(id)||!["overview","session","channels","diagnostics","events"].includes(tab))return null;
+ return "/settings/providers/"+encodeURIComponent(id)+(tab==="overview"?"":"/"+tab);
+}
 export function mediaPath({conversationId="all",type="all",query=""}={}){
  const params=new URLSearchParams();
  if(conversationId&&conversationId!=="all")params.set("conversation",conversationId);
