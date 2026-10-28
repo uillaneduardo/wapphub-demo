@@ -68,7 +68,23 @@ async function action(action,i){const c=active(),m=byId(c,i);if(!m||!canAccess(c
   }catch(error){notify("Não foi possível simular a ação: "+error.message)}
  }
 }
-function context(i,x,y){const m=byId(active(),i);if(!m)return;openMenu([["Responder",()=>action("reply",i)],["Copiar texto",()=>action("copy",i),!m.body],["Encaminhar",()=>action("forward",i),!can("forward")],["Selecionar mensagens",()=>action("select",i)],["Apagar para mim",()=>action("deleteMine",i),!can("deleteMine")],["Apagar para todos",()=>action("deleteAll",i),!can("deleteAll")],...(m.direction==="out"?[["Simular próximo estado",()=>action("cycle",i)],...(m.status==="failed"?[["Simular reenvio",()=>action("retry",i)]]:[])]:[] )],x,y)}
+function context(i,x,y){
+ const c=active(),m=byId(c,i);
+ if(!m||!canAccess(c))return;
+ const options=[
+  ["Responder",()=>action("reply",i)],
+  ["Copiar texto",()=>action("copy",i),!m.body],
+  ["Encaminhar",()=>action("forward",i),!can("forward")],
+  ["Selecionar mensagens",()=>action("select",i)],
+  ["Apagar para mim",()=>action("deleteMine",i),!can("deleteMine")],
+  ["Apagar para todos",()=>action("deleteAll",i),!can("deleteAll")]
+ ];
+ if(m.direction==="out"&&!m.deletedAll&&!m.hidden){
+  options.push(["Simular próximo estado",()=>action("cycle",i)]);
+  if(m.status==="failed")options.push(["Simular reenvio",()=>action("retry",i)]);
+ }
+ openMenu(options,x,y);
+}
 export function renderD2(c,container){container.replaceChildren(el("div","date-separator","Hoje"));let n=0;c.messages.forEach((m,i)=>{if(m.hidden)return;if(query&&!(m.body+" "+(m.file?.name||"")).toLowerCase().includes(query))return;n++;const row=el("div","message-row"+(m.direction==="out"?" mine":"")+(selected.has(m.id)?" d2-picked":""));row.dataset.messageId=m.id;if(m.id===recentlySentMessageId)row.classList.add("message-just-sent");row.tabIndex=0;const b=el("div","bubble");if(m.file)b.classList.add("has-media");if(m.reply){
  const ref=el("button","reply-reference","↪ "+(m.reply.body||m.reply.file?.name||"Mídia"));
  ref.type="button";
@@ -132,7 +148,28 @@ export function setupD2(getActive,getAll,onChange,messageCommands,attendanceComm
  searchClear.onclick=()=>{searchInput.value="";query="";refresh();searchInput.focus()};
  searchClose.onclick=closeSearch;
  $("#emoji-button").onclick=e=>{const r=e.currentTarget.getBoundingClientRect();openMenu(["🙂","👍","❤️","✅"].map(s=>[s,()=>{$("#message-input").value+=s;$("#message-input").focus()}]),r.left,r.top-160)};
- $("#chat-menu").onclick=e=>{const r=e.currentTarget.getBoundingClientRect();openMenu([["Selecionar mensagens",()=>{selectionMode=true;selected.clear();selectionBar()}],["Marcar como não lida",()=>{const c=active();if(!c)return;c.unread=1;refresh();if(innerWidth<=760)$("#app").classList.remove("chat-open")}],["Encerrar atendimento",()=>{const c=active();if(!c)return;c.status="Finalizado";refresh()}],["Reabrir atendimento",()=>{const c=active();if(!c)return;c.status="Em atendimento";refresh()}]],r.left,r.bottom)};
+ async function updateConversation(kind){
+ const conversation=active();
+ if(!canAccess(conversation)){notify("Acesso à conversa indisponível.");return}
+ try{
+  if(kind==="unread"){
+   await conversationActions.markUnread(conversation.id);
+   if(innerWidth<=760)$("#app").classList.remove("chat-open");
+  }else{
+   await conversationActions.setAttendanceStatus(conversation.id,kind==="close"?"Finalizado":"Em atendimento");
+  }
+  refresh();
+ }catch(error){notify("Falha na atualização do atendimento: "+error.message)}
+}
+$("#chat-menu").onclick=e=>{
+ const r=e.currentTarget.getBoundingClientRect();
+ openMenu([
+  ["Selecionar mensagens",()=>{selectionMode=true;selected.clear();selectionBar()}],
+  ["Marcar como não lida",()=>updateConversation("unread")],
+  ["Encerrar atendimento",()=>updateConversation("close")],
+  ["Reabrir atendimento",()=>updateConversation("open")]
+ ],r.left,r.bottom);
+};
  document.addEventListener("pointerdown",e=>{if(menu&&!menu.contains(e.target)&&!e.target.closest("[data-action],#emoji-button,#chat-menu"))closeMenu()});
  document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeMenu();closeDialog();if(selectionMode||selected.size)choose([])}});
 }
