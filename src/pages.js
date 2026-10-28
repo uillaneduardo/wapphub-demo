@@ -1,4 +1,5 @@
 import {channelIdentity} from "./channel-identity.mjs";
+import {filterAccessibleContacts} from "./domain/conversation-query.mjs";
 import {renderMediaLibrary} from "./media-gallery.js?v=origin-1";
 import {canAccess} from "./d3.js?v=d4-6";
 import {getProfile,saveProfile} from "./profile-store.js?v=d4-7";
@@ -57,11 +58,9 @@ function contacts({contactId=null,onNavigate=()=>{}}={}){
  const results=make("div","module-section");
  const render=()=>{
   results.replaceChildren();
-  const q=search.value.toLocaleLowerCase("pt-BR").replace(/[^a-z0-9À-ÿ]/gi,"");
+  const visible=filterAccessibleContacts(conversations,{canAccess,channels,query:search.value,nameOf});
   let found=0;
-  for(const c of conversations.filter(allowedConversation)){
-   const key=(nameOf(c)+" "+c.phone).toLocaleLowerCase("pt-BR").replace(/[^a-z0-9À-ÿ]/gi,"");
-   if(q&&!key.includes(q))continue;
+  for(const c of visible){
    found++;
    const row=make("div","module-contact");
    const open=make("button","module-contact-open");
