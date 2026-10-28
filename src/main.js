@@ -2,7 +2,7 @@ import {channelIdentity} from "./channel-identity.mjs";
 import {createOriginBadge} from "./channel-identity-ui.js?v=origin-1";
 import {checkRouteAccess} from "./router/guards.mjs";
 import {createRouter} from "./router/router.js?v=r2";
-import {pathFor,conversationPath,mediaPath,settingsPath} from "./router/routes.mjs";
+import {pathFor,conversationPath,mediaPath,settingsPath,providerPath} from "./router/routes.mjs";
 import {seedMediaFixtures} from "./media-fixtures.js?v=reply-1";
 import {renderConversationMedia} from "./media-gallery.js?v=origin-1";
 import {getProfile,initials} from "./profile-store.js?v=d4-7";
@@ -12,7 +12,7 @@ import {setupChannelPicker} from "./channel-picker.js?v=d5-1";
 import {conversationMatchesChannels} from "./channel-filter.mjs?v=d5-1";
 import {providers} from "./channels.js?v=channels-1";
 import {nameOf,avatar,editContact} from "./contact-identity.js?v=channel-popover-1";
-import {showModule,refreshCurrentMediaModule} from "./pages.js?v=origin-1";
+import {showModule,refreshCurrentMediaModule} from "./pages.js?v=d6-2";
 import {channels,getChannel} from "./channels.js?v=channels-1";
 import {setupD3,updateD3,canAccess,currentState,assertCanSend} from "./d3.js?v=d4-6";
 import {appearance,setAppearance,openAppearanceSettings} from "./appearance.js?v=motion-1";
@@ -163,6 +163,8 @@ const router=createRouter({render:route=>{
  if(route.name==="configuracoes"){
   showModule("configuracoes",{
    sectionId:route.params.section||"organizacao",
+   providerRoute:{...route.params,query:route.query},
+   onProviderNavigate:path=>router.navigate(path),
    onSectionChange:section=>router.navigate(settingsPath(section))
   });
   return;
