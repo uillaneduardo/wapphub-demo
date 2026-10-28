@@ -1,4 +1,4 @@
-import {swipeIntent,swipeOffset,swipeThreshold,swipeDirection,SWIPE_START_PX} from "./swipe-reply.mjs";
+import {swipeIntent,swipeOffset,swipeThreshold,swipeDirection,SWIPE_START_PX} from "./swipe-reply.mjs?v=swipe-2";
 
 /**
  * Reconhecedor de gesto independente do armazenamento e dos providers.
