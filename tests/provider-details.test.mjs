@@ -23,13 +23,13 @@ test("D6.3 session and QR lifecycle are clearly simulated",()=>{
 test("D6.3 details use repository for editable identification, channels, metrics and events",()=>{
  const ui=read("src/provider-details.js"),list=read("src/provider-management.js");
  for(const operation of ["getConnection","listTypes","updateConnection","assignChannels","getHealth","listEvents"])
-  assert.ok(ui.includes("providerRepository."+operation),operation);
+  assert.ok(ui.includes("providerService."+operation),operation);
  assert.match(ui,/aria-current/);
  assert.match(ui,/Simulação|simulação|fictíci/);
  assert.match(list,/renderProviderDetails/);
  assert.match(read("src/styles.css"),/\.provider-health-grid/);
  assert.match(read("src/styles.css"),/\.provider-event-list/);
- assert.match(read("index.html"),/main\.js\?v=d6-3/);
+ assert.match(read("index.html"),/main\.js\?v=d6-4/);
 });
 test("D6.3 repository manages session state separately and bounds history",()=>{
  const repo=read("src/data/adapters/mock/provider-repository.js");
