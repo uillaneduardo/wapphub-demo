@@ -37,5 +37,5 @@ test("D6.2 settings route passes domain options, UI keeps controls on mobile",()
  assert.match(css,/\.provider-toolbar/);
  assert.match(css,/\.provider-type-grid/);
  assert.match(css,/@media\(max-width:760px\)/);
- assert.match(read("index.html"),/main\.js\?v=d6-3/);
+ assert.match(read("index.html"),/main\.js\?v=d6-4/);
 });
