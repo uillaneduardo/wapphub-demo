@@ -8,7 +8,8 @@ export function matchesContactSearch(conversation,query,nameOf=c=>c.name) {
   if (!text) return true;
   const queryWords=text.split(/\s+/).filter(Boolean);
   const haystack=fold([nameOf(conversation),conversation.phone,conversation.preview].join(" "));
-  return queryWords.every(word=>haystack.includes(word));
+  const compact=haystack.replace(/[^a-z0-9]/g,"");
+  return queryWords.every(word=>haystack.includes(word) || (word.replace(/[^a-z0-9]/g,"") && compact.includes(word.replace(/[^a-z0-9]/g,""))));
 }
 export function filterInboxConversations(conversations,{canAccess,channels,selectedChannels=null,filter="all",query="",nameOf,conversationMatchesChannels}) {
   if (!Array.isArray(conversations) || typeof canAccess!=="function" || typeof nameOf!=="function" || typeof conversationMatchesChannels!=="function") throw new TypeError("Consulta de conversas inválida");
