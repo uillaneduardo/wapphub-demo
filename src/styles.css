@@ -822,3 +822,22 @@ html[data-animations="off"] .voice-dot{animation:none}
  #composer .composer-box{transition:none}
 }
 html[data-animations="off"] #composer .composer-box{transition:none}
+
+
+/* Inbox · indicador de mensagens não lidas acompanha a cor de destaque,
+   inclusive quando alterada com a interface aberta e em ambos os temas. */
+.conversation-preview .unread{
+  background:var(--brand-indicator);
+  color:var(--brand-text);
+  font-size:10px;
+  font-weight:700;
+  min-width:19px;
+  height:19px;
+  padding:0 5px;
+  border-radius:999px;
+  flex:0 0 auto;
+  display:grid;
+  place-items:center;
+  overflow:visible;
+  text-overflow:clip;
+}

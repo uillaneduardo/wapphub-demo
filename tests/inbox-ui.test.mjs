@@ -38,3 +38,16 @@ test("canal da conversa é exibido nos detalhes e imports são versionados",()=>
  assert.match(main,/d3\.js\?v=d4-6/);
  assert.match(main,/d2\.js\?v=chat-jump-1/);
 });
+
+test("indicador de não lidas na inbox usa destaque configurável e texto contrastante",()=>{
+ const css=source("src/styles.css");
+ const appearance=source("src/appearance.js");
+ const main=source("src/main.js");
+ const rule=css.match(/\.conversation-preview \.unread\s*\{([^}]+)\}/)?.[1]||"";
+ assert.match(rule,/background:var\(--brand-indicator\)/);
+ assert.match(rule,/color:var\(--brand-text\)/);
+ assert.match(rule,/flex:0 0 auto/);
+ assert.match(appearance,/setProperty\("--brand-indicator",base\)/);
+ assert.match(appearance,/setProperty\("--brand-text",contrast\(/);
+ assert.match(main,/node\("span","unread",String\(c\.unread\)\)/);
+});
