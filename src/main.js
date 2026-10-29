@@ -19,7 +19,7 @@ import {showModule,refreshCurrentMediaModule} from "./pages.js?v=d6-4";
 import {channels,getChannel} from "./channels.js?v=channels-1";
 import {setupD3,updateD3,canAccess,currentState,assertCanSend} from "./d3.js?v=d4-6";
 import {appearance,setAppearance,openAppearanceSettings} from "./appearance.js?v=motion-1";
-import {renderD2,sendD2,setupD2,resetD2Selection} from "./d2.js?v=motion-1";
+import {renderD2,sendD2,setupD2,resetD2Selection} from "./d2.js?v=chat-jump-1";
 import {createChatScrollController} from "./chat-scroll.js";
 import {conversations} from "./data.js?v=channels-1";
 import {createMessageCommandService} from "./services/message-commands.mjs";
