@@ -6,7 +6,7 @@ import {createContactService} from "../src/services/contacts.mjs";
 import {filterInboxConversations,filterAccessibleContacts,matchesContactSearch} from "../src/domain/conversation-query.mjs";
 import {conversationMatchesChannels} from "../src/channel-filter.mjs";
 import {conversations} from "../src/data.js";
-import {conversations as fixtures} from "../src/data/adapters/mock/fixtures/conversations.js?v=load50-1";
+import {conversations as fixtures} from "../src/data/adapters/mock/fixtures/conversations.js?v=load50-1&dates-1";
 import {configureContactIdentity,nameOf,updateContact} from "../src/contact-identity.js";
 
 const storage=(seed={})=>{
@@ -15,12 +15,13 @@ const storage=(seed={})=>{
 };
 const KEY="wapphub-demo-contacts-v1";
 
-test("legacy fixture export preserves identity, IDs, channels and message tuples",()=>{
+test("legacy fixture export preserves identity, IDs, channels and normalized dated messages",()=>{
  assert.equal(conversations,fixtures);
  assert.equal(conversations.length,56);
  assert.equal(conversations.filter(c=>c.id.startsWith("load-")).length,50);
  assert.equal(conversations.find(c=>c.id==="mariana").channelId,"wa-sales");
- assert.ok(Array.isArray(conversations[0].messages[0]));
+ assert.equal(typeof conversations[0].messages[0],"object");
+ assert.equal(typeof conversations[0].messages[0].demoDayOffset,"number");
 });
 
 test("contact service reads existing v1 aliases without changing the storage key",async()=>{
@@ -80,6 +81,7 @@ test("views no longer access contact localStorage or embed Inbox filtering",()=>
  const pages=readFileSync(new URL("../src/pages.js",import.meta.url),"utf8");
  assert.doesNotMatch(contact,/localStorage|wapphub-demo-contacts-v1/);
  assert.match(main,/configureContactIdentity\(createContactService\(createMockContactRepository\(\)\)\)/);
- assert.match(main,/filterInboxConversations\(conversations,/);
+ assert.match(main,/await inboxQueryService\.list/);
+ assert.doesNotMatch(main,/filterInboxConversations\(conversations,/);
  assert.match(pages,/filterAccessibleContacts\(conversations,/);
 });

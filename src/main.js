@@ -10,7 +10,8 @@ import {initializeAssignments} from "./demo-access-store.js?v=d4-6";
 import {adminState} from "./admin-data.js?v=inbox-1";
 import {setupChannelPicker} from "./channel-picker.js?v=d5-1";
 import {conversationMatchesChannels} from "./channel-filter.mjs?v=d5-1";
-import {filterInboxConversations} from "./domain/conversation-query.mjs";
+import {createInboxQueryService} from "./services/inbox-query.mjs";
+import {createMockInboxQueryRepository} from "./data/adapters/mock/inbox-query.mjs";
 import {providers} from "./channels.js?v=channels-1";
 import {nameOf,avatar,editContact,configureContactIdentity} from "./contact-identity.js?v=channel-popover-1";
 import {createContactService} from "./services/contacts.mjs";
@@ -35,6 +36,7 @@ const chatScroll=createChatScrollController({viewport:messages,composer:$("#comp
 const state={active:"mariana",filter:"all",selectedChannels:null,query:"",theme:appearance.mode};
 configureContactIdentity(createContactService(createMockContactRepository()));
 const conversationReadService=createConversationReadService(createMockConversationReadRepository(conversations));
+const inboxQueryService=createInboxQueryService(createMockInboxQueryRepository(conversations));
 const messageCommands=createMessageCommandService(createMockMessageCommandRepository(conversations));
 const conversationActions=createConversationActionService(createMockConversationActionRepository(conversations));
 
@@ -75,8 +77,17 @@ function renderOrigin(c){
  $("#detail-connection").replaceChildren(status);
 }
 
-function renderList(){
- const shown=filterInboxConversations(conversations,{canAccess,channels,selectedChannels:state.selectedChannels,filter:state.filter,query:state.query,nameOf,conversationMatchesChannels});
+let inboxRenderGeneration=0;
+const inboxCriteria=selectedChannels=>({
+ canAccess,channels,selectedChannels,filter:state.filter,query:state.query,
+ nameOf,conversationMatchesChannels
+});
+async function renderList(){
+ const generation=++inboxRenderGeneration;
+ try{
+ const shown=await inboxQueryService.list(inboxCriteria(state.selectedChannels));
+ // Requisições antigas não podem substituir os filtros ou contadores atuais.
+ if(generation!==inboxRenderGeneration)return;
  list.replaceChildren();
  for(const c of shown){const b=node("button","conversation"+(state.active===c.id?" selected":""));b.type="button";b.dataset.id=c.id;b.setAttribute("aria-label",nameOf(c)+(c.unread?", "+c.unread+" não lidas":""));b.setAttribute("aria-current",state.active===c.id?"true":"false");
  const av=avatar(c),body=node("span","conversation-content"),head=node("span","conversation-head"),preview=node("span","conversation-preview");
@@ -86,6 +97,12 @@ function renderList(){
  body.append(head,preview,origin);b.append(av,body);list.append(b)}
  if(!shown.length)list.append(node("p","placeholder","Nenhuma conversa encontrada."));
  $("#conversation-count").textContent=String(shown.length);
+ }catch(error){
+  if(generation!==inboxRenderGeneration)return;
+  list.replaceChildren(node("p","placeholder","Não foi possível carregar as conversas."));
+  $("#conversation-count").textContent="0";
+  toast("Falha ao consultar a caixa de entrada: "+error.message);
+ }
 }
 function renderMessages(){
  const conversation=active(),allowed=Boolean(conversation&&canAccess(conversation));
@@ -115,11 +132,20 @@ function clearActive(){
  $("#chat-menu").disabled=true;
  renderList();renderMessages();updateD3();
 }
-function onChannelSelection(next){
+let channelSelectionGeneration=0;
+async function onChannelSelection(next){
  state.selectedChannels=next;
- const candidates=filterInboxConversations(conversations,{canAccess,channels,selectedChannels:next,filter:"all",nameOf,conversationMatchesChannels});
- if(!candidates.some(c=>c.id===state.active))clearActive();
- renderList();
+ const generation=++channelSelectionGeneration;
+ try{
+  const candidates=await inboxQueryService.list({...inboxCriteria(next),filter:"all",query:""});
+  if(generation!==channelSelectionGeneration)return;
+  if(!candidates.some(c=>c.id===state.active))clearActive();
+  renderList();
+ }catch(error){
+  if(generation!==channelSelectionGeneration)return;
+  toast("Falha ao atualizar canais da Inbox: "+error.message);
+  renderList();
+ }
 }
 const channelPicker=setupChannelPicker({
  trigger:$("#channel-filter-trigger"),
