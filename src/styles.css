@@ -804,13 +804,13 @@ html[data-animations="off"] .voice-dot{animation:none}
 #composer .composer-box{
  border-color:var(--ring);
  border-radius:15px;
- background:color-mix(in srgb,var(--text) 7%,var(--panel));
+ background:var(--panel);
  box-shadow:0 1px 3px color-mix(in srgb,var(--text) 6%,transparent);
  transition:border-color .16s ease,box-shadow .16s ease,background-color .16s ease;
 }
 #composer .composer-box:focus-within{
  border-color:var(--brand-border);
- background:color-mix(in srgb,var(--text) 6%,var(--panel));
+ background:var(--panel);
  box-shadow:0 0 0 1px color-mix(in srgb,var(--brand-border) 27%,transparent);
 }
 #composer .composer-box > .icon-button:not(:disabled),
@@ -856,4 +856,38 @@ html[data-animations="off"] #composer .composer-box{transition:none}
   place-items:center;
   overflow:visible;
   text-overflow:clip;
+}
+
+
+/* Compositor branco no tema claro; superfície elevada no tema escuro. */
+html[data-theme="dark"] #composer .composer-box,
+html[data-theme="dark"] #composer .composer-box:focus-within{
+ background:var(--subtle);
+}
+#composer{
+ background:var(--bg);
+}
+/* Desktop: reservar uma linha flex real para o compositor.
+ * O histórico deve rolar, nunca comprimir ou deslocar o campo para fora da tela. */
+@media(min-width:761px){
+ .shell,.shell.details-open{
+  grid-template-rows:minmax(0,1fr);
+ }
+ .shell > .workspace{
+  display:flex;
+  height:100%;
+  min-height:0;
+  overflow:hidden;
+ }
+ .workspace > .messages{
+  flex:1 1 0%;
+  min-height:0;
+  overflow-y:auto;
+ }
+ .workspace > #composer{
+  display:block;
+  flex:0 0 auto;
+  position:relative;
+  z-index:2;
+ }
 }
