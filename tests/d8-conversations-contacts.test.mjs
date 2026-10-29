@@ -6,7 +6,7 @@ import {createContactService} from "../src/services/contacts.mjs";
 import {filterInboxConversations,filterAccessibleContacts,matchesContactSearch} from "../src/domain/conversation-query.mjs";
 import {conversationMatchesChannels} from "../src/channel-filter.mjs";
 import {conversations} from "../src/data.js";
-import {conversations as fixtures} from "../src/data/adapters/mock/fixtures/conversations.js";
+import {conversations as fixtures} from "../src/data/adapters/mock/fixtures/conversations.js?v=load50-1";
 import {configureContactIdentity,nameOf,updateContact} from "../src/contact-identity.js";
 
 const storage=(seed={})=>{
