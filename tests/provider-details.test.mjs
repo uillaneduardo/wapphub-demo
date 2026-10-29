@@ -29,7 +29,7 @@ test("D6.3 details use repository for editable identification, channels, metrics
  assert.match(list,/renderProviderDetails/);
  assert.match(read("src/styles.css"),/\.provider-health-grid/);
  assert.match(read("src/styles.css"),/\.provider-event-list/);
- assert.match(read("index.html"),/main\.js\?v=d6-4/);
+ assert.match(read("index.html"),/main\.js\?v=chat-jump-1/);
 });
 test("D6.3 repository manages session state separately and bounds history",()=>{
  const repo=read("src/data/adapters/mock/provider-repository.js");
