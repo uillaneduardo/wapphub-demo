@@ -4,13 +4,11 @@
  * Falhas de gravação são propagadas para que a interface não alegue sucesso.
  */
 export function createMockStorage(storage) {
-  if (arguments.length === 0) {
-    try { storage = globalThis.localStorage; } catch { storage = null; }
-  }
+  const resolve=arguments.length===0?()=>{try{return globalThis.localStorage}catch{return null}}:()=>storage;
   return Object.freeze({
     read(key, fallback = null) {
       try {
-        const raw=storage?.getItem(key);
+        const raw=resolve()?.getItem(key);
         if (raw == null) return structuredClone(fallback);
         return JSON.parse(raw);
       } catch {
@@ -18,8 +16,9 @@ export function createMockStorage(storage) {
       }
     },
     write(key, value) {
-      if(!storage || typeof storage.setItem!=="function")throw new Error("Armazenamento local indisponível");
-      storage.setItem(key,JSON.stringify(value));
+      const target=resolve();
+      if(!target || typeof target.setItem!=="function")throw new Error("Armazenamento local indisponível");
+      target.setItem(key,JSON.stringify(value));
       return true;
     }
   });
