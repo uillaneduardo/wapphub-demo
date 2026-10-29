@@ -719,3 +719,35 @@ html[data-animations="off"] *,html[data-animations="off"] *::before,html[data-an
 @media(max-width:760px){.chat-jump-latest{width:44px;height:44px;bottom:calc(var(--chat-jump-composer-height, 88px) + 10px)}}
 @media(prefers-reduced-motion:reduce){.chat-jump-latest:not([hidden]){animation:none}}
 html[data-animations="off"] .chat-jump-latest:not([hidden]){animation:none}
+
+
+/* Compositor de voz — captura local, controles compactos e estados acessíveis */
+.composer.voice-active .composer-box > :not(.voice-composer){display:none}
+.composer.voice-active .composer-foot,.composer.voice-active .d2-draft{display:none}
+.voice-composer{flex:1;min-width:0;width:100%}
+.voice-composer[hidden],.voice-recording[hidden],.voice-preview[hidden]{display:none!important}
+.voice-recording,.voice-preview{display:flex;align-items:center;gap:8px;width:100%;min-width:0;min-height:34px}
+.voice-state{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;min-width:0;font-size:11px;color:var(--muted);font-weight:550}
+.voice-state span:last-child{overflow:hidden;text-overflow:ellipsis}
+.voice-dot{width:7px;height:7px;border-radius:50%;background:#dc2626;flex:none;animation:voice-record-pulse 1.4s ease-in-out infinite}
+.voice-recording.is-paused .voice-dot{animation:none;opacity:.45}
+.voice-time{color:var(--muted);white-space:nowrap;font-size:11px;font-variant-numeric:tabular-nums}
+.voice-control{color:var(--text);border:1px solid var(--line);width:34px;height:34px}
+.voice-control:hover{background:var(--hover)}
+.voice-trash{color:var(--muted);margin-left:auto}
+.voice-trash:hover{color:#dc2626;background:var(--hover)}
+.voice-wave{flex:1;min-width:24px;height:28px;max-width:180px;display:block}
+.voice-preview #voice-progress{flex:1;min-width:30px;accent-color:var(--brand-accent);height:22px;cursor:pointer}
+.voice-send{flex:none}
+.voice-preview audio{display:none}
+@keyframes voice-record-pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@media(max-width:1040px){.voice-state{font-size:0;gap:0}.voice-dot{width:8px;height:8px;margin:0 4px}}
+@media(max-width:760px){
+ .composer.voice-active .composer-box{padding:7px}
+ .voice-recording,.voice-preview{gap:6px}
+ .voice-control,.voice-trash,.voice-send{min-width:36px;min-height:36px}
+ .voice-wave{max-width:none}
+}
+@media(max-width:360px){.voice-recording,.voice-preview{gap:4px}.voice-time{font-size:10px}.voice-control,.voice-trash,.voice-send{width:32px;min-width:32px}}
+@media(prefers-reduced-motion:reduce){.voice-dot{animation:none}}
+html[data-animations="off"] .voice-dot{animation:none}
