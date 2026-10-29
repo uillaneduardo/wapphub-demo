@@ -70,10 +70,28 @@ test("contorno e ícones do compositor ganham contraste com tema claro e escuro"
 test("compositor distingue superfície do fundo e mantém contraste dos ícones",()=>{
  const css=source("src/styles.css");
  const rule=css.match(/#composer \.composer-box\s*\{([^}]+)\}/)?.[1]||"";
- assert.match(rule,/background:color-mix\(in srgb,var\(--text\) 7%,var\(--panel\)\)/);
+ assert.match(rule,/background:var\(--panel\)/);
  assert.match(rule,/border-radius:15px/);
  assert.match(css,/#composer \.composer-box textarea::placeholder\s*\{/);
  assert.match(css,/#composer \.composer-box > \.icon-button svg,/);
  assert.match(css,/stroke-width:2\.15/);
  assert.match(css,/#composer \.composer-box:focus-within/);
+});
+
+test("compositor branco no claro e escuro elevado sem tintura cinza",()=>{
+ const css=source("src/styles.css"),html=source("index.html");
+ const rule=css.match(/#composer \.composer-box\s*\{([^}]+)\}/)?.[1]||"";
+ const focused=css.match(/#composer \.composer-box:focus-within\s*\{([^}]+)\}/)?.[1]||"";
+ assert.match(rule,/background:var\(--panel\)/);
+ assert.match(focused,/background:var\(--panel\)/);
+ assert.match(css,/html\[data-theme="dark"\] #composer \.composer-box/);
+ assert.match(css,/background:var\(--subtle\)/);
+ assert.match(html,/<form class="composer" id="composer">/);
+});
+test("desktop reserva espaço ao compositor sem ocultá-lo sob histórico longo",()=>{
+ const css=source("src/styles.css");
+ assert.match(css,/@media\(min-width:761px\)\{[\s\S]*?\.shell > \.workspace\s*\{/);
+ assert.match(css,/\.shell > \.workspace\s*\{[^}]*display:flex;[^}]*height:100%;[^}]*min-height:0;[^}]*overflow:hidden;/);
+ assert.match(css,/\.workspace > \.messages\s*\{[^}]*flex:1 1 0%;[^}]*min-height:0;[^}]*overflow-y:auto;/);
+ assert.match(css,/\.workspace > #composer\s*\{[^}]*display:block;[^}]*flex:0 0 auto;/);
 });
