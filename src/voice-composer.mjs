@@ -22,7 +22,7 @@ export function selectVoiceMimeType(isSupported) {
   return "";
 }
 
-export function setupVoiceComposer({getConversation, canStart, hasPendingAttachment, onSend, onSent, notify}) {
+export function setupVoiceComposer({getConversation, canStart, canTextSend, hasPendingAttachment, onSend, onSent, notify}) {
   const $ = id => document.getElementById(id);
   const form = $("composer");
   const mic = $("voice-start");
@@ -81,7 +81,7 @@ export function setupVoiceComposer({getConversation, canStart, hasPendingAttachm
     const playing = !audio.paused && !audio.ended;
     playIcon.setAttribute("href", playing ? "#i-pause" : "#i-play");
     play.setAttribute("aria-label", playing ? "Pausar prévia" : "Reproduzir prévia");
-    sendVoice.disabled = state !== "preview" || playing;
+    sendVoice.disabled = state !== "preview" || playing || !canTextSend(getConversation());
   }
   function render() {
     const busy = active();
@@ -89,8 +89,8 @@ export function setupVoiceComposer({getConversation, canStart, hasPendingAttachm
     box.hidden = !busy;
     recordView.hidden = !isCapturing();
     previewView.hidden = !["preview", "sending"].includes(state);
-    mic.disabled = busy;
-    textSend.disabled = busy;
+    mic.disabled = busy || !canTextSend(getConversation());
+    textSend.disabled = busy || !canTextSend(getConversation());
     recordStatus.textContent = ({
       requesting: "Solicitando acesso ao microfone…",
       recording: "Gravando áudio",
@@ -400,6 +400,10 @@ export function setupVoiceComposer({getConversation, canStart, hasPendingAttachm
   render();
   return Object.freeze({
     isActive: active,
+    syncPermissions() {
+      if (active() && !canTextSend(getConversation())) reset();
+      else render();
+    },
     setConversation(id) {
       if (id !== conversationId) {
         if (active()) reset();
