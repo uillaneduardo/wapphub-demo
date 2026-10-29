@@ -37,8 +37,21 @@ export function attachMediaBlur(surface,content,key,{onToggle}={}){
  button.type="button";button.className="media-blur-toggle";
  button.onclick=e=>{
   e.preventDefault();e.stopPropagation();
-  toggleMediaBlurred(key);
-  onToggle?.(isMediaBlurred(key));
+  try{
+   toggleMediaBlurred(key);
+   onToggle?.(isMediaBlurred(key));
+  }catch{
+   const region=document.getElementById("toast-region");
+   if(region){
+    const toast=document.createElement("div");
+    toast.className="toast";toast.setAttribute("role","alert");
+    toast.textContent="Não foi possível salvar a preferência desta mídia.";
+    region.append(toast);setTimeout(()=>toast.remove(),3800);
+   }else{
+    button.title="Falha ao salvar a preferência";
+    button.setAttribute("aria-label","Não foi possível salvar a preferência desta mídia");
+   }
+  }
  };
  surface.append(button);
  updateSurface(surface);
