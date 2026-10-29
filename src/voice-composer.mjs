@@ -37,10 +37,8 @@ export function setupVoiceComposer({getConversation, canStart, canTextSend, hasP
   const active = () => state !== "idle";
   const lengthMs = () => elapsedVoiceTime(recordedMs, startedAt, clock());
   const isRecording = () => state === "recording";
-  const canSendNow = () => ["recording", "paused"].includes(state) &&
-    lengthMs() >= 250 && canTextSend(getConversation()) && !!decodedParts.length || (
-      state === "recording" && lengthMs() >= 250 && canTextSend(getConversation())
-    );
+  const canSendNow = () => lengthMs() >= 250 && canTextSend(getConversation()) &&
+    (state === "recording" || (state === "paused" && decodedParts.length > 0));
 
   function updateClock() {
     elapsed.textContent = formatVoiceTime(lengthMs());
@@ -68,7 +66,7 @@ export function setupVoiceComposer({getConversation, canStart, canTextSend, hasP
     textSend.disabled = busy || !canTextSend(getConversation());
     const paused = state === "paused";
     pausedPlayer.hidden = !paused || !previewUrl;
-    wave.hidden = paused;
+    wave.hidden = !isRecording();
     status.textContent = ({
       requesting:"Aguardando microfone…", recording:"Gravando áudio",
       pausing:"Preparando trecho…", paused:"Gravação pausada",
@@ -82,7 +80,7 @@ export function setupVoiceComposer({getConversation, canStart, canTextSend, hasP
     discard.disabled = state === "sending";
     sendButton.disabled = !canSendNow();
     sendButton.title = "Finalizar e enviar áudio";
-    recordView.classList.toggle("is-paused", paused);
+    recordView.classList.toggle("is-paused", !isRecording());
     updateClock();
     updatePlayback();
   }
@@ -325,14 +323,16 @@ export function setupVoiceComposer({getConversation, canStart, canTextSend, hasP
       stopVisualTimers();
       render();
     }
+    let sentUrl = null;
     try {
       if (recording && !await finalizeSegment(token)) return;
       if (token !== generation) return;
       if (!previewUrl) buildPreview();
       audio.pause();
       state = "sending"; render();
-      const sentUrl = previewUrl;
+      sentUrl = previewUrl;
       const blob = previewBlob;
+      previewUrl = null; // O URL fica reservado até a operação finalizar.
       // Gravação em WAV garante duração finita e seek real em dispositivos móveis.
       const result = await onSend(conversation,{
         kind:"audio",name:"Mensagem de voz",mimeType:blob.type,
@@ -340,10 +340,10 @@ export function setupVoiceComposer({getConversation, canStart, canTextSend, hasP
       });
       if (!result) throw new Error("A mensagem não foi registrada");
       if (token !== generation) return;
-      previewUrl = null; // URL pertence à mensagem e permanece acessível no chat.
       reset();
       onSent(conversation);
     } catch(error) {
+      if (sentUrl) URL.revokeObjectURL(sentUrl);
       if (token !== generation) return;
       if (!previewUrl && decodedParts.length) buildPreview();
       state = "paused";
