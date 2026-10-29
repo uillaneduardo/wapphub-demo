@@ -14,7 +14,7 @@ export function createMockMessageCommandRepository(conversations) {
       if(!message||message.conversationId!==id||(!message.body?.trim()&&!message.file))throw new Error("Mensagem inválida");
       if(c.messages.some(m=>!Array.isArray(m)&&m.id===message.id))return {id:message.id};
       c.messages.push({...message});
-      c.preview=message.body||"📎 "+message.file.name;c.time=message.time;
+      c.preview=message.body||(message.file?.kind==="audio"?"🎙 Mensagem de voz":"📎 "+message.file.name);c.time=message.time;
       return {id:message.id};
     },
     async forward(sourceId,ids,destinationIds,{time}={}) {

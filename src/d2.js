@@ -116,7 +116,8 @@ const searchCount=$("#message-search-count"),clear=$("#message-search-clear");
 if(searchCount)searchCount.textContent=query?(n===1?"1 resultado":n+" resultados"):"";
 if(clear)clear.hidden=!query;
 selectionBar();recentlySentMessageId=null;return {searching:Boolean(query)}}
-export async function sendD2(c,value){const body=value.trim();if(!body&&!file)return false;const m={id:newId(),conversationId:c.id,direction:"out",body,time:stamp(),status:"sent"};if(reply&&reply.conversationId===c.id&&byId(c,reply.messageId))m.reply={...reply};if(file)m.file=file;await commands.send(c.id,m);file=null;recentlySentMessageId=m.id;reply=null;draft();return true}
+export function hasD2Attachment(){return Boolean(file)}
+export async function sendD2(c,value,mediaOverride=null){const body=value.trim();if(!body&&!file&&!mediaOverride)return false;if(file&&mediaOverride)throw new Error("Envie ou descarte o anexo antes do áudio");const m={id:newId(),conversationId:c.id,direction:"out",body,time:stamp(),status:"sent"};if(reply&&reply.conversationId===c.id&&byId(c,reply.messageId))m.reply={...reply};if(file||mediaOverride)m.file=mediaOverride||file;await commands.send(c.id,m);file=null;recentlySentMessageId=m.id;reply=null;draft();return true}
 export function resetD2Selection(){swipeGesture?.cancel();if(replyJumpTimer){clearTimeout(replyJumpTimer);replyJumpTimer=null}$("#messages")?.querySelectorAll(".reply-jump-highlight").forEach(row=>row.classList.remove("reply-jump-highlight"));reply=null;file=null;query="";selected.clear();selectionMode=false;const search=$("#message-search"),field=$("#message-search-input");if(search)search.hidden=true;if(field)field.value="";draft();closeDialog();closeMenu();selectionBar()}
 export function setupD2(getActive,getAll,onChange,messageCommands,attendanceCommands){active=getActive;all=getAll;refresh=onChange;commands=messageCommands;conversationActions=attendanceCommands;const area=$("#messages");
  swipeGesture=setupSwipeReply({
