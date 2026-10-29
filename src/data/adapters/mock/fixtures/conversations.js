@@ -1,4 +1,4 @@
-import {createLoadConversations} from "./load-conversations.mjs";
+import {createLoadConversations} from "./load-conversations.mjs?v=dates-1";
 // Dados fictícios: nunca representam mensagens reais.
 export const conversations=[
 {id:"mariana",name:"Mariana Costa",initials:"MC",phone:"+55 (81) 99999-1001",time:"14:32",unread:2,assigned:true,agent:"Você",status:"Em atendimento",preview:"Perfeito, fico no aguardo!",messages:[["in","Olá! Gostaria de saber se meu equipamento já está pronto.","14:16"],["out","Oi, Mariana! Estou verificando a situação para você.","14:19"],["in","Obrigada! Se possível, preciso retirar ainda hoje.","14:23"],["out","Conseguimos finalizar o diagnóstico. Vou confirmar o horário de retirada.","14:28"],["in","Perfeito, fico no aguardo!","14:32"]]},
