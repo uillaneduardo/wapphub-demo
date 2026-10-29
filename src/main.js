@@ -37,6 +37,14 @@ configureContactIdentity(createContactService(createMockContactRepository()));
 const conversationReadService=createConversationReadService(createMockConversationReadRepository(conversations));
 const messageCommands=createMessageCommandService(createMockMessageCommandRepository(conversations));
 const conversationActions=createConversationActionService(createMockConversationActionRepository(conversations));
+
+seedMediaFixtures(conversations);
+normalizeMockConversations(conversations);
+initializeAssignments(conversations,adminState().members);
+
+const active=()=>conversations.find(c=>c.id===state.active);
+const node=(tag,cls,text)=>{const x=document.createElement(tag);if(cls)x.className=cls;if(text!==undefined)x.textContent=text;return x};
+const toast=text=>{const item=node("div","toast",text);$("#toast-region").append(item);setTimeout(()=>item.remove(),3800)};
 const voiceComposer=setupVoiceComposer({
  getConversation:active,
  canStart:assertCanSend,
@@ -49,13 +57,6 @@ const voiceComposer=setupVoiceComposer({
  },
  notify:toast
 });
-seedMediaFixtures(conversations);
-normalizeMockConversations(conversations);
-initializeAssignments(conversations,adminState().members);
-
-const active=()=>conversations.find(c=>c.id===state.active);
-const node=(tag,cls,text)=>{const x=document.createElement(tag);if(cls)x.className=cls;if(text!==undefined)x.textContent=text;return x};
-const toast=text=>{const item=node("div","toast",text);$("#toast-region").append(item);setTimeout(()=>item.remove(),3800)};
 const originOf=c=>channelIdentity(channels.find(channel=>channel.id===c?.channelId),providers);
 function renderOrigin(c){
  const header=$("#chat-origin");
