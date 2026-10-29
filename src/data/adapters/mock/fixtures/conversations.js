@@ -13,3 +13,11 @@ const bindings={mariana:"wa-sales",ricardo:"wa-sales",empresa:"web-support",patr
 for(const conversation of conversations)conversation.channelId=bindings[conversation.id];
 // Carga para inspecionar a Inbox sob volume, sem substituir as seis conversas originais.
 conversations.push(...createLoadConversations());
+// Históricos distribuídos entre dias diferentes para validar a navegação cronológica.
+for(const conversation of conversations.slice(0,6)){
+ const count=conversation.messages.length;
+ conversation.messages=conversation.messages.map((message,index)=>{
+  if(Array.isArray(message))return {direction:message[0],body:message[1],time:message[2],demoDayOffset:conversation.id==="patricia"?-1:conversation.id==="lucas"||conversation.id==="ana"?-3:-(Math.floor((count-1-index)/2))};
+  return message;
+ });
+}
