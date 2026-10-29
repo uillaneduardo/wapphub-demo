@@ -85,3 +85,11 @@ test("no mobile um touchmove não passivo controla arrasto horizontal, sem imped
  assert.ok(adapter.includes("g.started&&g.armed&&"));
  assert.ok(adapter.includes("if(gesture&&!gesture.started)clear()"));
 });
+
+test("toque único nos controles de mídia não é interpretado como swipe nem suprimido",()=>{
+ const adapter=src("src/swipe-reply.js");
+ assert.match(adapter,/const excluded="button,/);
+ assert.match(adapter,/target\.closest\(excluded\)/);
+ assert.match(adapter,/if\(e\.target\.closest\("button,input,textarea,select,a,video,audio,\[contenteditable\]"\)\)return/);
+ assert.match(adapter,/if\(row\?\.dataset\.messageId!==suppressMessageId\)return/);
+});

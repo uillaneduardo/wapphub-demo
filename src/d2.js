@@ -1,6 +1,6 @@
 import {attachMediaBlur} from "./media-blur.js?v=motion-1";
 import {mediaVisibilityKey} from "./media-visibility-store.js?v=motion-1";
-import {setupSwipeReply} from "./swipe-reply.js?v=swipe-2&area-2";
+import {setupSwipeReply} from "./swipe-reply.js?v=swipe-2&area-2&controls-1";
 import {resolveReplyTarget} from "./reply-navigation.mjs?v=reply-1";
 import {createMediaPlayer,openMediaViewer} from "./media-player.js?v=motion-1&playback-2";
 import {canAccess} from "./d3.js?v=d4-6";

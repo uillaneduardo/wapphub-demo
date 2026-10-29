@@ -799,3 +799,26 @@ html[data-animations="off"] .voice-dot{animation:none}
   border:2px solid var(--brand-accent);
   box-shadow:0 0 0 1px var(--brand-text);
 }
+
+/* Compositor · hierarquia mais nítida sem alterar dimensões nem tokens da organização. */
+#composer .composer-box{
+ border-color:var(--ring);
+ box-shadow:0 0 0 1px color-mix(in srgb,var(--ring) 17%,transparent);
+ transition:border-color .16s ease,box-shadow .16s ease;
+}
+#composer .composer-box:focus-within{
+ border-color:var(--brand-border);
+ box-shadow:0 0 0 1px color-mix(in srgb,var(--brand-border) 24%,transparent);
+}
+#composer .composer-box > .icon-button:not(:disabled),
+#composer .voice-recording .icon-button:not(:disabled){
+ color:var(--text);
+}
+#composer .composer-box > .icon-button svg,
+#composer .voice-recording .icon-button svg{
+ stroke-width:2;
+}
+@media(prefers-reduced-motion:reduce){
+ #composer .composer-box{transition:none}
+}
+html[data-animations="off"] #composer .composer-box{transition:none}
