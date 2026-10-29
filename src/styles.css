@@ -802,16 +802,34 @@ html[data-animations="off"] .voice-dot{animation:none}
 
 /* Compositor · hierarquia mais nítida sem alterar dimensões nem tokens da organização. */
 #composer .composer-box{
- border-color:var(--ring);
- border-radius:15px;
- background:var(--panel);
- box-shadow:0 1px 3px color-mix(in srgb,var(--text) 6%,transparent);
- transition:border-color .16s ease,box-shadow .16s ease,background-color .16s ease;
+ border:0;
+ border-radius:16px;
+ background:color-mix(in srgb,var(--text) 4%,var(--panel));
+ box-shadow:0 7px 28px color-mix(in srgb,var(--text) 10%,transparent),
+            0 2px 7px color-mix(in srgb,var(--text) 5%,transparent);
+ transition:box-shadow .16s ease,background-color .16s ease;
 }
 #composer .composer-box:focus-within{
- border-color:var(--brand-border);
- background:var(--panel);
- box-shadow:0 0 0 1px color-mix(in srgb,var(--brand-border) 27%,transparent);
+ border:0;
+ background:color-mix(in srgb,var(--text) 4%,var(--panel));
+ box-shadow:0 7px 28px color-mix(in srgb,var(--text) 10%,transparent),
+            0 2px 7px color-mix(in srgb,var(--text) 5%,transparent);
+}
+/* A borda global de focus-visible não se aplica ao campo de texto do compositor;
+   controles independentes preservam seu foco acessível. */
+#composer .composer-box #message-input:focus,
+#composer .composer-box #message-input:focus-visible{
+ outline:none;
+ box-shadow:none;
+ border:0;
+}
+#composer .composer-box #message-input{
+ font-size:16px;
+ line-height:24px;
+ min-height:36px;
+ max-height:144px;
+ resize:none;
+ overflow-y:auto;
 }
 #composer .composer-box > .icon-button:not(:disabled),
 #composer .voice-recording .icon-button:not(:disabled){
@@ -862,7 +880,7 @@ html[data-animations="off"] #composer .composer-box{transition:none}
 /* Compositor branco no tema claro; superfície elevada no tema escuro. */
 html[data-theme="dark"] #composer .composer-box,
 html[data-theme="dark"] #composer .composer-box:focus-within{
- background:var(--subtle);
+ background:color-mix(in srgb,var(--text) 5%,var(--panel));
 }
 #composer{
  background:var(--bg);
