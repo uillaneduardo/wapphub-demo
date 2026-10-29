@@ -1,30 +1,28 @@
-# Compositor de voz (demo)
+# Compositor de voz (demo) — v2
 
-O compositor de /inbox/:conversationId permite gravar uma mensagem com o microfone local. Esta é uma **simulação de envio**; não chama o WappHub Core ou o provider Baileys.
+O microfone do compositor usa captura local e grava trechos reais pelo navegador. Esta funcionalidade não envia ao WhatsApp, usa o adaptador mock da demonstração.
 
-## Fluxo e estados
+## Fluxo
+1. **Microfone:** solicitar autorização e iniciar uma gravação, com tempo decorrido e barras responsivas ao volume do microfone enquanto a captação estiver ativa.
+2. **Pausar:** encerra e decodifica o trecho atual, mantendo-o no rascunho. O usuário pode **ouvir, pausar a escuta e navegar pelo tempo** do áudio parcial, com duração finita e barra de progresso.
+3. **Retomar:** inicia um novo trecho no mesmo rascunho. O trecho pausado continua preservado e a duração exclui intervalos de pausa.
+4. **Lixeira:** descarta todos os trechos, interrompe o microfone e libera URLs.
+5. **Enviar:** tanto gravando quanto pausado, **finaliza e envia diretamente**, sem etapa adicional de stop ou prévia obrigatória. Os segmentos decodificados são concatenados em um WAV PCM mono 16 bits (seekable) antes do envio simulado. A mensagem aparece na conversa e na biblioteca de mídias.
 
-- **Inativo**: microfone ao lado de Enviar; texto e anexos continuam com o fluxo existente.
-- **Solicitando microfone**: o navegador pede permissão. Cancelar interrompe a solicitação lógica e descarta qualquer stream concedido depois.
-- **Gravando**: status, ponto pulsante, duração real (sem tempo pausado), intensidade sonora quando Web Audio está disponível, botões de pausar, parar e descartar.
-- **Pausado**: a gravação fica preservada em um único MediaRecorder; retomar continua no mesmo áudio, sem contabilizar a pausa.
-- **Parando**: aguarda o último bloco do MediaRecorder e constrói um Blob de áudio.
-- **Prévia**: reproduzir/pausar, navegar na linha do tempo, descartar ou enviar. Enviar áudio fica indisponível durante a reprodução, voltando ao pausar ou ao final.
-- **Enviando**: bloqueia interações duplicadas e usa sendD2/serviço de comandos/adapter mock. O áudio aparece como mensagem na conversa e na biblioteca de mídias.
+O botão de envio de **texto** permanece inativo enquanto a gravação estiver ativa. O microfone é liberado no descarte, troca de conversa, perda de permissão, saída da página e após o envio. O compositor segue as restrições de envio da demo.
 
-O **Enviar mensagem** original permanece bloqueado enquanto qualquer estado de voz está ativo. A gravação descartada revoga sua object URL e encerra tracks de microfone, analisador e temporizadores. Uma gravação enviada transfere a URL para a mensagem mock; não a revoga antes de deixar o player utilizá-la. O gravador também é descartado ao trocar de conversa, navegar para outro módulo, perder acesso à conversa ou fechar a página.
+## Player e swipe
+O player de áudio usa duração real da mídia; se ela estiver indefinida ou infinita (WebM do MediaRecorder), tenta a duração registrada na mensagem e o intervalo seekable do navegador. A posição é atualizada também entre os eventos timeupdate. A onda sonora **decorativa e fixa foi removida** das mensagens enviadas/recebidas; permanecem controles reais de play, progresso, duração e velocidade.
 
-Anexos pendentes devem ser enviados ou descartados antes da gravação; o estado de resposta citada é preservado. Os formatos são escolhidos via MediaRecorder.isTypeSupported, sem dependências externas. Requer contexto seguro (HTTPS ou localhost) e permissão do microfone.
+O gesto de arrastar para responder pode começar em toda a linha da mensagem, inclusive em áreas de áudio não interativas. Preserva os sliders de busca de áudio, links, vídeo, texto editável e ações individuais. A intenção horizontal só é bloqueada após deslocamento suficiente, preservando a rolagem vertical.
 
-## Matriz de homologação no navegador
+## Homologação Android + desktop
+- Gravar, pausar por mais de 10s e retomar; verificar que o intervalo não cresce enquanto pausado.
+- Em pausa, reproduzir o trecho parcial e mover o seek para metade e fim.
+- Enviar diretamente durante a gravação e diretamente da pausa; conferir o player da mensagem enviada, duração correta e bolinha acompanhando o áudio.
+- Verificar que o desenho de onda fictícia desapareceu das mensagens já enviadas.
+- Descartar e trocar de conversa durante a captura; verificar liberação do microfone.
+- Arrastar para responder a partir do corpo da mensagem ou espaço ao redor de um áudio; controles de play e da barra continuam utilizáveis.
+- Testar acesso ao microfone negado, ausência de suporte, modo escuro, largura de 360px e movimento reduzido.
 
-1. Permitir microfone, gravar alguns segundos, pausar, esperar e retomar: contador não deve incluir o tempo pausado.
-2. Parar, reproduzir, pausar e arrastar a barra: o conteúdo deve ser audível e a posição deve atualizar.
-3. Verificar que **Enviar mensagem** não atua durante gravação/prévia e **Enviar áudio** só atua após parar, quando a prévia não estiver reproduzindo.
-4. Descartar enquanto grava, depois de pausar e durante a prévia: a interface volta ao texto, sem criar mensagem.
-5. Enviar áudio e confirmar player na conversa, prévia “Mensagem de voz” na lista e item no gerenciamento de mídias.
-6. Trocar de conversa durante gravação/solicitação de permissão e verificar que o microfone é liberado.
-7. Testar navegador sem autorização, estado desconectado, perfil sem acesso e atendimento finalizado.
-8. Repetir em tela estreita (360px), tema escuro e preferência de movimento reduzido.
-
-Testes unitários em tests/voice-composer.test.mjs cobrem duração, cálculo das pausas e negociação MIME. A demo não persiste áudios capturados após recarregar a página, assim como outras mensagens locais.
+**Limitação:** a navegação do áudio ainda em gravação exige tocar em **Pausar**, porque o navegador precisa finalizar o trecho corrente antes de decodificar e criar uma mídia navegável. Na retomada, a gravação continua do ponto pausado. O WAV garante navegação no arquivo final, mas utiliza mais memória que um formato compactado. Os dados da demo são temporários.
