@@ -1,6 +1,6 @@
 import {channelIdentity} from "./channel-identity.mjs";
 import {filterAccessibleContacts} from "./domain/conversation-query.mjs";
-import {renderMediaLibrary} from "./media-gallery.js?v=origin-1";
+import {renderMediaLibrary} from "./media-gallery.js?v=origin-1&playback-2";
 import {canAccess} from "./d3.js?v=d4-6";
 import {getProfile,saveProfile} from "./profile-store.js?v=d4-7";
 import {renderProfilePage} from "./profile-panel.js?v=d4-7";
