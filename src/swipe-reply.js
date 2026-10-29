@@ -7,7 +7,7 @@ import {swipeIntent,swipeOffset,swipeThreshold,swipeDirection,SWIPE_START_PX} fr
  */
 export function setupSwipeReply({area,onReply,isSelectionActive,onGestureStart}){
  let gesture=null,suppressClickUntil=0,suppressMessageId=null;
- const excluded="button,input,textarea,select,a,video,audio,[contenteditable],[data-action],[data-reply-target],.media-player,.file-card";
+ const excluded="input[type=range],textarea,select,a,video,audio,[contenteditable],[data-action],[data-reply-target],.message-actions";
  const touchSupported="ontouchstart" in window;
  function clear(){
   if(!gesture)return;
@@ -34,7 +34,7 @@ export function setupSwipeReply({area,onReply,isSelectionActive,onGestureStart})
   const target=e.target;
   if(!(target instanceof Element)||target.closest(excluded))return;
   const row=target.closest("[data-message-id]");
-  if(!row||!area.contains(row)||!target.closest(".bubble"))return;
+  if(!row||!area.contains(row))return;
   gesture={
    kind,pointerId:id,row,id:row.dataset.messageId,
    direction:row.classList.contains("mine")?"out":"in",
@@ -98,7 +98,7 @@ export function setupSwipeReply({area,onReply,isSelectionActive,onGestureStart})
   if(e.pointerType==="touch"&&touchSupported)return;
   if(e.isPrimary===false||(e.pointerType==="mouse"&&e.button!==0))return;
   start(e,"pointer",e.pointerId);
-  if(gesture&&e.pointerType==="mouse"&&e.cancelable)e.preventDefault();
+  if(gesture&&e.pointerType==="mouse"&&e.cancelable&&!e.target.closest("button,input,a"))e.preventDefault();
  });
  area.addEventListener("pointermove",e=>{
   if(gesture?.kind!=="pointer"||e.pointerId!==gesture.pointerId)return;
