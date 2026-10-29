@@ -45,8 +45,19 @@ export function renderSettings(root,{sectionId="organizacao",onSectionChange=()=
     const toggle=el("input","settings-preference-toggle");
     toggle.type="checkbox";toggle.dataset.appearanceKey=key;toggle.checked=appearance[key];
     toggle.setAttribute("aria-label",title);
-    toggle.onchange=()=>setAppearance({[key]:toggle.checked});
-    row.append(info,toggle);panel.append(row);
+    const feedback=el("p","provider-form-error","");
+    feedback.hidden=true;feedback.setAttribute("role","alert");
+    toggle.onchange=()=>{
+      try{
+        setAppearance({[key]:toggle.checked});
+        feedback.hidden=true;feedback.textContent="";
+      }catch{
+        toggle.checked=Boolean(appearance[key]);
+        feedback.textContent="Não foi possível salvar esta preferência no navegador.";
+        feedback.hidden=false;
+      }
+    };
+    row.append(info,toggle);panel.append(row,feedback);
   }
   preference("Animações da interface","Ativar transições discretas em menus, ações e mensagens. A opção do dispositivo para reduzir movimento continua sendo respeitada.","animations");
   preference("Desfocar prévias de mídias","Aplicar desfoque por padrão a imagens e vídeos. O botão de olho permite ajustar cada mídia individualmente.","blurMedia");
