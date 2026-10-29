@@ -17,7 +17,8 @@ const KEY="wapphub-demo-contacts-v1";
 
 test("legacy fixture export preserves identity, IDs, channels and message tuples",()=>{
  assert.equal(conversations,fixtures);
- assert.equal(conversations.length,6);
+ assert.equal(conversations.length,56);
+ assert.equal(conversations.filter(c=>c.id.startsWith("load-")).length,50);
  assert.equal(conversations.find(c=>c.id==="mariana").channelId,"wa-sales");
  assert.ok(Array.isArray(conversations[0].messages[0]));
 });
