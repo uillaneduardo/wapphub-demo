@@ -803,12 +803,15 @@ html[data-animations="off"] .voice-dot{animation:none}
 /* Compositor · hierarquia mais nítida sem alterar dimensões nem tokens da organização. */
 #composer .composer-box{
  border-color:var(--ring);
- box-shadow:0 0 0 1px color-mix(in srgb,var(--ring) 17%,transparent);
- transition:border-color .16s ease,box-shadow .16s ease;
+ border-radius:15px;
+ background:color-mix(in srgb,var(--text) 7%,var(--panel));
+ box-shadow:0 1px 3px color-mix(in srgb,var(--text) 6%,transparent);
+ transition:border-color .16s ease,box-shadow .16s ease,background-color .16s ease;
 }
 #composer .composer-box:focus-within{
  border-color:var(--brand-border);
- box-shadow:0 0 0 1px color-mix(in srgb,var(--brand-border) 24%,transparent);
+ background:color-mix(in srgb,var(--text) 6%,var(--panel));
+ box-shadow:0 0 0 1px color-mix(in srgb,var(--brand-border) 27%,transparent);
 }
 #composer .composer-box > .icon-button:not(:disabled),
 #composer .voice-recording .icon-button:not(:disabled){
@@ -816,7 +819,20 @@ html[data-animations="off"] .voice-dot{animation:none}
 }
 #composer .composer-box > .icon-button svg,
 #composer .voice-recording .icon-button svg{
- stroke-width:2;
+ width:20px;
+ height:20px;
+ stroke-width:2.15;
+}
+#composer .composer-box > .icon-button:not(:disabled):hover{
+ background:color-mix(in srgb,var(--text) 9%,transparent);
+}
+#composer .composer-box textarea::placeholder{
+ color:color-mix(in srgb,var(--text) 52%,var(--panel));
+}
+#composer .composer-box > .send-button svg,
+#composer .voice-send svg{
+ width:17px;
+ height:17px;
 }
 @media(prefers-reduced-motion:reduce){
  #composer .composer-box{transition:none}
