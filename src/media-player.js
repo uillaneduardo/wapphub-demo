@@ -62,7 +62,9 @@ export function createMediaPlayer(file,{compact=false,visibilityKey=null}={}){
    try{media.currentTime=position} catch { /* ainda sem metadados */ }
    refresh();
  }
- play.onclick=async()=>{
+ play.onclick=async e=>{
+   // O toque pertence somente ao player, não à seleção/gestos da mensagem.
+   e.stopPropagation();
    if(media.paused){
      try{
        await media.play();
