@@ -24,7 +24,7 @@ export function renderAccessPanel(panel,{getMembers,getConversations,getChannel,
    toggle.type="checkbox";toggle.checked=getGrant(roles.value,capability.id);
    toggle.disabled=roles.value==="OWNER"||(roles.value==="AGENT"&&capability.id==="manageAssignments");
    toggle.setAttribute("aria-label",capability.label+" para "+roles.selectedOptions[0].textContent);
-   toggle.onchange=()=>setGrant(roles.value,capability.id,toggle.checked);
+   toggle.onchange=()=>{try{setGrant(roles.value,capability.id,toggle.checked)}catch(error){toggle.checked=getGrant(roles.value,capability.id);alert("Não foi possível salvar a permissão: "+error.message)}};
    line.append(copy,toggle);grid.append(line);
   }
  }
@@ -47,7 +47,8 @@ export function renderAccessPanel(panel,{getMembers,getConversations,getChannel,
   }
   assignee.value=conversation.assignedToMemberId||"";
   assignee.onchange=()=>{
-   if(assign(conversation.id,assignee.value||null))copy.querySelector("span").textContent=getChannel(conversation.channelId).name+" · "+conversation.status;
+   try{if(assign(conversation.id,assignee.value||null))copy.querySelector("span").textContent=getChannel(conversation.channelId).name+" · "+conversation.status;else assignee.value=conversation.assignedToMemberId||""}
+   catch(error){assignee.value=conversation.assignedToMemberId||"";alert("Não foi possível salvar a atribuição: "+error.message)}
   };
   selectField.append(assignee);row.append(copy,selectField);list.append(row);
  }
