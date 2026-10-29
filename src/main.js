@@ -20,6 +20,7 @@ import {channels,getChannel} from "./channels.js?v=channels-1";
 import {setupD3,updateD3,canAccess,currentState,assertCanSend} from "./d3.js?v=d4-6";
 import {appearance,setAppearance,openAppearanceSettings} from "./appearance.js?v=motion-1";
 import {renderD2,sendD2,setupD2,resetD2Selection} from "./d2.js?v=motion-1";
+import {createChatScrollController} from "./chat-scroll.js";
 import {conversations} from "./data.js?v=channels-1";
 import {createMessageCommandService} from "./services/message-commands.mjs";
 import {createMockMessageCommandRepository} from "./data/adapters/mock/message-commands.mjs";
@@ -29,6 +30,7 @@ import {createMockConversationActionRepository} from "./data/adapters/mock/conve
 import {createConversationReadService} from "./services/conversation-read.mjs";
 import {createMockConversationReadRepository} from "./data/adapters/mock/conversation-read.mjs";
 const $=s=>document.querySelector(s);const root=$("#app"),list=$("#conversation-list"),messages=$("#messages");
+const chatScroll=createChatScrollController({viewport:messages,composer:$("#composer"),workspace:$("#workspace"),button:$("#chat-jump-latest")});
 const state={active:"mariana",filter:"all",selectedChannels:null,query:"",theme:appearance.mode};
 configureContactIdentity(createContactService(createMockContactRepository()));
 const conversationReadService=createConversationReadService(createMockConversationReadRepository(conversations));
@@ -71,7 +73,20 @@ function renderList(){
  if(!shown.length)list.append(node("p","placeholder","Nenhuma conversa encontrada."));
  $("#conversation-count").textContent=String(shown.length);
 }
-function renderMessages(){if(!active()){messages.replaceChildren(node("p","placeholder","Nenhuma conversa disponível nos canais selecionados."));return}if(!canAccess(active())){messages.replaceChildren(node("p","placeholder","Conversa não atribuída. Aguarde autorização de um OWNER ou SUPERVISOR."));return}renderD2(active(),messages)}
+function renderMessages(){
+ const conversation=active(),allowed=Boolean(conversation&&canAccess(conversation));
+ const before=chatScroll.capture(allowed?conversation.id:null);
+ if(!conversation){
+  messages.replaceChildren(node("p","placeholder","Nenhuma conversa disponível nos canais selecionados."));
+  chatScroll.commit(before);return;
+ }
+ if(!allowed){
+  messages.replaceChildren(node("p","placeholder","Conversa não atribuída. Aguarde autorização de um OWNER ou SUPERVISOR."));
+  chatScroll.commit(before);return;
+ }
+ const result=renderD2(conversation,messages);
+ chatScroll.commit(before,result);
+}
 function select(id,{openChat=true,markRead=openChat}={}){resetD2Selection();state.active=id;const c=active();if(markRead)void conversationReadService.markRead(id).then(()=>renderList()).catch(error=>toast("Falha ao marcar conversa como lida: "+error.message));$("#chat-title").textContent=nameOf(c);$("#chat-avatar").replaceWith(Object.assign(avatar(c),{id:"chat-avatar"}));$("#chat-subtitle").textContent=c.status+" · "+originOf(c).channelName;$("#detail-avatar").replaceWith(Object.assign(avatar(c,"avatar large"),{id:"detail-avatar"}));$("#detail-name").textContent=nameOf(c);$("#detail-phone").textContent=c.phone;$("#detail-agent").textContent=c.agent;$("#detail-status").textContent=c.status;$("#detail-channel").textContent=getChannel(c.channelId).name;renderOrigin(c);renderConversationMedia(c,$("#detail-media"),openConversationMedia);$("#message-input").value="";renderList();renderMessages();$("#details-toggle").disabled=false;$("#find-messages").disabled=false;$("#chat-menu").disabled=false;if(openChat)root.classList.add("chat-open");updateD3()}
 function clearActive(){
  resetD2Selection();state.active=null;
