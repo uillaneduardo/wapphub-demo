@@ -59,10 +59,10 @@ test("play inicia no primeiro toque sem propagar para gestos da conversa",()=>{
  assert.match(swipe,/const excluded="button,/);
  assert.match(swipe,/if\(e\.target\.closest\("button,input,textarea,select,a,video,audio,\[contenteditable\]"\)\)return;/);
 });
-test("contorno e ícones do compositor ganham contraste com tema claro e escuro",()=>{
+test("compositor mantém ícones contrastantes e remove bordas",()=>{
  const css=source("src/styles.css");
- assert.match(css,/#composer \.composer-box\{\s*border-color:var\(--ring\)/);
- assert.match(css,/#composer \.composer-box:focus-within\{/);
+ assert.match(css,/#composer \.composer-box\{\s*border:0;/);
+ assert.match(css,/#composer \.composer-box:focus-within\{\s*border:0;/);
  assert.match(css,/#composer \.composer-box > \.icon-button:not\(:disabled\)/);
  assert.match(css,/color:var\(--text\)/);
 });
@@ -70,7 +70,7 @@ test("contorno e ícones do compositor ganham contraste com tema claro e escuro"
 test("compositor distingue superfície do fundo e mantém contraste dos ícones",()=>{
  const css=source("src/styles.css");
  const rule=css.match(/#composer \.composer-box\s*\{([^}]+)\}/)?.[1]||"";
- assert.match(rule,/background:var\(--panel\)/);
+ assert.match(rule,/background:color-mix\(in srgb,var\(--text\) 4%,var\(--panel\)\)/);
  assert.match(rule,/border-radius:15px/);
  assert.match(css,/#composer \.composer-box textarea::placeholder\s*\{/);
  assert.match(css,/#composer \.composer-box > \.icon-button svg,/);
@@ -82,8 +82,8 @@ test("compositor branco no claro e escuro elevado sem tintura cinza",()=>{
  const css=source("src/styles.css"),html=source("index.html");
  const rule=css.match(/#composer \.composer-box\s*\{([^}]+)\}/)?.[1]||"";
  const focused=css.match(/#composer \.composer-box:focus-within\s*\{([^}]+)\}/)?.[1]||"";
- assert.match(rule,/background:var\(--panel\)/);
- assert.match(focused,/background:var\(--panel\)/);
+ assert.match(rule,/background:color-mix\(in srgb,var\(--text\) 4%,var\(--panel\)\)/);
+ assert.match(focused,/background:color-mix\(in srgb,var\(--text\) 4%,var\(--panel\)\)/);
  assert.match(css,/html\[data-theme="dark"\] #composer \.composer-box/);
  assert.match(css,/background:var\(--subtle\)/);
  assert.match(html,/<form class="composer" id="composer">/);
@@ -94,4 +94,21 @@ test("desktop reserva espaço ao compositor sem ocultá-lo sob histórico longo"
  assert.match(css,/\.shell > \.workspace\s*\{[^}]*display:flex;[^}]*height:100%;[^}]*min-height:0;[^}]*overflow:hidden;/);
  assert.match(css,/\.workspace > \.messages\s*\{[^}]*flex:1 1 0%;[^}]*min-height:0;[^}]*overflow-y:auto;/);
  assert.match(css,/\.workspace > #composer\s*\{[^}]*display:block;[^}]*flex:0 0 auto;/);
+});
+
+test("campo do compositor tem foco sem contorno azul e tipografia mais legível",()=>{
+ const css=source("src/styles.css");
+ const block=css.match(/#composer \.composer-box #message-input:focus,\s*#composer \.composer-box #message-input:focus-visible\s*\{([^}]+)\}/)?.[1]||"";
+ assert.match(block,/outline:none/);
+ assert.match(block,/border:0/);
+ const inputRule=css.match(/#composer \.composer-box #message-input\s*\{([^}]+)\}/)?.[1]||"";
+ assert.match(inputRule,/font-size:16px/);
+ assert.match(inputRule,/max-height:144px/);
+ const box=css.match(/#composer \.composer-box\s*\{([^}]+)\}/)?.[1]||"";
+ assert.match(box,/box-shadow:0 7px 28px/);
+});
+test("altura de textarea é redefinida ao trocar conversa e ao apagar texto",()=>{
+ const main=source("src/main.js");
+ assert.match(main,/\$\("#message-input"\)\.value="";\$\("#message-input"\)\.style\.height=""/);
+ assert.match(main,/if\(!e\.target\.value\)\{e\.target\.style\.height="";return\}/);
 });
