@@ -16,6 +16,7 @@ export function createChatScrollController({viewport,composer,workspace,button})
  const snap=()=>{if(viewport.clientHeight>0)viewport.scrollTop=viewport.scrollHeight};
  const reducedMotion=()=>document.documentElement.dataset.animations==="off"||window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
  const onScroll=()=>{
+  if(!viewport.clientHeight){sync();return}
   if(jumping && !atBottom()){sync();return}
   jumping=false;pinned=atBottom();sync();
  };
