@@ -26,6 +26,7 @@ Execute os testes com Node: node --test tests/*.test.mjs. GitHub Actions valida 
 O Nginx usa fallback SPA para páginas, e devolve 404 para assets inexistentes.
 
 ## Documentação
+- [D8.3 — Persistência consistente em Providers e preferências](docs/D8-3-persistence-consistency.md)
 - [D6.1 — Contratos](docs/architecture/D6-1-provider-contracts.md)
 - [D6.2 — Lista e assistente](docs/D6-2-provider-interface.md)
 - [D6.3 — Detalhes](docs/D6-3-provider-details.md)
