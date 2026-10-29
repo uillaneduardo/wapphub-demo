@@ -691,3 +691,31 @@ html[data-animations="off"] *,html[data-animations="off"] *::before,html[data-an
  .provider-detail-tabs{margin-right:-8px}
 }
 @media(max-width:360px){.provider-health-grid{grid-template-columns:minmax(0,1fr)}}
+
+/* Chat · retorno contextual à mensagem mais recente (D8 UX) */
+.chat-jump-latest{
+ position:absolute;z-index:6;left:50%;
+ bottom:calc(var(--chat-jump-composer-height, 88px) + 12px);
+ transform:translateX(-50%);
+ display:grid;place-items:center;width:44px;height:44px;
+ border:1px solid var(--line);border-radius:999px;
+ background:var(--panel);color:var(--text);
+ box-shadow:0 5px 22px #0000001c;
+ -webkit-tap-highlight-color:transparent;
+ touch-action:manipulation;
+}
+.chat-jump-latest svg{width:20px;height:20px;stroke-width:2}
+.chat-jump-latest[hidden]{display:none!important}
+.chat-jump-latest:hover{background:var(--hover);box-shadow:0 6px 24px #00000026}
+/* A barra de ações múltiplas tem prioridade sobre o atalho flutuante. */
+.workspace:has(#d2-selection) .chat-jump-latest{display:none!important}
+.chat-jump-latest:active{background:var(--brand-soft)}
+.chat-jump-latest:focus-visible{outline:2px solid var(--brand-border);outline-offset:3px}
+.chat-jump-latest:not([hidden]){animation:chat-jump-enter .18s ease-out both}
+@keyframes chat-jump-enter{
+ from{opacity:0;transform:translate(-50%,8px)}
+ to{opacity:1;transform:translate(-50%,0)}
+}
+@media(max-width:760px){.chat-jump-latest{width:44px;height:44px;bottom:calc(var(--chat-jump-composer-height, 88px) + 10px)}}
+@media(prefers-reduced-motion:reduce){.chat-jump-latest:not([hidden]){animation:none}}
+html[data-animations="off"] .chat-jump-latest:not([hidden]){animation:none}
