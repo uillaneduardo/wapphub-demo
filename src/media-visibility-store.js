@@ -1,11 +1,12 @@
 import {mediaVisibilityKey,resolveMediaBlur} from "./media-preferences.mjs";
 import {appearance} from "./appearance.js?v=motion-1";
+import {mockStorage} from "./data/adapters/mock/storage.mjs";
 /**
  * Adaptador local das preferências por mídia: estado de apresentação, não
  * altera anexos nem o Core. A UI acessa apenas estes métodos.
  */
 const KEY="wapphub-demo-media-blur-v1";
-const read=()=>{try{const value=JSON.parse(localStorage.getItem(KEY)||"{}");return value&&typeof value==="object"&&!Array.isArray(value)?value:{}}catch{return {}}};
+const read=()=>{const value=mockStorage.read(KEY,{});return value&&typeof value==="object"&&!Array.isArray(value)?value:{}};
 let overrides=read();
 export {mediaVisibilityKey};
 export function isMediaBlurred(key){
@@ -13,8 +14,9 @@ export function isMediaBlurred(key){
 }
 export function setMediaBlurred(key,value){
  if(!key)return;
- overrides[key]=Boolean(value);
- try{localStorage.setItem(KEY,JSON.stringify(overrides))}catch(e){console.warn("Preferência da mídia não pôde ser salva",e)}
+ const next={...overrides,[key]:Boolean(value)};
+ mockStorage.write(KEY,next);
+ overrides=next;
  window.dispatchEvent(new CustomEvent("wapphub-media-blur-changed",{detail:{key}}));
 }
 export function toggleMediaBlurred(key){setMediaBlurred(key,!isMediaBlurred(key))}
