@@ -57,7 +57,7 @@ export function createLoadConversations(){
    const body=blocks[j%blocks.length];
    const time=formatTime(firstMinute+j*2);
    const message={id:id+":msg-"+String(j+1).padStart(3,"0"),conversationId:id,
-    direction,body,time};
+    direction,body,time,demoDayOffset:-Math.floor((length-1-j)/Math.max(6,Math.floor(length/5)))};
    if(direction==="out")message.status=["sent","delivered","read"][Math.floor(j/2)%3];
    return message;
   });
