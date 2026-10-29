@@ -29,9 +29,9 @@ test("settings and main consume same records and channel registry instance",()=>
  const main=file("src/main.js"),settings=file("src/settings.js"),pages=file("src/pages.js"),manage=file("src/channel-management.js");
  assert.match(main,/initializeAssignments\(conversations,adminState\(\)\.members\)/);
  assert.match(settings,/renderAccessPanel\(panel/);
- assert.match(main,/data\.js\?v=channels-1/);
- assert.match(settings,/data\.js\?v=channels-1/);
- assert.match(pages,/data\.js\?v=channels-1/);
+ assert.match(main,/data\.js\?v=load50-1/);
+ assert.match(settings,/data\.js\?v=load50-1/);
+ assert.match(pages,/data\.js\?v=load50-1/);
  for(const s of [main,settings,pages,manage])assert.match(s,/channels\.js\?v=channels-1/);
  assert.match(file("src/d3.js"),/assignedToMemberId==="member-agent"/);
  assert.doesNotMatch(file("src/access-panel.js"),/localStorage\.|fetch\(/);
