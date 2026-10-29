@@ -777,3 +777,25 @@ html[data-animations="off"] .voice-dot{animation:none}
  .voice-paused-player .voice-preview-time{font-size:9px}
  .message-row .bubble{touch-action:pan-y}
 }
+
+
+/* Player de áudio · progresso legível sobre o balão de mensagens enviadas.
+ * O preenchimento nunca deve usar a mesma cor de fundo do balão. */
+.message-row.mine .media-progress{
+  color:var(--brand-text);
+  background:linear-gradient(to right,
+    currentColor 0%,
+    currentColor var(--media-played,0%),
+    color-mix(in srgb,currentColor 35%,transparent) var(--media-played,0%),
+    color-mix(in srgb,currentColor 35%,transparent) 100%);
+}
+.message-row.mine .media-progress::-webkit-slider-thumb{
+  background:var(--brand-text);
+  border:2px solid var(--brand-accent);
+  box-shadow:0 0 0 1px var(--brand-text);
+}
+.message-row.mine .media-progress::-moz-range-thumb{
+  background:var(--brand-text);
+  border:2px solid var(--brand-accent);
+  box-shadow:0 0 0 1px var(--brand-text);
+}
