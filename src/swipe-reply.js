@@ -7,7 +7,7 @@ import {swipeIntent,swipeOffset,swipeThreshold,swipeDirection,SWIPE_START_PX} fr
  */
 export function setupSwipeReply({area,onReply,isSelectionActive,onGestureStart}){
  let gesture=null,suppressClickUntil=0,suppressMessageId=null;
- const excluded="input[type=range],textarea,select,a,video,audio,[contenteditable],[data-action],[data-reply-target],.message-actions";
+ const excluded="button,input[type=range],input,textarea,select,a,video,audio,[contenteditable],[data-action],[data-reply-target],.message-actions";
  const touchSupported="ontouchstart" in window;
  function clear(){
   if(!gesture)return;
@@ -117,6 +117,8 @@ export function setupSwipeReply({area,onReply,isSelectionActive,onGestureStart})
  // Touch devices synthesize a click after release; do not select the dragged bubble.
  area.addEventListener("click",e=>{
   if(performance.now()>suppressClickUntil)return;
+  // Gestos no corpo da mensagem não podem consumir um toque posterior em Play/Pause.
+  if(e.target.closest("button,input,textarea,select,a,video,audio,[contenteditable]"))return;
   const row=e.target.closest("[data-message-id]");
   if(row?.dataset.messageId!==suppressMessageId)return;
   e.preventDefault();e.stopImmediatePropagation();
