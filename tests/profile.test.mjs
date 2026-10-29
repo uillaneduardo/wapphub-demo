@@ -13,7 +13,8 @@ test("a apresentação não depende da persistência",()=>{
  const panel=src("src/profile-panel.js"),store=src("src/profile-store.js");
  assert.doesNotMatch(panel,/localStorage\.|\bfetch\(/);
  assert.match(panel,/saveProfile\(\{\.\.\.data,photo:chosenPhoto\}\)/);
- assert.match(store,/localStorage\.setItem/);
+ assert.match(store,/mockStorage\.write\(KEY,next\)/);
+ assert.doesNotMatch(store,/localStorage\.setItem/);
  assert.match(store,/demo-profile-updated/);
  assert.match(panel,/photoFile|upload\.onchange|reader\.readAsDataURL/);
 });
