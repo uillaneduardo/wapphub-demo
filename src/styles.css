@@ -804,14 +804,14 @@ html[data-animations="off"] .voice-dot{animation:none}
 #composer .composer-box{
  border:0;
  border-radius:16px;
- background:color-mix(in srgb,var(--text) 4%,var(--panel));
+ background:var(--panel);
  box-shadow:0 7px 28px color-mix(in srgb,var(--text) 10%,transparent),
             0 2px 7px color-mix(in srgb,var(--text) 5%,transparent);
  transition:box-shadow .16s ease,background-color .16s ease;
 }
 #composer .composer-box:focus-within{
  border:0;
- background:color-mix(in srgb,var(--text) 4%,var(--panel));
+ background:var(--panel);
  box-shadow:0 7px 28px color-mix(in srgb,var(--text) 10%,transparent),
             0 2px 7px color-mix(in srgb,var(--text) 5%,transparent);
 }
@@ -880,10 +880,14 @@ html[data-animations="off"] #composer .composer-box{transition:none}
 /* Compositor branco no tema claro; superfície elevada no tema escuro. */
 html[data-theme="dark"] #composer .composer-box,
 html[data-theme="dark"] #composer .composer-box:focus-within{
- background:color-mix(in srgb,var(--text) 5%,var(--panel));
+ background:var(--subtle);
+}
+/* O pano de fundo da conversa é suavemente acinzentado: o compositor continua branco. */
+.workspace{
+ background:color-mix(in srgb,var(--text) 3%,var(--bg));
 }
 #composer{
- background:var(--bg);
+ background:transparent;
 }
 /* Desktop: reservar uma linha flex real para o compositor.
  * O histórico deve rolar, nunca comprimir ou deslocar o campo para fora da tela. */
