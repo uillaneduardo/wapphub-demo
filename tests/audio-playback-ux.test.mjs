@@ -41,3 +41,12 @@ test("player não cria waveform fictícia e sincroniza cursor pelo progresso rea
  assert.match(code,/media\.currentTime=position/);
  assert.match(code,/requestAnimationFrame\(tick\)/);
 });
+
+test("barra de progresso enviada preserva contraste durante a reprodução",()=>{
+ const css=source("src/styles.css");
+ const rule=css.match(/\.message-row\.mine \.media-progress\s*\{([^}]+)\}/)?.[1] || "";
+ assert.ok(rule.includes("currentColor var(--media-played,0%)"),"trecho reproduzido deve contrastar com o balão");
+ assert.ok(rule.includes("color-mix(in srgb,currentColor 35%,transparent)"),"trilha restante deve permanecer perceptível");
+ assert.match(css,/\.message-row\.mine \.media-progress::-webkit-slider-thumb\s*\{/);
+ assert.match(css,/\.message-row\.mine \.media-progress::-moz-range-thumb\s*\{/);
+});
