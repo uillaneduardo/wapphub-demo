@@ -19,10 +19,10 @@ import {showModule,refreshCurrentMediaModule} from "./pages.js?v=d6-4&load50-1&p
 import {channels,getChannel} from "./channels.js?v=channels-1";
 import {setupD3,updateD3,canAccess,canSend,currentState,assertCanSend} from "./d3.js?v=d4-6&voice-1";
 import {appearance,setAppearance,openAppearanceSettings} from "./appearance.js?v=motion-1";
-import {renderD2,sendD2,hasD2Attachment,setupD2,resetD2Selection} from "./d2.js?v=chat-jump-1&voice-2&controls-1";
+import {renderD2,sendD2,hasD2Attachment,setupD2,resetD2Selection} from "./d2.js?v=chat-jump-1&voice-2&controls-1&dates-1";
 import {setupVoiceComposer} from "./voice-composer.mjs?v=voice-2";
 import {createChatScrollController} from "./chat-scroll.js";
-import {conversations} from "./data.js?v=load50-1";
+import {conversations} from "./data.js?v=load50-1&dates-1";
 import {createMessageCommandService} from "./services/message-commands.mjs";
 import {createMockMessageCommandRepository} from "./data/adapters/mock/message-commands.mjs";
 import {normalizeMockConversations} from "./data/adapters/mock/message-store.mjs";
