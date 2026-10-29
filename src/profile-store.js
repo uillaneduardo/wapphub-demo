@@ -1,11 +1,13 @@
+import {mockStorage} from "./data/adapters/mock/storage.mjs";
 const KEY="wapphub-demo-user-profile-v1";
 const initial={name:"Usuário WappHub",displayName:"Atendente",email:"usuario@example.test",photo:null};
-function read(){try{return {...initial,...JSON.parse(localStorage.getItem(KEY)||"{}")}}catch{return {...initial}}}
+function read(){const saved=mockStorage.read(KEY,{});return {...initial,...(saved&&typeof saved==="object"&&!Array.isArray(saved)?saved:{})}}
 let profile=read();
 export const getProfile=()=>({...profile});
 export function saveProfile(fields){
- profile={...profile,...fields};
- localStorage.setItem(KEY,JSON.stringify(profile));
+ const next={...profile,...fields};
+ mockStorage.write(KEY,next);
+ profile=next;
  window.dispatchEvent(new Event("demo-profile-updated"));
  return getProfile();
 }
