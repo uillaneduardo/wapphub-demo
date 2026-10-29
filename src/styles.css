@@ -707,6 +707,8 @@ html[data-animations="off"] *,html[data-animations="off"] *::before,html[data-an
 .chat-jump-latest svg{width:20px;height:20px;stroke-width:2}
 .chat-jump-latest[hidden]{display:none!important}
 .chat-jump-latest:hover{background:var(--hover);box-shadow:0 6px 24px #00000026}
+/* A barra de ações múltiplas tem prioridade sobre o atalho flutuante. */
+.workspace:has(#d2-selection) .chat-jump-latest{display:none!important}
 .chat-jump-latest:active{background:var(--brand-soft)}
 .chat-jump-latest:focus-visible{outline:2px solid var(--brand-border);outline-offset:3px}
 .chat-jump-latest:not([hidden]){animation:chat-jump-enter .18s ease-out both}
