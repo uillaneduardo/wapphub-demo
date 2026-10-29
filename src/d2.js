@@ -1,3 +1,4 @@
+import {messageDay,formatMessageDay,refreshChatDateIndicator} from "./chat-dates.js?v=dates-1";
 import {attachMediaBlur} from "./media-blur.js?v=motion-1";
 import {mediaVisibilityKey} from "./media-visibility-store.js?v=motion-1";
 import {setupSwipeReply} from "./swipe-reply.js?v=swipe-2&area-2&controls-1";
@@ -85,7 +86,10 @@ function context(i,x,y){
  }
  openMenu(options,x,y);
 }
-export function renderD2(c,container){container.replaceChildren(el("div","date-separator","Hoje"));let n=0;c.messages.forEach((m,i)=>{if(m.hidden)return;if(query&&!(m.body+" "+(m.file?.name||"")).toLowerCase().includes(query))return;n++;const row=el("div","message-row"+(m.direction==="out"?" mine":"")+(selected.has(m.id)?" d2-picked":""));row.dataset.messageId=m.id;if(m.id===recentlySentMessageId)row.classList.add("message-just-sent");row.tabIndex=0;const b=el("div","bubble");if(m.file)b.classList.add("has-media");if(m.reply){
+export function renderD2(c,container){container.replaceChildren();let n=0,lastDay=null;c.messages.forEach((m,i)=>{if(m.hidden)return;if(query&&!(m.body+" "+(m.file?.name||"")).toLowerCase().includes(query))return;n++;
+ const day=messageDay(m);
+ if(day!==lastDay){const separator=el("div","date-separator chat-day-separator",formatMessageDay(day));separator.dataset.day=day;container.append(separator);lastDay=day}
+ const row=el("div","message-row"+(m.direction==="out"?" mine":"")+(selected.has(m.id)?" d2-picked":""));row.dataset.messageId=m.id;row.dataset.messageDay=day;if(m.id===recentlySentMessageId)row.classList.add("message-just-sent");row.tabIndex=0;const b=el("div","bubble");if(m.file)b.classList.add("has-media");if(m.reply){
  const ref=el("button","reply-reference","↪ "+(m.reply.body||m.reply.file?.name||"Mídia"));
  ref.type="button";
  ref.dataset.replyTarget=m.reply.messageId||"";
@@ -115,9 +119,9 @@ export function renderD2(c,container){container.replaceChildren(el("div","date-s
 const searchCount=$("#message-search-count"),clear=$("#message-search-clear");
 if(searchCount)searchCount.textContent=query?(n===1?"1 resultado":n+" resultados"):"";
 if(clear)clear.hidden=!query;
-selectionBar();recentlySentMessageId=null;return {searching:Boolean(query)}}
+selectionBar();recentlySentMessageId=null;refreshChatDateIndicator(container);return {searching:Boolean(query)}}
 export function hasD2Attachment(){return Boolean(file)}
-export async function sendD2(c,value,mediaOverride=null){const body=value.trim();if(!body&&!file&&!mediaOverride)return false;if(file&&mediaOverride)throw new Error("Envie ou descarte o anexo antes do áudio");const m={id:newId(),conversationId:c.id,direction:"out",body,time:stamp(),status:"sent"};if(reply&&reply.conversationId===c.id&&byId(c,reply.messageId))m.reply={...reply};if(file||mediaOverride)m.file=mediaOverride||file;await commands.send(c.id,m);file=null;recentlySentMessageId=m.id;reply=null;draft();return true}
+export async function sendD2(c,value,mediaOverride=null){const body=value.trim();if(!body&&!file&&!mediaOverride)return false;if(file&&mediaOverride)throw new Error("Envie ou descarte o anexo antes do áudio");const m={id:newId(),conversationId:c.id,direction:"out",body,time:stamp(),createdAt:new Date().toISOString(),status:"sent"};if(reply&&reply.conversationId===c.id&&byId(c,reply.messageId))m.reply={...reply};if(file||mediaOverride)m.file=mediaOverride||file;await commands.send(c.id,m);file=null;recentlySentMessageId=m.id;reply=null;draft();return true}
 export function resetD2Selection(){swipeGesture?.cancel();if(replyJumpTimer){clearTimeout(replyJumpTimer);replyJumpTimer=null}$("#messages")?.querySelectorAll(".reply-jump-highlight").forEach(row=>row.classList.remove("reply-jump-highlight"));reply=null;file=null;query="";selected.clear();selectionMode=false;const search=$("#message-search"),field=$("#message-search-input");if(search)search.hidden=true;if(field)field.value="";draft();closeDialog();closeMenu();selectionBar()}
 export function setupD2(getActive,getAll,onChange,messageCommands,attendanceCommands){active=getActive;all=getAll;refresh=onChange;commands=messageCommands;conversationActions=attendanceCommands;const area=$("#messages");
  swipeGesture=setupSwipeReply({
