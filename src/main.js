@@ -17,9 +17,10 @@ import {createContactService} from "./services/contacts.mjs";
 import {createMockContactRepository} from "./data/adapters/mock/contact-storage.mjs";
 import {showModule,refreshCurrentMediaModule} from "./pages.js?v=d6-4&load50-1";
 import {channels,getChannel} from "./channels.js?v=channels-1";
-import {setupD3,updateD3,canAccess,currentState,assertCanSend} from "./d3.js?v=d4-6";
+import {setupD3,updateD3,canAccess,canSend,currentState,assertCanSend} from "./d3.js?v=voice-1";
 import {appearance,setAppearance,openAppearanceSettings} from "./appearance.js?v=motion-1";
-import {renderD2,sendD2,setupD2,resetD2Selection} from "./d2.js?v=chat-jump-1";
+import {renderD2,sendD2,hasD2Attachment,setupD2,resetD2Selection} from "./d2.js?v=voice-1";
+import {setupVoiceComposer} from "./voice-composer.mjs?v=voice-1";
 import {createChatScrollController} from "./chat-scroll.js";
 import {conversations} from "./data.js?v=load50-1";
 import {createMessageCommandService} from "./services/message-commands.mjs";
@@ -36,6 +37,18 @@ configureContactIdentity(createContactService(createMockContactRepository()));
 const conversationReadService=createConversationReadService(createMockConversationReadRepository(conversations));
 const messageCommands=createMessageCommandService(createMockMessageCommandRepository(conversations));
 const conversationActions=createConversationActionService(createMockConversationActionRepository(conversations));
+const voiceComposer=setupVoiceComposer({
+ getConversation:active,
+ canStart:assertCanSend,
+ canTextSend:canSend,
+ hasPendingAttachment:hasD2Attachment,
+ onSend:(conversation,media)=>sendD2(conversation,"",media),
+ onSent:conversation=>{
+  renderMessages();renderList();
+  if(active()?.id===conversation.id)renderConversationMedia(conversation,$("#detail-media"),openConversationMedia);
+ },
+ notify:toast
+});
 seedMediaFixtures(conversations);
 normalizeMockConversations(conversations);
 initializeAssignments(conversations,adminState().members);
@@ -87,8 +100,9 @@ function renderMessages(){
  const result=renderD2(conversation,messages);
  chatScroll.commit(before,result);
 }
-function select(id,{openChat=true,markRead=openChat}={}){resetD2Selection();state.active=id;const c=active();if(markRead)void conversationReadService.markRead(id).then(()=>renderList()).catch(error=>toast("Falha ao marcar conversa como lida: "+error.message));$("#chat-title").textContent=nameOf(c);$("#chat-avatar").replaceWith(Object.assign(avatar(c),{id:"chat-avatar"}));$("#chat-subtitle").textContent=c.status+" · "+originOf(c).channelName;$("#detail-avatar").replaceWith(Object.assign(avatar(c,"avatar large"),{id:"detail-avatar"}));$("#detail-name").textContent=nameOf(c);$("#detail-phone").textContent=c.phone;$("#detail-agent").textContent=c.agent;$("#detail-status").textContent=c.status;$("#detail-channel").textContent=getChannel(c.channelId).name;renderOrigin(c);renderConversationMedia(c,$("#detail-media"),openConversationMedia);$("#message-input").value="";renderList();renderMessages();$("#details-toggle").disabled=false;$("#find-messages").disabled=false;$("#chat-menu").disabled=false;if(openChat)root.classList.add("chat-open");updateD3()}
+function select(id,{openChat=true,markRead=openChat}={}){voiceComposer.setConversation(id);resetD2Selection();state.active=id;const c=active();if(markRead)void conversationReadService.markRead(id).then(()=>renderList()).catch(error=>toast("Falha ao marcar conversa como lida: "+error.message));$("#chat-title").textContent=nameOf(c);$("#chat-avatar").replaceWith(Object.assign(avatar(c),{id:"chat-avatar"}));$("#chat-subtitle").textContent=c.status+" · "+originOf(c).channelName;$("#detail-avatar").replaceWith(Object.assign(avatar(c,"avatar large"),{id:"detail-avatar"}));$("#detail-name").textContent=nameOf(c);$("#detail-phone").textContent=c.phone;$("#detail-agent").textContent=c.agent;$("#detail-status").textContent=c.status;$("#detail-channel").textContent=getChannel(c.channelId).name;renderOrigin(c);renderConversationMedia(c,$("#detail-media"),openConversationMedia);$("#message-input").value="";renderList();renderMessages();$("#details-toggle").disabled=false;$("#find-messages").disabled=false;$("#chat-menu").disabled=false;if(openChat)root.classList.add("chat-open");updateD3()}
 function clearActive(){
+ voiceComposer.setConversation(null);
  resetD2Selection();state.active=null;
  $("#chat-title").textContent="Selecione uma conversa";
  $("#chat-subtitle").textContent="";renderOrigin(null);
@@ -117,7 +131,7 @@ const channelPicker=setupChannelPicker({
  onChange:onChannelSelection
 });
 window.addEventListener("demo-channels-updated",()=>{channelPicker.refresh();renderOrigin(active());renderList();router?.refresh()});
-window.addEventListener("demo-assignments-updated",()=>{onChannelSelection(channelPicker.getSelection());const current=active();if(current){$("#detail-agent").textContent=current.agent;$("#detail-status").textContent=current.status;}renderMessages();updateD3();router?.refresh();refreshCurrentMediaModule()});
+window.addEventListener("demo-assignments-updated",()=>{onChannelSelection(channelPicker.getSelection());voiceComposer.syncPermissions();const current=active();if(current){$("#detail-agent").textContent=current.agent;$("#detail-status").textContent=current.status;}renderMessages();updateD3();router?.refresh();refreshCurrentMediaModule()});
 list.addEventListener("click",e=>{const item=e.target.closest("[data-id]");if(item)router.navigate(conversationPath(item.dataset.id))});
 $("#search").addEventListener("input",e=>{state.query=e.target.value;renderList()});
 document.querySelectorAll("[data-filter]").forEach(b=>b.addEventListener("click",()=>{state.filter=b.dataset.filter;document.querySelectorAll("[data-filter]").forEach(x=>{x.classList.toggle("selected",x===b);x.setAttribute("aria-pressed",String(x===b))});renderList()}));
@@ -129,7 +143,7 @@ $("#details-toggle").addEventListener("click",()=>{if(active())router.navigate(c
 $("#details-close").addEventListener("click",()=>{if(active())router.navigate(conversationPath(active().id))});
 $("#back-button").addEventListener("click",()=>router.navigate("/inbox"));
 $("#theme-toggle").addEventListener("click",()=>setAppearance({mode:appearance.mode==="light"?"dark":"light"}));
-$("#composer").addEventListener("submit",async e=>{e.preventDefault();const input=$("#message-input"),conversation=active();if(!conversation||!assertCanSend(conversation))return;const submit=$("#composer").querySelector('button[type="submit"]');if(submit?.disabled)return;if(submit)submit.disabled=true;try{if(!await sendD2(conversation,input.value))return;input.value="";input.style.height="";renderMessages();renderList()}catch(error){toast("Falha ao enviar mensagem: "+error.message)}finally{if(submit)submit.disabled=false}});
+$("#composer").addEventListener("submit",async e=>{e.preventDefault();if(voiceComposer.isActive())return;const input=$("#message-input"),conversation=active();if(!conversation||!assertCanSend(conversation))return;const submit=$("#composer").querySelector('button[type="submit"]');if(submit?.disabled)return;if(submit)submit.disabled=true;try{if(!await sendD2(conversation,input.value))return;input.value="";input.style.height="";renderMessages();renderList()}catch(error){toast("Falha ao enviar mensagem: "+error.message)}finally{if(submit)submit.disabled=voiceComposer.isActive()||!canSend(active())}});
 $("#message-input").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){e.preventDefault();$("#composer").requestSubmit()}});
 $("#message-input").addEventListener("input",e=>{e.target.style.height="auto";e.target.style.height=Math.min(e.target.scrollHeight,144)+"px"});
 function renderProfileAvatar(){
@@ -149,9 +163,10 @@ document.querySelectorAll("[data-nav]").forEach(b=>b.addEventListener("click",()
 
 document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();$("#search").focus()}if(e.key==="Escape"&&root.classList.contains("details-open"))setDetails(false)});
 setupD2(active,()=>conversations,()=>{const c=active();if(c){$("#detail-status").textContent=c.status;$("#detail-agent").textContent=c.agent;renderConversationMedia(c,$("#detail-media"),openConversationMedia);}renderMessages();renderList();updateD3()},messageCommands,conversationActions);
-setupD3(active,()=>{onChannelSelection(channelPicker.getSelection());renderMessages();router?.refresh();refreshCurrentMediaModule()});
+setupD3(active,()=>{onChannelSelection(channelPicker.getSelection());voiceComposer.syncPermissions();renderMessages();router?.refresh();refreshCurrentMediaModule()});
 select(state.active,{openChat:false,markRead:window.matchMedia("(min-width:761px)").matches});onChannelSelection(channelPicker.getSelection());root.classList.remove("chat-open");
 const router=createRouter({render:route=>{
+ voiceComposer.onRouteChange(route.name==="atendimento");
  const gate=checkRouteAccess(route,{conversations,canAccess,channels,role:currentState().role});
  if(gate.status==="redirect"){router.navigate(gate.path,{replace:true});return}
  if(gate.status==="forbidden"||gate.status==="not-found"){
@@ -176,6 +191,7 @@ const router=createRouter({render:route=>{
    select(id,{openChat:true,markRead:true});
    setDetails(Boolean(route.params.details));
   }else{
+   voiceComposer.onRouteChange(false);
    if(active()&&(!canAccess(active())||getChannel(active().channelId).enabled===false))clearActive();
    root.classList.remove("chat-open");
    setDetails(false);
