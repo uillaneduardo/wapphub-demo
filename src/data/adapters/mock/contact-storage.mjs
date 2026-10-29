@@ -1,3 +1,4 @@
+import {createMockStorage} from "./storage.mjs";
 const KEY="wapphub-demo-contacts-v1";
 const isRecord=value=>value!==null && typeof value==="object" && !Array.isArray(value);
 const sanitize=value=>{
@@ -17,9 +18,8 @@ const sanitize=value=>{
  * Erro de escrita é propagado para o formulário: não simular persistência.
  */
 export function createMockContactRepository(storage) {
- if(arguments.length===0){try{storage=globalThis.localStorage}catch{storage=null}}
- let records=Object.create(null);
- try{records=sanitize(JSON.parse(storage?.getItem(KEY)||"{}"))}catch{records=Object.create(null)}
+ const json=arguments.length===0?createMockStorage():createMockStorage(storage);
+ let records=sanitize(json.read(KEY,{}));
  return {
   snapshot:()=>structuredClone(records),
   async save(id,fields){
@@ -32,8 +32,7 @@ export function createMockContactRepository(storage) {
    };
    if(entry.photo!==undefined && (typeof entry.photo!=="string" || !/^(https:\/\/|data:image\/(png|jpeg|webp);base64,)/i.test(entry.photo)))throw new TypeError("Imagem inválida");
    const next={...records,[id]:entry};
-   if(!storage || typeof storage.setItem!=="function")throw new Error("Armazenamento local indisponível");
-   storage.setItem(KEY,JSON.stringify(next));
+   json.write(KEY,next);
    records=sanitize(next);
    return {id,...records[id]};
   }
