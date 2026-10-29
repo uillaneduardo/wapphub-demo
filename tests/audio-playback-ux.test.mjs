@@ -50,3 +50,19 @@ test("barra de progresso enviada preserva contraste durante a reprodução",()=>
  assert.match(css,/\.message-row\.mine \.media-progress::-webkit-slider-thumb\s*\{/);
  assert.match(css,/\.message-row\.mine \.media-progress::-moz-range-thumb\s*\{/);
 });
+
+test("play inicia no primeiro toque sem propagar para gestos da conversa",()=>{
+ const player=source("src/media-player.js");
+ const swipe=source("src/swipe-reply.js");
+ assert.match(player,/play\.onclick=async e=>\{/);
+ assert.match(player,/e\.stopPropagation\(\)/);
+ assert.match(swipe,/const excluded="button,/);
+ assert.match(swipe,/if\(e\.target\.closest\("button,input,textarea,select,a,video,audio,\[contenteditable\]"\)\)return;/);
+});
+test("contorno e ícones do compositor ganham contraste com tema claro e escuro",()=>{
+ const css=source("src/styles.css");
+ assert.match(css,/#composer \.composer-box\{\s*border-color:var\(--ring\)/);
+ assert.match(css,/#composer \.composer-box:focus-within\{/);
+ assert.match(css,/#composer \.composer-box > \.icon-button:not\(:disabled\)/);
+ assert.match(css,/color:var\(--text\)/);
+});
