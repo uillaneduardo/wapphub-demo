@@ -35,8 +35,10 @@ test("adaptador suporta touch, mouse e pen sem conflitar com ações existentes"
   assert.ok(adapter.includes('addEventListener("'+event+'"'),event);
  assert.match(adapter,/e\.pointerType==="mouse"&&e\.button!==0/);
  assert.match(adapter,/isSelectionActive\(\)/);
- assert.match(adapter,/\.media-player,\.file-card/);
- assert.ok(adapter.includes('target.closest(".bubble")'));
+ assert.doesNotMatch(adapter,/\.media-player,\.file-card/);
+ assert.doesNotMatch(adapter,/target.closest\(".bubble"\)/);
+ assert.match(adapter,/input\[type=range\]/);
+ assert.match(adapter,/\.message-actions/);
  assert.ok(adapter.includes("area.setPointerCapture(g.pointerId)"));
  assert.match(adapter,/e\.preventDefault\(\);e\.stopImmediatePropagation\(\)/);
  assert.match(chat,/swipeGesture=setupSwipeReply/);
