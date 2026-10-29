@@ -1,3 +1,4 @@
+import {resolveMediaDuration} from "./audio-utils.mjs";
 import {attachMediaBlur} from "./media-blur.js?v=motion-1";
 import {mediaVisibilityKey,setMediaBlurred} from "./media-visibility-store.js?v=motion-1";
 /** Player de apresentação. Trabalha com objetos {kind,url,poster,name}, sem armazenamento/API. */
@@ -16,7 +17,7 @@ export function createMediaPlayer(file,{compact=false,visibilityKey=null}={}){
  media.src=file.url;
  media.setAttribute("aria-label",file.name|| (video?"Vídeo":"Áudio"));
  if(video){const stage=el("div","media-video-stage");stage.append(media);wrap.append(stage);if(visibilityKey)attachMediaBlur(stage,media,visibilityKey,{onToggle:blurred=>{if(blurred&&!media.paused)media.pause()}})}
- else {const waves=el("div","media-waveform");waves.setAttribute("aria-hidden","true");for(let i=0;i<24;i++){const bar=el("span");bar.style.height=(10+(i*19%23))+"px";waves.append(bar)}wrap.append(waves)}
+
  const controls=el("div","media-controls");
  const play=el("button","media-play");play.type="button";play.setAttribute("aria-label","Reproduzir "+(video?"vídeo":"áudio"));play.append(icon("play"));
  const timeline=el("input","media-progress");timeline.type="range";timeline.min="0";timeline.max="1000";timeline.step="1";timeline.value="0";timeline.setAttribute("aria-label","Posição de reprodução");
@@ -26,19 +27,80 @@ export function createMediaPlayer(file,{compact=false,visibilityKey=null}={}){
  const speed=el("button","media-speed","1×");speed.type="button";speed.title="Velocidade de reprodução";speed.setAttribute("aria-label","Velocidade: 1 vez");
  controls.append(play,timeline,elapsed,sep,end,speed);wrap.append(controls);
  const error=el("p","media-error");error.hidden=true;error.setAttribute("role","alert");wrap.append(error);
- const speeds=[1,1.5,2],update=()=>{
-  const duration=Number.isFinite(media.duration)?media.duration:0;
-  elapsed.textContent=clock(media.currentTime||0);end.textContent=clock(duration);
-  timeline.value=duration?String(Math.min(1000,Math.round(media.currentTime/duration*1000))):"0";
-  timeline.style.setProperty("--media-played",timeline.value/10+"%");
+ const speeds=[1,1.5,2];
+ let frame=null, dragging=false, pendingSeek=null;
+ const duration=()=>resolveMediaDuration(media,Number(file.durationSeconds));
+ const refresh=()=>{
+  const length=duration();
+  const position=Number.isFinite(media.currentTime)?Math.max(0,media.currentTime):0;
+  elapsed.textContent=clock(position);
+  end.textContent=length>0?clock(length):"--:--";
+  if(!dragging){
+    timeline.value=length?String(Math.min(1000,Math.max(0,Math.round(position/length*1000)))):"0";
+  }
+  timeline.disabled=!length;
+  timeline.style.setProperty("--media-played",Number(timeline.value)/10+"%");
   play.replaceChildren(icon(media.paused?"play":"pause"));
   play.setAttribute("aria-label",(media.paused?"Reproduzir ":"Pausar ")+(video?"vídeo":"áudio"));
  };
- play.onclick=async()=>{if(media.paused){try{await media.play()}catch{error.hidden=false;error.textContent="Não foi possível reproduzir este arquivo."}}else media.pause();update()};
- timeline.oninput=()=>{if(Number.isFinite(media.duration)&&media.duration>0)media.currentTime=media.duration*(Number(timeline.value)/1000);update()};
- speed.onclick=()=>{const next=speeds[(speeds.indexOf(media.playbackRate)+1)%speeds.length];media.playbackRate=next;speed.textContent=next+"×";speed.setAttribute("aria-label","Velocidade: "+String(next).replace(".",",")+" vezes")};
- for(const event of ["loadedmetadata","durationchange","timeupdate","ended","pause","play","seeked"])media.addEventListener(event,update);
- media.addEventListener("play",()=>{if(video&&visibilityKey)setMediaBlurred(visibilityKey,false);for(const other of document.querySelectorAll(".media-element"))if(other!==media&&!other.paused)other.pause()});
+ const stopFrames=()=>{if(frame!==null)cancelAnimationFrame(frame);frame=null};
+ const tick=()=>{
+   refresh();
+   if(!media.paused&&!media.ended)frame=requestAnimationFrame(tick);
+   else frame=null;
+ };
+ const update=()=>{
+   refresh();
+   if(!media.paused&&!media.ended&&frame===null)frame=requestAnimationFrame(tick);
+   else if(media.paused||media.ended)stopFrames();
+ };
+ function seekTo(ratio){
+   const length=duration();
+   if(!length)return;
+   const position=Math.max(0,Math.min(length,ratio*length));
+   pendingSeek=position;
+   try{media.currentTime=position} catch { /* ainda sem metadados */ }
+   refresh();
+ }
+ play.onclick=async()=>{
+   if(media.paused){
+     try{
+       await media.play();
+       error.hidden=true;
+     }catch{
+       error.hidden=false;
+       error.textContent="Não foi possível reproduzir este arquivo.";
+     }
+   } else media.pause();
+   update();
+ };
+ timeline.addEventListener("input",()=>{
+   dragging=true;
+   timeline.style.setProperty("--media-played",Number(timeline.value)/10+"%");
+   const length=duration();
+   elapsed.textContent=length?clock(length*Number(timeline.value)/1000):"0:00";
+   seekTo(Number(timeline.value)/1000);
+ });
+ const finishDrag=()=>{dragging=false;refresh()};
+ timeline.addEventListener("change",finishDrag);
+ timeline.addEventListener("pointerup",finishDrag);
+ timeline.addEventListener("pointercancel",finishDrag);
+ timeline.addEventListener("blur",finishDrag);
+ speed.onclick=()=>{
+   const next=speeds[(speeds.indexOf(media.playbackRate)+1)%speeds.length];
+   media.playbackRate=next;speed.textContent=next+"×";
+   speed.setAttribute("aria-label","Velocidade: "+String(next).replace(".",",")+" vezes");
+ };
+ for(const event of ["loadedmetadata","durationchange","timeupdate","ended","pause","play","seeked","seeking"])media.addEventListener(event,update);
+ media.addEventListener("loadedmetadata",()=>{
+   if(pendingSeek!==null){const seek=pendingSeek;pendingSeek=null;try{media.currentTime=seek}catch{}}
+ });
+ media.addEventListener("play",()=>{
+   if(video&&visibilityKey)setMediaBlurred(visibilityKey,false);
+   for(const other of document.querySelectorAll(".media-element")) {
+     if(other!==media&&!other.paused)other.pause();
+   }
+ });
  media.addEventListener("error",()=>{error.textContent="Mídia indisponível. Verifique a conexão e tente novamente.";error.hidden=false;play.disabled=true});
  if(video)media.addEventListener("click",()=>play.click());
  update();
