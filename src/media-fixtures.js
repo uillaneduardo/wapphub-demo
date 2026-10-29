@@ -40,7 +40,7 @@ export function seedMediaFixtures(conversations){
  // Quatro arquivos por conversa de carga: imagem, documento, voz e vídeo.
  // A gravação de voz é sintética (não contém fala); o vídeo usa a mesma amostra CC0
  // já adotada pela demo. Os documentos são gerados em memória, sem requisições.
- for(const c of conversations.filter(item=>/^load-\\d{3}$/.test(item.id))){
+ for(const c of conversations.filter(item=>/^load-\d{3}$/.test(item.id))){
   const n=c.messages.length;
   if(c.messages.some(m=>m?.id===c.id+":media:image"))continue;
   const docBody=[
@@ -49,7 +49,7 @@ export function seedMediaFixtures(conversations){
    "Assunto: "+c.subject,
    "Protocolo: SIM-"+c.id.toUpperCase(),
    "Este documento não contém dados reais e não representa um pedido válido."
-  ].join("\\n");
+  ].join("\n");
   const docURL=URL.createObjectURL(new Blob([docBody],{type:"text/plain;charset=utf-8"}));
   const photoURL=c.channelId==="web-support"?"./assets/receipt.svg":"./assets/equipment.svg";
   const media=[
