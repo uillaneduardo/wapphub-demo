@@ -66,3 +66,14 @@ test("contorno e ícones do compositor ganham contraste com tema claro e escuro"
  assert.match(css,/#composer \.composer-box > \.icon-button:not\(:disabled\)/);
  assert.match(css,/color:var\(--text\)/);
 });
+
+test("compositor distingue superfície do fundo e mantém contraste dos ícones",()=>{
+ const css=source("src/styles.css");
+ const rule=css.match(/#composer \.composer-box\s*\{([^}]+)\}/)?.[1]||"";
+ assert.match(rule,/background:color-mix\(in srgb,var\(--text\) 7%,var\(--panel\)\)/);
+ assert.match(rule,/border-radius:15px/);
+ assert.match(css,/#composer \.composer-box textarea::placeholder\s*\{/);
+ assert.match(css,/#composer \.composer-box > \.icon-button svg,/);
+ assert.match(css,/stroke-width:2\.15/);
+ assert.match(css,/#composer \.composer-box:focus-within/);
+});
