@@ -70,7 +70,7 @@ test("compositor mantém ícones contrastantes e remove bordas",()=>{
 test("compositor distingue superfície do fundo e mantém contraste dos ícones",()=>{
  const css=source("src/styles.css");
  const rule=css.match(/#composer \.composer-box\s*\{([^}]+)\}/)?.[1]||"";
- assert.match(rule,/background:color-mix\(in srgb,var\(--text\) 4%,var\(--panel\)\)/);
+ assert.match(rule,/background:var\(--panel\)/);
  assert.match(rule,/border-radius:16px/);
  assert.match(css,/#composer \.composer-box textarea::placeholder\s*\{/);
  assert.match(css,/#composer \.composer-box > \.icon-button svg,/);
@@ -78,14 +78,15 @@ test("compositor distingue superfície do fundo e mantém contraste dos ícones"
  assert.match(css,/#composer \.composer-box:focus-within/);
 });
 
-test("compositor tem fundo discretamente escurecido no claro e elevado no escuro",()=>{
+test("compositor fica branco sobre fundo de conversa ligeiramente escurecido",()=>{
  const css=source("src/styles.css"),html=source("index.html");
  const rule=css.match(/#composer \.composer-box\s*\{([^}]+)\}/)?.[1]||"";
  const focused=css.match(/#composer \.composer-box:focus-within\s*\{([^}]+)\}/)?.[1]||"";
- assert.match(rule,/background:color-mix\(in srgb,var\(--text\) 4%,var\(--panel\)\)/);
- assert.match(focused,/background:color-mix\(in srgb,var\(--text\) 4%,var\(--panel\)\)/);
+ assert.match(rule,/background:var\(--panel\)/);
+ assert.match(focused,/background:var\(--panel\)/);
  assert.match(css,/html\[data-theme="dark"\] #composer \.composer-box/);
- assert.match(css,/background:color-mix\(in srgb,var\(--text\) 5%,var\(--panel\)\)/);
+ assert.match(css,/html\[data-theme="dark"\] #composer \.composer-box,[\s\S]*?background:var\(--subtle\)/);
+ assert.match(css,/\.workspace\s*\{\s*background:color-mix\(in srgb,var\(--text\) 3%,var\(--bg\)\)/);
  assert.match(html,/<form class="composer" id="composer">/);
 });
 test("desktop reserva espaço ao compositor sem ocultá-lo sob histórico longo",()=>{
