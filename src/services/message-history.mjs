@@ -32,6 +32,11 @@ export function createMessageHistoryWindow(service,{pageSize=60}={}){
   if(id!==conversationId)reset(id);
   if(!id)return snapshot();
   const token=++generation;
+  if(mode==="all" && !ready){
+   const first=await service.listMessages(id,{limit:pageSize});
+   if(token!==generation||conversationId!==id)return null;
+   items=first.items;nextCursor=first.nextCursor;ready=true;
+  }
   if(mode==="older" && (!ready||!nextCursor))return snapshot();
   if(mode==="all" && ready && !nextCursor)return snapshot();
   if(mode==="older"||mode==="all"){
