@@ -8,7 +8,7 @@ import {canAccess} from "./d3.js?v=d4-6";
 import {can} from "./permissions.js?v=d4-6";
 import {demoDeliveryLabels} from "./domain/message-status.mjs";
 const $=s=>document.querySelector(s), el=(tag,cl="",text)=>{const n=document.createElement(tag);n.className=cl;if(text!==undefined)n.textContent=text;return n};
-let reply=null,file=null,query="",selected=new Set(),selectionMode=false,menu=null,active=()=>null,all=()=>[],refresh=()=>{},commands=null,conversationActions=null,modal=null,touchTimer=0,touchStart=null,swipeGesture=null;
+let reply=null,file=null,query="",selected=new Set(),selectionMode=false,menu=null,active=()=>null,all=()=>[],refresh=()=>{},commands=null,conversationActions=null,ensureMessageVisible=null,modal=null,touchTimer=0,touchStart=null,swipeGesture=null;
 const newId=()=>globalThis.crypto?.randomUUID?.()||"msg-"+Date.now()+"-"+Math.random().toString(36).slice(2);
 const byId=(c,id)=>c?.messages?.find(m=>m.id===id);
 const notify=t=>{const n=el("div","toast",t);$("#toast-region").append(n);setTimeout(()=>n.remove(),3300)};
@@ -33,7 +33,7 @@ function forward(ids){if(!can("forward")){notify("Encaminhamento bloqueado nas p
 }
 let replyJumpTimer=null;
 let recentlySentMessageId=null;
-function jumpToOriginal(reference){
+async function jumpToOriginal(reference){
  const conversation=active();
  if(!conversation||!reference)return;
  const original=resolveReplyTarget(conversation,reference);
@@ -42,10 +42,16 @@ function jumpToOriginal(reference){
  if(query){
   query="";
   const input=$("#message-search-input");if(input)input.value="";
-  refresh();
+  await refresh();
  }
+ if(active()?.id!==conversation.id)return;
  const area=$("#messages");
- const row=[...area.querySelectorAll("[data-message-id]")].find(node=>node.dataset.messageId===original.id);
+ let row=[...area.querySelectorAll("[data-message-id]")].find(node=>node.dataset.messageId===original.id);
+ if(!row&&ensureMessageVisible){
+  try{await ensureMessageVisible(original.id)}catch(error){notify("Falha ao buscar a mensagem original: "+error.message);return}
+  if(active()?.id!==conversation.id)return;
+  row=[...area.querySelectorAll("[data-message-id]")].find(node=>node.dataset.messageId===original.id);
+ }
  if(!row){notify("Não foi possível localizar a mensagem original.");return}
  if(replyJumpTimer)clearTimeout(replyJumpTimer);
  for(const previous of area.querySelectorAll(".reply-jump-highlight"))previous.classList.remove("reply-jump-highlight");
@@ -121,9 +127,10 @@ if(searchCount)searchCount.textContent=query?(n===1?"1 resultado":n+" resultados
 if(clear)clear.hidden=!query;
 selectionBar();recentlySentMessageId=null;refreshChatDateIndicator(container);return {searching:Boolean(query)}}
 export function hasD2Attachment(){return Boolean(file)}
+export function isD2Searching(){return Boolean(query)}
 export async function sendD2(c,value,mediaOverride=null){const body=value.trim();if(!body&&!file&&!mediaOverride)return false;if(file&&mediaOverride)throw new Error("Envie ou descarte o anexo antes do áudio");const m={id:newId(),conversationId:c.id,direction:"out",body,time:stamp(),createdAt:new Date().toISOString(),status:"sent"};if(reply&&reply.conversationId===c.id&&byId(c,reply.messageId))m.reply={...reply};if(file||mediaOverride)m.file=mediaOverride||file;await commands.send(c.id,m);file=null;recentlySentMessageId=m.id;reply=null;draft();return true}
 export function resetD2Selection(){swipeGesture?.cancel();if(replyJumpTimer){clearTimeout(replyJumpTimer);replyJumpTimer=null}$("#messages")?.querySelectorAll(".reply-jump-highlight").forEach(row=>row.classList.remove("reply-jump-highlight"));reply=null;file=null;query="";selected.clear();selectionMode=false;const search=$("#message-search"),field=$("#message-search-input");if(search)search.hidden=true;if(field)field.value="";draft();closeDialog();closeMenu();selectionBar()}
-export function setupD2(getActive,getAll,onChange,messageCommands,attendanceCommands){active=getActive;all=getAll;refresh=onChange;commands=messageCommands;conversationActions=attendanceCommands;const area=$("#messages");
+export function setupD2(getActive,getAll,onChange,messageCommands,attendanceCommands,loadMessage=null){active=getActive;all=getAll;refresh=onChange;commands=messageCommands;conversationActions=attendanceCommands;ensureMessageVisible=loadMessage;const area=$("#messages");
  swipeGesture=setupSwipeReply({
   area,onReply:id=>action("reply",id),
   isSelectionActive:()=>selectionMode||selected.size>0,
