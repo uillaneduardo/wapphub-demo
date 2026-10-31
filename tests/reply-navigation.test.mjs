@@ -25,7 +25,8 @@ test("referência se torna acionável e preserva seleção múltipla",()=>{
  const chat=source("src/d2.js");
  assert.match(chat,/ref=el\("button","reply-reference"/);
  assert.match(chat,/ref\.dataset\.replyTarget=m\.reply\.messageId/);
- assert.match(chat,/if\(message\?\.reply\)jumpToOriginal\(message\.reply\)/);
+ assert.match(chat,/await operationQuery\.getMessage\(conversation\.id,messageRow\.dataset\.messageId\)/);
+ assert.match(chat,/if\(active\(\)\?\.id===conversation\.id&&message\?\.reply\)await jumpToOriginal\(message\.reply\)/);
  assert.match(chat,/\[data-reply-target\],a,button,input,video,audio/);
  assert.match(chat,/if\(query\)\{/);
  assert.match(chat,/row\.scrollIntoView\(/);

@@ -20,7 +20,7 @@ import {showModule,refreshCurrentMediaModule} from "./pages.js?v=d6-4&load50-1&p
 import {channels,getChannel} from "./channels.js?v=channels-1";
 import {setupD3,updateD3,canAccess,canSend,currentState,assertCanSend} from "./d3.js?v=d4-6&voice-1";
 import {appearance,setAppearance,openAppearanceSettings} from "./appearance.js?v=motion-1";
-import {renderD2,sendD2,hasD2Attachment,isD2Searching,setupD2,resetD2Selection,closeD2EmojiPicker} from "./d2.js?v=chat-jump-1&voice-2&controls-1&dates-1&history-1&route-scope-1&emoji-1";
+import {renderD2,sendD2,hasD2Attachment,isD2Searching,setupD2,resetD2Selection,closeD2EmojiPicker} from "./d2.js?v=chat-jump-1&voice-2&controls-1&dates-1&history-1&route-scope-1&emoji-1&operations-1";
 import {setupVoiceComposer} from "./voice-composer.mjs?v=voice-2";
 import {createChatScrollController} from "./chat-scroll.js";
 import {setChatDateIndicatorVisible} from "./chat-dates.js?v=dates-1&route-scope-1";
@@ -28,6 +28,8 @@ import {createMessageHistoryService,createMessageHistoryWindow} from "./services
 import {createMockMessageHistoryRepository} from "./data/adapters/mock/message-history.mjs";
 import {conversations} from "./data.js?v=load50-1&dates-1";
 import {createMessageCommandService} from "./services/message-commands.mjs";
+import {createMessageOperationQueryService} from "./services/message-operation-query.mjs";
+import {createMockMessageOperationQueryRepository} from "./data/adapters/mock/message-operation-query.mjs";
 import {createMockMessageCommandRepository} from "./data/adapters/mock/message-commands.mjs";
 import {normalizeMockConversations} from "./data/adapters/mock/message-store.mjs";
 import {createConversationActionService} from "./services/conversation-actions.mjs";
@@ -42,6 +44,7 @@ const conversationReadService=createConversationReadService(createMockConversati
 const inboxQueryService=createInboxQueryService(createMockInboxQueryRepository(conversations));
 const historyWindow=createMessageHistoryWindow(createMessageHistoryService(createMockMessageHistoryRepository(conversations)),{pageSize:60});
 const messageCommands=createMessageCommandService(createMockMessageCommandRepository(conversations));
+const messageOperationQuery=createMessageOperationQueryService(createMockMessageOperationQueryRepository(conversations));
 const conversationActions=createConversationActionService(createMockConversationActionRepository(conversations));
 
 seedMediaFixtures(conversations);
@@ -225,7 +228,7 @@ const contactEditButton=document.createElement("button");contactEditButton.class
 document.querySelectorAll("[data-nav]").forEach(b=>b.addEventListener("click",()=>router.navigate(pathFor(b.dataset.nav))));
 
 document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();$("#search").focus()}if(e.key==="Escape"&&root.classList.contains("details-open"))setDetails(false)});
-setupD2(active,()=>conversations,()=>{const c=active();if(c){$("#detail-status").textContent=c.status;$("#detail-agent").textContent=c.agent;renderConversationMedia(c,$("#detail-media"),openConversationMedia);}const pending=renderMessages();renderList();updateD3();return pending},messageCommands,conversationActions,async()=>{await renderMessages({all:true})});
+setupD2(active,()=>conversations,()=>{const c=active();if(c){$("#detail-status").textContent=c.status;$("#detail-agent").textContent=c.agent;renderConversationMedia(c,$("#detail-media"),openConversationMedia);}const pending=renderMessages();renderList();updateD3();return pending},messageCommands,conversationActions,async()=>{await renderMessages({all:true})},messageOperationQuery);
 setupD3(active,()=>{onChannelSelection(channelPicker.getSelection());voiceComposer.syncPermissions();renderMessages();router?.refresh();refreshCurrentMediaModule()});
 select(state.active,{openChat:false,markRead:window.matchMedia("(min-width:761px)").matches});onChannelSelection(channelPicker.getSelection());root.classList.remove("chat-open");
 const router=createRouter({render:route=>{
