@@ -32,24 +32,25 @@ export function createMessageHistoryWindow(service,{pageSize=60}={}){
   if(id!==conversationId)reset(id);
   if(!id)return snapshot();
   const token=++generation;
-  if(mode==="all" && !ready){
-   const first=await service.listMessages(id,{limit:pageSize});
-   if(token!==generation||conversationId!==id)return null;
-   items=first.items;nextCursor=first.nextCursor;ready=true;
-  }
-  if(mode==="older" && (!ready||!nextCursor))return snapshot();
-  if(mode==="all" && ready && !nextCursor)return snapshot();
-  if(mode==="older"||mode==="all"){
-   let cursor=nextCursor;
-   let accumulated=items.slice();
-   // Para pesquisa e salto a uma resposta, completar as páginas anteriores.
-   do {
+  if(mode==="all"){
+   // Sempre releia todas as páginas: ações recentes não podem ficar invisíveis
+   // em buscas ou respostas citadas após um histórico já ter sido expandido.
+   let cursor=null,accumulated=[];
+   do{
     const page=await service.listMessages(id,{before:cursor,limit:pageSize});
     if(token!==generation||conversationId!==id)return null;
     accumulated=[...page.items,...accumulated];
     cursor=page.nextCursor;
-   }while(mode==="all"&&cursor);
-   items=accumulated;nextCursor=cursor;ready=true;
+   }while(cursor);
+   items=accumulated;nextCursor=null;ready=true;
+   return snapshot();
+  }
+  if(mode==="older"){
+   if(!ready||!nextCursor)return snapshot();
+   const page=await service.listMessages(id,{before:nextCursor,limit:pageSize});
+   if(token!==generation||conversationId!==id)return null;
+   items=[...page.items,...items];
+   nextCursor=page.nextCursor;ready=true;
    return snapshot();
   }
   // Em atualizações de envio/exclusão, preservar a extensão já carregada.
