@@ -229,9 +229,9 @@ setupD2(active,()=>conversations,()=>{const c=active();if(c){$("#detail-status")
 setupD3(active,()=>{onChannelSelection(channelPicker.getSelection());voiceComposer.syncPermissions();renderMessages();router?.refresh();refreshCurrentMediaModule()});
 select(state.active,{openChat:false,markRead:window.matchMedia("(min-width:761px)").matches});onChannelSelection(channelPicker.getSelection());root.classList.remove("chat-open");
 const router=createRouter({render:route=>{
- closeD2EmojiPicker();
  // O overlay é filho de body e deve ser desativado em toda navegação.
  setChatDateIndicatorVisible(false);
+ closeD2EmojiPicker();
  voiceComposer.onRouteChange(route.name==="atendimento");
  const gate=checkRouteAccess(route,{conversations,canAccess,channels,role:currentState().role});
  if(gate.status==="redirect"){router.navigate(gate.path,{replace:true});return}
