@@ -5,8 +5,8 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#fafafa"><meta name="description" content="WappHub — atendimento multicanal">
 <title>Atendimento · WappHub</title>
-<link rel="stylesheet" href="./src/styles.css?v=chat-jump-1&voice-2&audio-progress-1&composer-contrast-1&unread-accent-1&composer-surface-1&white-desktop-1&composer-soft-1&history-1">
-<script type="module" src="./src/main.js?v=chat-jump-1&route-scope-1&inbox-query-1&history-1&voice-2&load50-1&controls-1&dates-1"></script>
+<link rel="stylesheet" href="./src/styles.css?v=chat-jump-1&emoji-1&voice-2&audio-progress-1&composer-contrast-1&unread-accent-1&composer-surface-1&white-desktop-1&composer-soft-1&history-1">
+<script type="module" src="./src/main.js?v=chat-jump-1&emoji-1&route-scope-1&inbox-query-1&history-1&voice-2&load50-1&controls-1&dates-1"></script>
 </head>
 <body>
 <div id="app" class="shell">
@@ -81,7 +81,7 @@
       <div class="composer-box">
         <button type="button" class="icon-button" id="attach-button" aria-label="Anexar arquivo" title="Anexar"><svg><use href="#i-plus"/></svg></button>
         <textarea id="message-input" rows="1" placeholder="Escreva uma mensagem..." aria-label="Escreva uma mensagem"></textarea>
-        <button type="button" class="icon-button" id="emoji-button" aria-label="Inserir emoji" title="Emoji"><svg><use href="#i-smile"/></svg></button>
+        <button type="button" class="icon-button" id="emoji-button" aria-label="Abrir seletor de emojis" aria-expanded="false" aria-haspopup="dialog" title="Emojis"><svg><use href="#i-smile"/></svg></button>
         <button type="button" class="icon-button" id="voice-start" aria-label="Gravar mensagem de voz" title="Gravar áudio"><svg><use href="#i-mic"/></svg></button>
         <button class="send-button" type="submit" aria-label="Enviar mensagem"><svg><use href="#i-send"/></svg></button>
         <div id="voice-composer" class="voice-composer" hidden>
