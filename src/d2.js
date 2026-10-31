@@ -1,4 +1,4 @@
-import {messageDay,formatMessageDay,refreshChatDateIndicator} from "./chat-dates.js?v=dates-1";
+import {messageDay,formatMessageDay,refreshChatDateIndicator} from "./chat-dates.js?v=dates-1&route-scope-1";
 import {attachMediaBlur} from "./media-blur.js?v=motion-1";
 import {mediaVisibilityKey} from "./media-visibility-store.js?v=motion-1";
 import {setupSwipeReply} from "./swipe-reply.js?v=swipe-2&area-2&controls-1";
