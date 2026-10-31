@@ -111,13 +111,14 @@ let historyRenderGeneration=0;
 async function renderMessages({more=false,all=false}={}){
  const generation=++historyRenderGeneration;
  const conversation=active(),allowed=Boolean(conversation&&canAccess(conversation));
- const before=chatScroll.capture(allowed?conversation.id:null);
  if(!conversation){
+  const before=chatScroll.capture(null);
   historyWindow.reset(null);
   messages.replaceChildren(node("p","placeholder","Nenhuma conversa disponível nos canais selecionados."));
   chatScroll.commit(before);return;
  }
  if(!allowed){
+  const before=chatScroll.capture(null);
   historyWindow.reset(null);
   messages.replaceChildren(node("p","placeholder","Conversa não atribuída. Aguarde autorização de um OWNER ou SUPERVISOR."));
   chatScroll.commit(before);return;
@@ -127,6 +128,9 @@ async function renderMessages({more=false,all=false}={}){
  try{
   const history=await historyWindow.load(conversation.id,all||isD2Searching()?"all":more?"older":"refresh");
   if(!history||generation!==historyRenderGeneration||active()?.id!==conversation.id)return;
+  // Capturar somente depois da consulta: outra renderização não deve
+  // consumir o estado "abrir conversa no final" antes do primeiro commit.
+  const before=chatScroll.capture(allowed?conversation.id:null);
   const priorHeight=messages.scrollHeight,priorTop=messages.scrollTop;
   const result=renderD2({...conversation,messages:history.items},messages);
   if(history.nextCursor&&!isD2Searching()){
@@ -141,6 +145,7 @@ async function renderMessages({more=false,all=false}={}){
   if(more&&priorHeight>0)messages.scrollTop=priorTop+Math.max(0,messages.scrollHeight-priorHeight);
  }catch(error){
   if(generation!==historyRenderGeneration||active()?.id!==conversation.id)return;
+  const before=chatScroll.capture(allowed?conversation.id:null);
   const retry=node("button","chip","Tentar novamente");
   retry.type="button";retry.addEventListener("click",()=>{void renderMessages()});
   messages.replaceChildren(node("p","placeholder","Não foi possível carregar o histórico."),retry);
