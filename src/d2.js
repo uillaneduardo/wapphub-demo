@@ -112,37 +112,52 @@ async function jumpToOriginal(reference){
  row.scrollIntoView({behavior:motion==="instant"?"auto":"smooth",block:"center"});
  replyJumpTimer=setTimeout(()=>{row.classList.remove("reply-jump-highlight");replyJumpTimer=null},1900);
 }
-async function action(action,i){const c=active(),m=byId(c,i);if(!m||!canAccess(c))return;
- if(action==="reply"){reply={conversationId:c.id,messageId:m.id,body:m.body,direction:m.direction,file:m.file?{name:m.file.name}:undefined};draft();$("#message-input").focus()}
- if(action==="forward")forward([i]);
- if(action==="select")choose([...selected,i]);
- if(action==="deleteMine"){choose([i]);removeMessages(false)}
- if(action==="deleteAll"){choose([i]);removeMessages(true)}
- if(action==="copy")navigator.clipboard?.writeText(m.body||"").then(()=>notify("Texto copiado.")).catch(()=>notify("Não foi possível copiar."));
- if(action==="cycle"||action==="retry"){
+async function action(kind,id){
+ const c=active();if(!c||!canAccess(c))return;
+ let m;
+ try{m=await operationQuery.getMessage(c.id,id)}
+ catch(error){notify("Falha ao consultar mensagem: "+error.message);return}
+ if(!m||m.hidden||active()?.id!==c.id||!canAccess(active()))return;
+ if(kind==="reply"){
+  reply={conversationId:c.id,messageId:m.id,body:m.body,direction:m.direction,file:m.file?{name:m.file.name}:undefined};
+  draft();$("#message-input").focus();
+ }
+ if(kind==="forward")void forward([id]);
+ if(kind==="select")choose([...selected,id]);
+ if(kind==="deleteMine"){choose([id]);removeMessages(false)}
+ if(kind==="deleteAll"){choose([id]);removeMessages(true)}
+ if(kind==="copy"){
+  try{await navigator.clipboard.writeText(m.body||"");notify("Texto copiado.")}
+  catch{notify("Não foi possível copiar.")}
+ }
+ if(kind==="cycle"||kind==="retry"){
   try{
-   const result=action==="cycle"?await commands.cycleDemoStatus(c.id,i):await commands.retryDemo(c.id,i);
-   refresh();notify(action==="cycle"?"Estado simulado: "+demoDeliveryLabels[result.status]:"Reenvio simulado (sem contato com o provider).");
+   const result=kind==="cycle"?await commands.cycleDemoStatus(c.id,id):await commands.retryDemo(c.id,id);
+   refresh();notify(kind==="cycle"?"Estado simulado: "+demoDeliveryLabels[result.status]:"Reenvio simulado (sem contato com o provider).");
   }catch(error){notify("Não foi possível simular a ação: "+error.message)}
  }
 }
-function context(i,x,y){
- const c=active(),m=byId(c,i);
- if(!m||!canAccess(c))return;
+async function context(id,x,y){
+ const c=active();if(!c||!canAccess(c))return;
+ let m;
+ try{m=await operationQuery.getMessage(c.id,id)}
+ catch(error){notify("Falha ao consultar mensagem: "+error.message);return}
+ if(!m||m.hidden||active()?.id!==c.id||!canAccess(active()))return;
  const options=[
-  ["Responder",()=>action("reply",i)],
-  ["Copiar texto",()=>action("copy",i),!m.body],
-  ["Encaminhar",()=>action("forward",i),!can("forward")],
-  ["Selecionar mensagens",()=>action("select",i)],
-  ["Apagar para mim",()=>action("deleteMine",i),!can("deleteMine")],
-  ["Apagar para todos",()=>action("deleteAll",i),!can("deleteAll")]
+  ["Responder",()=>action("reply",id)],
+  ["Copiar texto",()=>action("copy",id),!m.body],
+  ["Encaminhar",()=>action("forward",id),!can("forward")],
+  ["Selecionar mensagens",()=>action("select",id)],
+  ["Apagar para mim",()=>action("deleteMine",id),!can("deleteMine")],
+  ["Apagar para todos",()=>action("deleteAll",id),!can("deleteAll")]
  ];
- if(m.direction==="out"&&!m.deletedAll&&!m.hidden){
-  options.push(["Simular próximo estado",()=>action("cycle",i)]);
-  if(m.status==="failed")options.push(["Simular reenvio",()=>action("retry",i)]);
+ if(m.direction==="out"&&!m.deletedAll){
+  options.push(["Simular próximo estado",()=>action("cycle",id)]);
+  if(m.status==="failed")options.push(["Simular reenvio",()=>action("retry",id)]);
  }
  openMenu(options,x,y);
 }
+
 export function renderD2(c,container){container.replaceChildren();let n=0,lastDay=null;c.messages.forEach((m,i)=>{if(m.hidden)return;if(query&&!(m.body+" "+(m.file?.name||"")).toLowerCase().includes(query))return;n++;
  const day=messageDay(m);
  if(day!==lastDay){const separator=el("div","date-separator chat-day-separator",formatMessageDay(day));separator.dataset.day=day;container.append(separator);lastDay=day}
