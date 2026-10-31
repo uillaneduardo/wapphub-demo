@@ -22,16 +22,60 @@ function dialog(title,content){closeDialog();const backdrop=el("div","d2-overlay
 function choose(ids){selected=new Set(ids);selectionMode=selected.size>0;refresh();selectionBar()}
 function selectionBar(){document.querySelector("#d2-selection")?.remove();if(!selected.size&&!selectionMode)return;const bar=el("div","d2-selection");bar.id="d2-selection";bar.setAttribute("role","toolbar");bar.setAttribute("aria-label","Ações em mensagens selecionadas");bar.append(el("strong","",selected.size?selected.size+" selecionada(s)":"Toque para selecionar"));for(const [text,fn] of [["Encaminhar",()=>forward([...selected])],["Apagar para mim",()=>removeMessages(false)],["Apagar para todos",()=>removeMessages(true)],["Cancelar",()=>choose([])]]){const b=el("button","chip",text);b.type="button";b.disabled=text!=="Cancelar"&&!selected.size||text==="Encaminhar"&&!can("forward")||text==="Apagar para mim"&&!can("deleteMine")||text==="Apagar para todos"&&!can("deleteAll");b.onclick=fn;bar.append(b)}$("#workspace").append(bar)}
 function removeMessages(everyone){const key=everyone?"deleteAll":"deleteMine";if(!can(key)){notify("Ação não permitida para o perfil.");return}const c=active(),ids=[...selected];if(!ids.length)return;const content=el("div","d2-body");content.append(el("p","",everyone?"Apagar para todos? O conteúdo será substituído por um aviso.":"Apagar estas mensagens apenas da sua visualização?"));const btn=el("button","d2-primary","Confirmar exclusão");btn.onclick=async()=>{btn.disabled=true;try{await commands.remove(c.id,ids,everyone);selected.clear();selectionMode=false;closeDialog();selectionBar();refresh();notify("Mensagem removida da conversa.")}catch(error){notify("Falha na exclusão: "+error.message);btn.disabled=false}};content.append(btn);dialog(everyone?"Apagar para todos":"Apagar para mim",content)}
-function forward(ids){if(!can("forward")){notify("Encaminhamento bloqueado nas permissões.");return}
- const source=active(),items=ids.map(i=>byId(source,i)).filter(m=>m&&!m.hidden&&!m.deletedAll);if(!items.length)return;
+async function forward(ids){
+ if(!can("forward")){notify("Encaminhamento bloqueado nas permissões.");return}
+ const source=active();
+ if(!source||!canAccess(source))return;
+ let items,recipients;
+ try{
+  [items,recipients]=await Promise.all([
+   operationQuery.getMessages(source.id,ids),
+   operationQuery.listRecipients(source.id)
+  ]);
+ }catch(error){notify("Não foi possível consultar as mensagens: "+error.message);return}
+ if(active()?.id!==source.id)return;
+ items=items.filter(m=>!m.hidden&&!m.deletedAll);
+ if(!items.length){notify("As mensagens selecionadas não estão disponíveis.");return}
  const content=el("div","d2-body"),summary=el("p","",items.length+" mensagem(ns) selecionada(s). Escolha os destinatários.");
  const search=el("input","d2-search");search.type="search";search.placeholder="Buscar por nome ou telefone";search.setAttribute("aria-label","Buscar destinatários");
  const results=el("div","d2-results"),picked=new Set(),footer=el("div","d2-footer"),count=el("span","","0 destinatários");
  const confirm=el("button","d2-primary","Encaminhar");confirm.disabled=true;
- function render(){results.replaceChildren();const q=search.value.toLowerCase().replace(/[^a-z0-9À-ÿ]/gi,"");let found=0;all().filter(c=>c.id!==source.id&&canAccess(c)).forEach(c=>{const key=(c.name+" "+c.phone).toLowerCase().replace(/[^a-z0-9À-ÿ]/gi,"");if(q&&!key.includes(q))return;found++;const b=el("button","d2-result"+(picked.has(c.id)?" chosen":""));b.type="button";b.append(el("strong","",c.name||c.phone),el("small","",c.phone||"Número não informado"));const check=el("span","",picked.has(c.id)?"✓":"○");b.prepend(check);b.onclick=()=>{picked.has(c.id)?picked.delete(c.id):picked.add(c.id);render()};results.append(b)});if(!found)results.append(el("p","placeholder","Nenhum destinatário encontrado"));count.textContent=picked.size+" destinatário(s)";confirm.disabled=!picked.size}
- search.addEventListener("input",render);confirm.onclick=async()=>{confirm.disabled=true;try{const targets=all().filter(c=>picked.has(c.id)&&canAccess(c));const outcome=await commands.forward(source.id,items.map(m=>m.id),targets.map(c=>c.id),{time:stamp()});closeDialog();choose([]);refresh();notify(outcome.messages+" mensagem(ns) encaminhada(s) para "+outcome.destinations+" destinatário(s).")}catch(error){notify("Falha no encaminhamento: "+error.message);confirm.disabled=false}};
- footer.append(count,confirm);content.append(summary,search,results,footer);dialog("Encaminhar mensagens",content);render();search.focus();
+ const eligible=()=>recipients.filter(c=>c.id!==source.id&&canAccess(c));
+ function render(){
+  results.replaceChildren();
+  const q=search.value.toLowerCase().replace(/[^a-z0-9À-ÿ]/gi,"");
+  let found=0;
+  eligible().forEach(c=>{
+   const key=(c.name+" "+c.phone).toLowerCase().replace(/[^a-z0-9À-ÿ]/gi,"");
+   if(q&&!key.includes(q))return;
+   found++;
+   const b=el("button","d2-result"+(picked.has(c.id)?" chosen":""));b.type="button";
+   b.append(el("strong","",c.name||c.phone),el("small","",c.phone||"Número não informado"));
+   const check=el("span","",picked.has(c.id)?"✓":"○");b.prepend(check);
+   b.onclick=()=>{picked.has(c.id)?picked.delete(c.id):picked.add(c.id);render()};results.append(b);
+  });
+  if(!found)results.append(el("p","placeholder","Nenhum destinatário encontrado"));
+  count.textContent=picked.size+" destinatário(s)";
+  confirm.disabled=!picked.size;
+ }
+ search.addEventListener("input",render);
+ confirm.onclick=async()=>{
+  if(active()?.id!==source.id){notify("A conversa foi alterada; selecione novamente.");closeDialog();return}
+  confirm.disabled=true;
+  try{
+   const allowed=await operationQuery.listRecipients(source.id);
+   if(active()?.id!==source.id){closeDialog();return}
+   const targets=allowed.filter(c=>picked.has(c.id)&&canAccess(c));
+   if(targets.length!==picked.size)throw new Error("Destinatários alterados, revise a seleção.");
+   const outcome=await commands.forward(source.id,items.map(m=>m.id),targets.map(c=>c.id),{time:stamp()});
+   closeDialog();choose([]);refresh();
+   notify(outcome.messages+" mensagem(ns) encaminhada(s) para "+outcome.destinations+" destinatário(s).");
+  }catch(error){notify("Falha no encaminhamento: "+error.message);confirm.disabled=false}
+ };
+ footer.append(count,confirm);content.append(summary,search,results,footer);
+ dialog("Encaminhar mensagens",content);render();search.focus();
 }
+
 let replyJumpTimer=null;
 let recentlySentMessageId=null;
 async function jumpToOriginal(reference){
