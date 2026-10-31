@@ -913,3 +913,15 @@ html[data-theme="dark"] #composer .composer-box:focus-within{
   z-index:2;
  }
 }
+
+/* Paginação do histórico: controle discreto acima do dia mais antigo. */
+#messages .history-load-older{
+ display:block;
+ margin:12px auto 16px;
+ max-width:calc(100% - 24px);
+ flex-shrink:0;
+ border-radius:999px;
+ font-size:12px;
+ white-space:normal;
+}
+#messages .history-load-older:disabled{opacity:.65;cursor:wait}
