@@ -225,13 +225,16 @@ export function setupD2(getActive,getAll,onChange,messageCommands,attendanceComm
   isSelectionActive:()=>selectionMode||selected.size>0,
   onGestureStart:()=>{clearTimeout(touchTimer);touchStart=null;closeMenu()}
  });
- area.addEventListener("click",e=>{
+ area.addEventListener("click",async e=>{
   const quote=e.target.closest("[data-reply-target]");
   if(!quote)return;
   e.preventDefault();e.stopPropagation();
-  const messageRow=quote.closest("[data-message-id]");
-  const message=messageRow&&active()?byId(active(),messageRow.dataset.messageId):null;
-  if(message?.reply)jumpToOriginal(message.reply);
+  const conversation=active(),messageRow=quote.closest("[data-message-id]");
+  if(!conversation||!messageRow)return;
+  try{
+   const message=await operationQuery.getMessage(conversation.id,messageRow.dataset.messageId);
+   if(active()?.id===conversation.id&&message?.reply)await jumpToOriginal(message.reply);
+  }catch(error){notify("Falha ao consultar resposta citada: "+error.message)}
  });
  area.addEventListener("click",e=>{const b=e.target.closest("[data-action]");if(!b)return;const i=b.dataset.msg;if(b.dataset.action==="context"){const r=b.getBoundingClientRect();context(i,r.left,r.bottom);return}action(b.dataset.action,i)});
  area.addEventListener("click",e=>{if((!selected.size&&!selectionMode)||e.target.closest("[data-action],[data-reply-target],a,button,input,video,audio"))return;const row=e.target.closest("[data-message-id]");if(!row)return;const id=row.dataset.messageId;selected.has(id)?selected.delete(id):selected.add(id);refresh()});
