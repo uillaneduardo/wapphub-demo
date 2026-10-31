@@ -2,18 +2,16 @@ import {messageDay,formatMessageDay,refreshChatDateIndicator} from "./chat-dates
 import {attachMediaBlur} from "./media-blur.js?v=motion-1";
 import {mediaVisibilityKey} from "./media-visibility-store.js?v=motion-1";
 import {setupSwipeReply} from "./swipe-reply.js?v=swipe-2&area-2&controls-1";
-import {resolveReplyTarget} from "./reply-navigation.mjs?v=reply-1";
 import {createMediaPlayer,openMediaViewer} from "./media-player.js?v=motion-1&playback-2";
 import {canAccess} from "./d3.js?v=d4-6";
 import {can} from "./permissions.js?v=d4-6";
 import {demoDeliveryLabels} from "./domain/message-status.mjs";
 import {setupEmojiPicker} from "./emoji-picker.mjs?v=emoji-1";
 const $=s=>document.querySelector(s), el=(tag,cl="",text)=>{const n=document.createElement(tag);n.className=cl;if(text!==undefined)n.textContent=text;return n};
-let reply=null,file=null,query="",selected=new Set(),selectionMode=false,menu=null,active=()=>null,all=()=>[],refresh=()=>{},commands=null,conversationActions=null,ensureMessageVisible=null,modal=null,touchTimer=0,touchStart=null,swipeGesture=null;
+let reply=null,file=null,query="",selected=new Set(),selectionMode=false,menu=null,active=()=>null,refresh=()=>{},commands=null,operationQuery=null,conversationActions=null,ensureMessageVisible=null,modal=null,touchTimer=0,touchStart=null,swipeGesture=null;
 let emojiPicker=null;
 export function closeD2EmojiPicker(){emojiPicker?.close()}
 const newId=()=>globalThis.crypto?.randomUUID?.()||"msg-"+Date.now()+"-"+Math.random().toString(36).slice(2);
-const byId=(c,id)=>c?.messages?.find(m=>m.id===id);
 const notify=t=>{const n=el("div","toast",t);$("#toast-region").append(n);setTimeout(()=>n.remove(),3300)};
 const stamp=()=>new Intl.DateTimeFormat("pt-BR",{hour:"2-digit",minute:"2-digit"}).format(new Date());
 function draft(){document.querySelectorAll(".d2-draft").forEach(n=>n.remove());if(reply&&active()?.id!==reply.conversationId)reply=null;if(!reply&&!file)return;const bar=el("div","d2-draft");bar.id="d2-draft";bar.append(el("span","",reply?"↪ Respondendo: "+(reply.body||reply.file?.name||"Mídia"):"📎 "+file.name));const cancel=el("button","chip","Cancelar");cancel.type="button";cancel.onclick=e=>{e.preventDefault();e.stopPropagation();reply=null;file=null;draft()};bar.append(cancel);$("#composer").prepend(bar)}
@@ -39,8 +37,14 @@ let recentlySentMessageId=null;
 async function jumpToOriginal(reference){
  const conversation=active();
  if(!conversation||!reference)return;
- const original=resolveReplyTarget(conversation,reference);
- if(!original){notify("A mensagem original não está disponível nesta conversa.");return}
+ if(reference.conversationId&&reference.conversationId!==conversation.id)return;
+ const targetId=reference.messageId||reference.id;
+ if(!targetId){notify("A referência não contém uma mensagem válida.");return}
+ let original;
+ try{original=await operationQuery.getMessage(conversation.id,targetId)}
+ catch(error){notify("Falha ao consultar mensagem original: "+error.message);return}
+ if(active()?.id!==conversation.id)return;
+ if(!original||original.hidden){notify("A mensagem original não está disponível nesta conversa.");return}
  // O filtro de busca pode ter ocultado a referência: restaurar o histórico.
  if(query){
   query="";
@@ -131,9 +135,29 @@ if(clear)clear.hidden=!query;
 selectionBar();recentlySentMessageId=null;refreshChatDateIndicator(container);return {searching:Boolean(query)}}
 export function hasD2Attachment(){return Boolean(file)}
 export function isD2Searching(){return Boolean(query)}
-export async function sendD2(c,value,mediaOverride=null){const body=value.trim();if(!body&&!file&&!mediaOverride)return false;if(file&&mediaOverride)throw new Error("Envie ou descarte o anexo antes do áudio");const m={id:newId(),conversationId:c.id,direction:"out",body,time:stamp(),createdAt:new Date().toISOString(),status:"sent"};if(reply&&reply.conversationId===c.id&&byId(c,reply.messageId))m.reply={...reply};if(file||mediaOverride)m.file=mediaOverride||file;await commands.send(c.id,m);file=null;recentlySentMessageId=m.id;reply=null;draft();return true}
+export async function sendD2(c,value,mediaOverride=null){
+ const body=value.trim();
+ if(!body&&!file&&!mediaOverride)return false;
+ if(file&&mediaOverride)throw new Error("Envie ou descarte o anexo antes do áudio");
+ const draftReply=reply&&reply.conversationId===c.id?{...reply}:null;
+ const draftFile=file;
+ const m={id:newId(),conversationId:c.id,direction:"out",body,time:stamp(),createdAt:new Date().toISOString(),status:"sent"};
+ if(draftReply){
+  const original=await operationQuery.getMessage(c.id,draftReply.messageId);
+  if(original&&!original.hidden)m.reply=draftReply;
+ }
+ if(draftFile||mediaOverride)m.file=mediaOverride||draftFile;
+ await commands.send(c.id,m);
+ recentlySentMessageId=m.id;
+ if(active()?.id===c.id){
+  if(file===draftFile)file=null;
+  if(reply?.messageId===draftReply?.messageId)reply=null;
+  draft();
+ }
+ return true;
+}
 export function resetD2Selection(){closeD2EmojiPicker();swipeGesture?.cancel();if(replyJumpTimer){clearTimeout(replyJumpTimer);replyJumpTimer=null}$("#messages")?.querySelectorAll(".reply-jump-highlight").forEach(row=>row.classList.remove("reply-jump-highlight"));reply=null;file=null;query="";selected.clear();selectionMode=false;const search=$("#message-search"),field=$("#message-search-input");if(search)search.hidden=true;if(field)field.value="";draft();closeDialog();closeMenu();selectionBar()}
-export function setupD2(getActive,getAll,onChange,messageCommands,attendanceCommands,loadMessage=null){active=getActive;all=getAll;refresh=onChange;commands=messageCommands;conversationActions=attendanceCommands;ensureMessageVisible=loadMessage;emojiPicker=setupEmojiPicker({trigger:$("#emoji-button"),input:$("#message-input")});const area=$("#messages");
+export function setupD2(getActive,getAll,onChange,messageCommands,attendanceCommands,loadMessage=null,queries){active=getActive;refresh=onChange;commands=messageCommands;operationQuery=queries;conversationActions=attendanceCommands;ensureMessageVisible=loadMessage;emojiPicker=setupEmojiPicker({trigger:$("#emoji-button"),input:$("#message-input")});const area=$("#messages");
  $("#voice-start").addEventListener("click",closeD2EmojiPicker);
  $("#attach-button").addEventListener("click",closeD2EmojiPicker);
  $("#composer").addEventListener("submit",closeD2EmojiPicker);
