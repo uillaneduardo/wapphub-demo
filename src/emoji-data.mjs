@@ -37,5 +37,5 @@ export function insertEmojiText(value,start,end,emoji){
  return {value:text.slice(0,first)+emoji+text.slice(last),caret:first+emoji.length};
 }
 export function addRecentEmoji(items,emoji,max=28){
- return [emoji,...(Array.isArray(items)?items:[]).filter(x=>x!==emoji)].slice(0,max);
+ return [...new Set([emoji,...(Array.isArray(items)?items:[])])].slice(0,max);
 }
