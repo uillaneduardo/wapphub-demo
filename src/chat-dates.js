@@ -35,12 +35,27 @@ function ensureStyles(){
  if(stylesheetAdded)return;
  stylesheetAdded=true;
  const link=document.createElement("link");link.rel="stylesheet";
- link.href=new URL("./chat-dates.css",import.meta.url).href;
+ link.href=new URL("./chat-dates.css?v=route-scope-1",import.meta.url).href;
  document.head.append(link);
 }
-let activeViewport=null,overlay=null;
+let activeViewport=null,overlay=null,routeVisible=false,resizeListenerAttached=false;
+/** A data só pertence à rota de uma conversa aberta, nunca às outras telas. */
+export function setChatDateIndicatorVisible(visible){
+ routeVisible=visible===true;
+ if(!routeVisible){
+  if(overlay)overlay.hidden=true;
+  return;
+ }
+ if(activeViewport&&overlay)requestAnimationFrame(updateFloating);
+}
 function updateFloating(){
- if(!activeViewport||!overlay)return;
+ if(!overlay)return;
+ const showingOtherModule=document.body.classList.contains("module-active");
+ const hiddenOnMobile=window.matchMedia?.("(max-width: 760px)")?.matches &&
+   !document.getElementById("app")?.classList.contains("chat-open");
+ if(!routeVisible||!activeViewport||!activeViewport.isConnected||showingOtherModule||hiddenOnMobile){
+  overlay.hidden=true;return;
+ }
  const rows=[...activeViewport.querySelectorAll(".message-row[data-message-day]")];
  if(!rows.length){overlay.hidden=true;return}
  const bounds=activeViewport.getBoundingClientRect();
@@ -58,8 +73,8 @@ export function refreshChatDateIndicator(viewport){
   if(activeViewport)activeViewport.removeEventListener("scroll",updateFloating);
   activeViewport=viewport;
   viewport.addEventListener("scroll",updateFloating,{passive:true});
-  window.addEventListener("resize",updateFloating,{passive:true});
  }
+ if(!resizeListenerAttached){window.addEventListener("resize",updateFloating,{passive:true});resizeListenerAttached=true}
  if(!overlay){
   overlay=document.createElement("div");
   overlay.className="chat-floating-date";
