@@ -20,7 +20,7 @@ import {showModule,refreshCurrentMediaModule} from "./pages.js?v=d6-4&load50-1&p
 import {channels,getChannel} from "./channels.js?v=channels-1";
 import {setupD3,updateD3,canAccess,canSend,currentState,assertCanSend} from "./d3.js?v=d4-6&voice-1";
 import {appearance,setAppearance,openAppearanceSettings} from "./appearance.js?v=motion-1";
-import {renderD2,sendD2,hasD2Attachment,isD2Searching,setupD2,resetD2Selection} from "./d2.js?v=chat-jump-1&voice-2&controls-1&dates-1&history-1&route-scope-1";
+import {renderD2,sendD2,hasD2Attachment,isD2Searching,setupD2,resetD2Selection,closeD2EmojiPicker} from "./d2.js?v=chat-jump-1&voice-2&controls-1&dates-1&history-1&route-scope-1&emoji-1";
 import {setupVoiceComposer} from "./voice-composer.mjs?v=voice-2";
 import {createChatScrollController} from "./chat-scroll.js";
 import {setChatDateIndicatorVisible} from "./chat-dates.js?v=dates-1&route-scope-1";
@@ -229,6 +229,7 @@ setupD2(active,()=>conversations,()=>{const c=active();if(c){$("#detail-status")
 setupD3(active,()=>{onChannelSelection(channelPicker.getSelection());voiceComposer.syncPermissions();renderMessages();router?.refresh();refreshCurrentMediaModule()});
 select(state.active,{openChat:false,markRead:window.matchMedia("(min-width:761px)").matches});onChannelSelection(channelPicker.getSelection());root.classList.remove("chat-open");
 const router=createRouter({render:route=>{
+ closeD2EmojiPicker();
  // O overlay é filho de body e deve ser desativado em toda navegação.
  setChatDateIndicatorVisible(false);
  voiceComposer.onRouteChange(route.name==="atendimento");
