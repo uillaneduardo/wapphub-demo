@@ -15,7 +15,7 @@ Demonstração estática da experiência WappHub para homologação da interface
 
 ## Arquitetura
 
-A consulta/listagem da Inbox passou a utilizar serviço assíncrono e adapter mock isolado (D8.4). O histórico e demais módulos ainda aguardam migração gradual da issue #61.
+A consulta/listagem da Inbox passou a utilizar serviço assíncrono e adapter mock isolado (D8.4). O histórico usa serviço assíncrono com paginação e snapshots isolados (D8.5). Operações de mensagens e demais módulos continuam em migração gradual na issue #61.
 Interface → Services → contrato do Repository → adaptador mock. A migração global dos módulos legados está planejada na issue #61. O domínio de Providers já tem services, contratos puros e fixtures isoladas.
 
 **Dados de Providers são 100% fictícios.** Não há conexão real com WhatsApp, QR escaneável, autenticação real ou telemetria. Não inserir tokens/chaves de produção. Permissões reais devem ser aplicadas pelo Core.
@@ -28,6 +28,7 @@ Execute os testes com Node: node --test tests/*.test.mjs. GitHub Actions valida 
 O Nginx usa fallback SPA para páginas, e devolve 404 para assets inexistentes.
 
 ## Documentação
+- [D8.5 — Histórico de mensagens paginado](docs/D8-5-message-history.md)
 - [D8.4 — Consultas da Inbox por serviço assíncrono](docs/D8-4-inbox-query.md)
 - [D8.3 — Persistência consistente em Providers e preferências](docs/D8-3-persistence-consistency.md)
 - [D6.1 — Contratos](docs/architecture/D6-1-provider-contracts.md)

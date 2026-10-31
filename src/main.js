@@ -20,9 +20,11 @@ import {showModule,refreshCurrentMediaModule} from "./pages.js?v=d6-4&load50-1&p
 import {channels,getChannel} from "./channels.js?v=channels-1";
 import {setupD3,updateD3,canAccess,canSend,currentState,assertCanSend} from "./d3.js?v=d4-6&voice-1";
 import {appearance,setAppearance,openAppearanceSettings} from "./appearance.js?v=motion-1";
-import {renderD2,sendD2,hasD2Attachment,setupD2,resetD2Selection} from "./d2.js?v=chat-jump-1&voice-2&controls-1&dates-1";
+import {renderD2,sendD2,hasD2Attachment,isD2Searching,setupD2,resetD2Selection} from "./d2.js?v=chat-jump-1&voice-2&controls-1&dates-1&history-1";
 import {setupVoiceComposer} from "./voice-composer.mjs?v=voice-2";
 import {createChatScrollController} from "./chat-scroll.js";
+import {createMessageHistoryService,createMessageHistoryWindow} from "./services/message-history.mjs";
+import {createMockMessageHistoryRepository} from "./data/adapters/mock/message-history.mjs";
 import {conversations} from "./data.js?v=load50-1&dates-1";
 import {createMessageCommandService} from "./services/message-commands.mjs";
 import {createMockMessageCommandRepository} from "./data/adapters/mock/message-commands.mjs";
@@ -37,6 +39,7 @@ const state={active:"mariana",filter:"all",selectedChannels:null,query:"",theme:
 configureContactIdentity(createContactService(createMockContactRepository()));
 const conversationReadService=createConversationReadService(createMockConversationReadRepository(conversations));
 const inboxQueryService=createInboxQueryService(createMockInboxQueryRepository(conversations));
+const historyWindow=createMessageHistoryWindow(createMessageHistoryService(createMockMessageHistoryRepository(conversations)),{pageSize:60});
 const messageCommands=createMessageCommandService(createMockMessageCommandRepository(conversations));
 const conversationActions=createConversationActionService(createMockConversationActionRepository(conversations));
 
@@ -104,19 +107,51 @@ async function renderList(){
   toast("Falha ao consultar a caixa de entrada: "+error.message);
  }
 }
-function renderMessages(){
+let historyRenderGeneration=0;
+async function renderMessages({more=false,all=false}={}){
+ const generation=++historyRenderGeneration;
  const conversation=active(),allowed=Boolean(conversation&&canAccess(conversation));
- const before=chatScroll.capture(allowed?conversation.id:null);
  if(!conversation){
+  const before=chatScroll.capture(null);
+  historyWindow.reset(null);
   messages.replaceChildren(node("p","placeholder","Nenhuma conversa disponível nos canais selecionados."));
   chatScroll.commit(before);return;
  }
  if(!allowed){
+  const before=chatScroll.capture(null);
+  historyWindow.reset(null);
   messages.replaceChildren(node("p","placeholder","Conversa não atribuída. Aguarde autorização de um OWNER ou SUPERVISOR."));
   chatScroll.commit(before);return;
  }
- const result=renderD2(conversation,messages);
- chatScroll.commit(before,result);
+ const olderButton=messages.querySelector(".history-load-older");
+ if(olderButton){olderButton.disabled=true;olderButton.textContent="Carregando mensagens…"}
+ try{
+  const history=await historyWindow.load(conversation.id,all||isD2Searching()?"all":more?"older":"refresh");
+  if(!history||generation!==historyRenderGeneration||active()?.id!==conversation.id)return;
+  // Capturar somente depois da consulta: outra renderização não deve
+  // consumir o estado "abrir conversa no final" antes do primeiro commit.
+  const before=chatScroll.capture(allowed?conversation.id:null);
+  const priorHeight=messages.scrollHeight,priorTop=messages.scrollTop;
+  const result=renderD2({...conversation,messages:history.items},messages);
+  if(history.nextCursor&&!isD2Searching()){
+   const loadButton=node("button","chip history-load-older","Carregar mensagens anteriores");
+   loadButton.type="button";
+   loadButton.setAttribute("aria-label","Carregar mensagens anteriores desta conversa");
+   loadButton.addEventListener("click",()=>{void renderMessages({more:true})});
+   messages.prepend(loadButton);
+  }
+  chatScroll.commit(before,result);
+  // Prepend preserva a posição visual do leitor em históricos longos.
+  if(more&&priorHeight>0)messages.scrollTop=priorTop+Math.max(0,messages.scrollHeight-priorHeight);
+ }catch(error){
+  if(generation!==historyRenderGeneration||active()?.id!==conversation.id)return;
+  const before=chatScroll.capture(allowed?conversation.id:null);
+  const retry=node("button","chip","Tentar novamente");
+  retry.type="button";retry.addEventListener("click",()=>{void renderMessages()});
+  messages.replaceChildren(node("p","placeholder","Não foi possível carregar o histórico."),retry);
+  chatScroll.commit(before);
+  toast("Falha ao consultar mensagens: "+error.message);
+ }
 }
 function select(id,{openChat=true,markRead=openChat}={}){voiceComposer.setConversation(id);resetD2Selection();state.active=id;const c=active();if(markRead)void conversationReadService.markRead(id).then(()=>renderList()).catch(error=>toast("Falha ao marcar conversa como lida: "+error.message));$("#chat-title").textContent=nameOf(c);$("#chat-avatar").replaceWith(Object.assign(avatar(c),{id:"chat-avatar"}));$("#chat-subtitle").textContent=c.status+" · "+originOf(c).channelName;$("#detail-avatar").replaceWith(Object.assign(avatar(c,"avatar large"),{id:"detail-avatar"}));$("#detail-name").textContent=nameOf(c);$("#detail-phone").textContent=c.phone;$("#detail-agent").textContent=c.agent;$("#detail-status").textContent=c.status;$("#detail-channel").textContent=getChannel(c.channelId).name;renderOrigin(c);renderConversationMedia(c,$("#detail-media"),openConversationMedia);$("#message-input").value="";$("#message-input").style.height="";renderList();renderMessages();$("#details-toggle").disabled=false;$("#find-messages").disabled=false;$("#chat-menu").disabled=false;if(openChat)root.classList.add("chat-open");updateD3()}
 function clearActive(){
@@ -189,7 +224,7 @@ const contactEditButton=document.createElement("button");contactEditButton.class
 document.querySelectorAll("[data-nav]").forEach(b=>b.addEventListener("click",()=>router.navigate(pathFor(b.dataset.nav))));
 
 document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();$("#search").focus()}if(e.key==="Escape"&&root.classList.contains("details-open"))setDetails(false)});
-setupD2(active,()=>conversations,()=>{const c=active();if(c){$("#detail-status").textContent=c.status;$("#detail-agent").textContent=c.agent;renderConversationMedia(c,$("#detail-media"),openConversationMedia);}renderMessages();renderList();updateD3()},messageCommands,conversationActions);
+setupD2(active,()=>conversations,()=>{const c=active();if(c){$("#detail-status").textContent=c.status;$("#detail-agent").textContent=c.agent;renderConversationMedia(c,$("#detail-media"),openConversationMedia);}const pending=renderMessages();renderList();updateD3();return pending},messageCommands,conversationActions,async()=>{await renderMessages({all:true})});
 setupD3(active,()=>{onChannelSelection(channelPicker.getSelection());voiceComposer.syncPermissions();renderMessages();router?.refresh();refreshCurrentMediaModule()});
 select(state.active,{openChat:false,markRead:window.matchMedia("(min-width:761px)").matches});onChannelSelection(channelPicker.getSelection());root.classList.remove("chat-open");
 const router=createRouter({render:route=>{
