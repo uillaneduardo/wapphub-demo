@@ -85,3 +85,19 @@ test("integração usa consulta assíncrona, sem acessar arrays diretamente ao r
  assert.match(main,/await historyWindow\.load/);
  assert.match(main,/renderD2\(\{\.\.\.conversation,messages:history\.items\},messages\)/);
 });
+
+test("consulta integral funciona mesmo antes da página inicial",async()=>{
+ const {service}=build();
+ const window=createMessageHistoryWindow(service,{pageSize:60});
+ const page=await window.load("a","all");
+ assert.equal(page.items.length,145);
+ assert.equal(page.nextCursor,null);
+});
+test("novo controle de paginação preserva âncora de scroll e não altera compositor",()=>{
+ const main=source("src/main.js");
+ const styles=source("src/styles.css");
+ assert.match(main,/history\.nextCursor&&!isD2Searching\(\)/);
+ assert.match(main,/Carregar mensagens anteriores/);
+ assert.match(main,/priorTop\+Math\.max\(0,messages\.scrollHeight-priorHeight\)/);
+ assert.match(styles,/\.history-load-older/);
+});
