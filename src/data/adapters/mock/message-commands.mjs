@@ -17,6 +17,28 @@ export function createMockMessageCommandRepository(conversations) {
       c.preview=message.body||(message.file?.kind==="audio"?"🎙 Mensagem de voz":"📎 "+message.file.name);c.time=message.time;
       return {id:message.id};
     },
+    async edit(id,messageId,body,expectedRevision) {
+      const c=ensure(id);
+      const message=c.messages.find(m=>!Array.isArray(m)&&m.id===messageId);
+      if(!message||message.direction!=="out"||message.hidden||message.deletedAll||message.forwarded||message.file)
+        throw new Error("Esta mensagem não pode ser editada.");
+      if(typeof body!=="string"||!body.trim()||body.length>4096)
+        throw new Error("Informe um texto válido de até 4096 caracteres.");
+      const next=body.trim(),currentRevision=message.revision||1;
+      if(expectedRevision!==currentRevision)throw new Error("A mensagem foi alterada. Reabra a edição.");
+      if(next===message.body)throw new Error("O texto não foi alterado.");
+      const now=new Date().toISOString();
+      const history=Array.isArray(message.revisions)?message.revisions.slice():[{
+        revision:1,body:message.body,at:message.createdAt||now
+      }];
+      history.push({revision:currentRevision+1,body:next,at:now});
+      message.body=next;
+      message.revision=currentRevision+1;
+      message.editedAt=now;
+      message.revisions=history;
+      if(c.messages.at(-1)===message)c.preview=next;
+      return {id:message.id,revision:message.revision,editedAt:now};
+    },
     async forward(sourceId,ids,destinationIds,{time}={}) {
       const source=ensure(sourceId);
       const messages=ids.map(id=>source.messages.find(m=>!Array.isArray(m)&&m.id===id)).filter(m=>m&&!m.hidden&&!m.deletedAll);
