@@ -5,8 +5,8 @@ const pool=process.env.DATABASE_URL?new Pool({connectionString:process.env.DATAB
 const send=(res,status,body)=>{res.writeHead(status,{"content-type":"application/json; charset=utf-8","cache-control":"no-store","x-content-type-options":"nosniff"});res.end(JSON.stringify(body))};
 const server=http.createServer(async(req,res)=>{
   const path=new URL(req.url,"http://localhost").pathname;
-  if(req.method==="GET"&&path==="/health/live")return send(res,200,{status:"alive",service:"wapphub-core-next"});
-  if(req.method==="GET"&&path==="/health/ready"){
+  if(req.method==="GET"&&(path==="/health/live"||path==="/api/v1/health/live"))return send(res,200,{status:"alive",service:"wapphub-core-next"});
+  if(req.method==="GET"&&(path==="/health/ready"||path==="/api/v1/health/ready")){
     if(!pool)return send(res,503,{status:"not_ready",reason:"DATABASE_URL missing"});
     try{await pool.query("select 1");return send(res,200,{status:"ready"})}
     catch{return send(res,503,{status:"not_ready"})}
