@@ -1014,3 +1014,15 @@ body.module-active .emoji-picker{display:none!important}
 @media(prefers-reduced-motion:reduce){
  .emoji-picker *{scroll-behavior:auto}
 }
+
+/* Mensagens editadas: formulário e linha temporal de versões. */
+.d2-edit-label{display:flex;flex-direction:column;gap:9px;font-weight:600}
+.d2-edit-field{width:100%;min-height:110px;resize:vertical;padding:12px;border:1px solid var(--line);border-radius:9px;background:var(--subtle);color:var(--text);font:inherit;font-weight:400;line-height:1.5}
+.d2-edit-field:focus-visible{outline:2px solid var(--brand-border);outline-offset:2px}
+.d2-edit-help{color:var(--muted);line-height:1.5}
+.d2-version-details{overflow-y:auto}
+.d2-version-timeline{list-style:none;margin:0;padding:0 0 0 15px;border-left:2px solid var(--line);display:flex;flex-direction:column;gap:15px}
+.d2-version-entry{position:relative;display:flex;flex-direction:column;gap:6px;padding:0 0 0 13px;overflow-wrap:anywhere}
+.d2-version-entry::before{content:"";position:absolute;left:-21px;top:4px;width:10px;height:10px;border-radius:100%;background:var(--brand-accent)}
+.d2-version-entry time{font-size:11px;color:var(--muted)}
+.d2-version-body{white-space:pre-wrap;overflow-wrap:anywhere;padding:11px;border-radius:8px;background:var(--subtle);font-weight:400}
