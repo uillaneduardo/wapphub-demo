@@ -29,7 +29,7 @@ export function createMockMessageCommandRepository(conversations) {
       if(next===message.body)throw new Error("O texto não foi alterado.");
       const now=new Date().toISOString();
       const history=Array.isArray(message.revisions)?message.revisions.slice():[{
-        revision:1,body:message.body,at:message.createdAt||now
+        revision:1,body:message.body,at:message.createdAt||null
       }];
       history.push({revision:currentRevision+1,body:next,at:now});
       message.body=next;
