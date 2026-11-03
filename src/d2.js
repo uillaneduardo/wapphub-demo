@@ -112,12 +112,65 @@ async function jumpToOriginal(reference){
  row.scrollIntoView({behavior:motion==="instant"?"auto":"smooth",block:"center"});
  replyJumpTimer=setTimeout(()=>{row.classList.remove("reply-jump-highlight");replyJumpTimer=null},1900);
 }
+function formatVersionDate(iso){
+ if(!iso)return "Data original não registrada";
+ const date=new Date(iso);
+ return Number.isNaN(date.getTime())?"Data indisponível":new Intl.DateTimeFormat("pt-BR",{dateStyle:"short",timeStyle:"medium"}).format(date);
+}
+async function editMessage(conversationId,messageId){
+ let message;
+ try{message=await operationQuery.getMessage(conversationId,messageId)}
+ catch(error){notify("Falha ao consultar mensagem: "+error.message);return}
+ if(active()?.id!==conversationId||!message||message.direction!=="out"||message.deletedAll||message.hidden||message.file||message.forwarded)return;
+ const content=el("div","d2-body");
+ const label=el("label","d2-edit-label","Editar mensagem");
+ const field=el("textarea","d2-edit-field");
+ field.value=message.body||"";field.maxLength=4096;field.rows=5;field.setAttribute("aria-label","Novo texto da mensagem");
+ label.append(field);
+ const note=el("small","d2-edit-help","O conteúdo anterior continuará disponível no histórico de edições.");
+ const footer=el("div","d2-footer");
+ const cancel=el("button","chip","Cancelar");cancel.type="button";cancel.onclick=closeDialog;
+ const save=el("button","d2-primary","Salvar edição");save.type="button";
+ save.onclick=async()=>{
+  if(!field.value.trim()||field.value.trim()===message.body){notify("Digite um texto diferente para salvar.");return}
+  if(active()?.id!==conversationId){closeDialog();return}
+  save.disabled=true;
+  try{await commands.edit(conversationId,messageId,field.value,message.revision||1);closeDialog();await refresh();notify("Mensagem editada.");}
+  catch(error){notify("Falha ao editar: "+error.message);save.disabled=false}
+ };
+ field.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key==="Enter"){e.preventDefault();save.click()}});
+ footer.append(cancel,save);content.append(label,note,footer);
+ dialog("Editar mensagem",content);field.focus();field.select();
+}
+async function showMessageDetails(conversationId,messageId){
+ let message;
+ try{message=await operationQuery.getMessage(conversationId,messageId)}
+ catch(error){notify("Falha ao consultar detalhes: "+error.message);return}
+ if(active()?.id!==conversationId||!message||message.hidden)return;
+ const content=el("div","d2-body d2-version-details");
+ const created=el("p","","Enviada em: "+formatVersionDate(message.createdAt));
+ const edited=el("p","","Última edição: "+(message.editedAt?formatVersionDate(message.editedAt):"Não editada"));
+ content.append(created,edited);
+ const history=Array.isArray(message.revisions)&&message.revisions.length?message.revisions:[{revision:1,body:message.body,at:message.createdAt||null}];
+ const title=el("strong","","Histórico de versões");content.append(title);
+ const timeline=el("ol","d2-version-timeline");
+ history.slice().reverse().forEach((version,index)=>{
+  const li=el("li","d2-version-entry");
+  li.append(el("strong","",version.revision===1?"Mensagem original":"Edição "+(version.revision-1)+(index===0?" · Atual":"")));
+  li.append(el("time","",formatVersionDate(version.at)));
+  li.append(el("p","d2-version-body",version.body||"Sem texto"));
+  timeline.append(li);
+ });
+ content.append(timeline);dialog("Detalhes da mensagem",content);
+}
 async function action(kind,id){
  const c=active();if(!c||!canAccess(c))return;
  let m;
  try{m=await operationQuery.getMessage(c.id,id)}
  catch(error){notify("Falha ao consultar mensagem: "+error.message);return}
  if(!m||m.hidden||active()?.id!==c.id||!canAccess(active()))return;
+ if(kind==="edit")return editMessage(c.id,id);
+ if(kind==="details")return showMessageDetails(c.id,id);
  if(kind==="reply"){
   reply={conversationId:c.id,messageId:m.id,body:m.body,direction:m.direction,file:m.file?{name:m.file.name}:undefined};
   draft();$("#message-input").focus();
@@ -146,12 +199,14 @@ async function context(id,x,y){
  const options=[
   ["Responder",()=>action("reply",id)],
   ["Copiar texto",()=>action("copy",id),!m.body],
+  ["Detalhes da mensagem",()=>action("details",id)],
   ["Encaminhar",()=>action("forward",id),!can("forward")],
   ["Selecionar mensagens",()=>action("select",id)],
   ["Apagar para mim",()=>action("deleteMine",id),!can("deleteMine")],
   ["Apagar para todos",()=>action("deleteAll",id),!can("deleteAll")]
  ];
  if(m.direction==="out"&&!m.deletedAll){
+  options.push(["Editar mensagem",()=>action("edit",id),!m.body||Boolean(m.file)||Boolean(m.forwarded)]);
   options.push(["Simular próximo estado",()=>action("cycle",id)]);
   if(m.status==="failed")options.push(["Simular reenvio",()=>action("retry",id)]);
  }
@@ -187,7 +242,7 @@ export function renderD2(c,container){container.replaceChildren();let n=0,lastDa
    if(m.file.url){const a=el("a","file-link","Abrir");a.href=m.file.url;a.download=m.file.name;f.append(a)}
    b.append(f);
  }
-}if(m.body)b.append(el("span","message-text",m.body));row.append(b,el("span","message-meta",m.time+(m.direction==="out"?" · "+(demoDeliveryLabels[m.status]||"Estado simulado"):"")));const controls=el("div","message-actions");for(const [text,a] of [["Responder","reply"],["Encaminhar","forward"],["Mais","context"]]){const btn=el("button","message-action",text);btn.type="button";btn.dataset.action=a;btn.dataset.msg=m.id;controls.append(btn)}row.append(controls);container.append(row)});if(!n)container.append(el("p","placeholder","Nenhuma mensagem encontrada."));
+}if(m.body)b.append(el("span","message-text",m.body));row.append(b,el("span","message-meta",m.time+(m.editedAt?" · Editada":"")+(m.direction==="out"?" · "+(demoDeliveryLabels[m.status]||"Estado simulado"):"")));const controls=el("div","message-actions");for(const [text,a] of [["Responder","reply"],["Encaminhar","forward"],["Mais","context"]]){const btn=el("button","message-action",text);btn.type="button";btn.dataset.action=a;btn.dataset.msg=m.id;controls.append(btn)}row.append(controls);container.append(row)});if(!n)container.append(el("p","placeholder","Nenhuma mensagem encontrada."));
 const searchCount=$("#message-search-count"),clear=$("#message-search-clear");
 if(searchCount)searchCount.textContent=query?(n===1?"1 resultado":n+" resultados"):"";
 if(clear)clear.hidden=!query;
